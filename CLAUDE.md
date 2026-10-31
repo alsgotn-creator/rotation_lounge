@@ -17,7 +17,7 @@ Stack (user's choice): **Next.js**, deployed on **Vercel**, shared state/realtim
 ## Domain rules (agreed with the user)
 
 - **Phases** set by host, visible to all: 시작 전 → 대화 → 최종선택 → 마무리. Within 대화, the host starts rounds and presses "next round".
-- **Pre-registration** happens before the event via a shared link (no on-site QR entry): name, gender, age, job, area, MBTI, 1–2 "나만의 키워드", character, and ~30 love/values questions.
+- **Pre-registration** happens before the event via a shared link (no on-site QR entry): nickname, gender, age, job, area, MBTI, 1–2 "나만의 키워드", character, and 15 love/values questions.
 - **Love type**: answers map onto 4 axes (거리감 / 표현 / 데이트 / 미래) → 16 types. Shown as a **real color only, no letters or color-name text**, plus short tendency phrases. Recommend the most similar opposite-sex participant ("당신과 가장 비슷한 사람은 ○호분이에요!"), revealed once everyone has registered.
 - **Seating**: tables are a rectangular layout (venue may change). Participants tap their table before round 1; taken seats are blocked. Women stay; men move one table clockwise (wrapping) when the host presses next round. Pairings are derived from this. Unequal counts: the unpaired person just sits out that round.
 - **Lounge** shows only character + keywords. Age/job/area/MBTI are revealed at **minute 7** of each conversation, **only to the person sitting opposite**.
@@ -28,4 +28,10 @@ Stack (user's choice): **Next.js**, deployed on **Vercel**, shared state/realtim
 
 ## Design direction
 
-풋풋하고 사랑이 느껴지되 **고급스럽게** — the user rejected pastel/cartoon/pixel mockups as too childish. The user's existing printed materials (black/white/pink-red editorial look) are content sources only — do **not** copy their visual style.
+풋풋하고 사랑이 느껴지되 **고급스럽게** — the user rejected pastel/cartoon/pixel mockups as too childish. Theme: midnight navy + rose gold, one font (Pretendard) except the rolling paper (handwriting font), portrait layouts only.
+
+Characters: glossy cloud-jelly body with big googly eyes (Higgsfield `gpt_image_2_5`, transparent PNG). Animation is **image-based, not video**: per character 3 aligned frames (base / smile / eyes-closed); body "breathes" via CSS scale, and only the face region (masked) swaps to blink/smile. Colors follow the 16 love types.
+
+Splash (loading screen): app name **플러팅 / 라운지** in two lines, large, handwriting font with a rose-gold shimmer; below it a rose-gold fine-line illustration of a man and woman meeting at a café table (Higgsfield job `54867cda-4cbd-46a9-9aed-8bb5b514fb2d`, transparent PNG); twinkling stars and a thin loading bar. No characters on the splash.
+
+The user's existing printed materials (black/white/pink-red editorial look) are content sources only — do **not** copy their visual style.
