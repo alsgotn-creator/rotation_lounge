@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-No application code yet. The project is in design (superpowers brainstorming); the design doc will live at `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`. Add build/test commands here once the app is scaffolded. `.superpowers/` holds brainstorm mockups and is gitignored.
+No application code yet. Design is approved: spec `docs/superpowers/specs/2026-10-31-flirting-lounge-design.md`, plan `docs/superpowers/plans/2026-10-31-flirting-lounge.md` (read its "Status / pending revision" section first — Supabase deferred, Vercel-only preview mode, building paused by the user). Add build/test commands here once the app is scaffolded. `.superpowers/` holds brainstorm mockups and is gitignored.
 
 ## What this is
 

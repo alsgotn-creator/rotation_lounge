@@ -10,6 +10,17 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-31-flirting-lounge-design.md`. Visual mockups live in `.superpowers/brainstorm/2664-1793417169/content/` (gitignored, local only). Match them: `splash-v2.html` (A), `prereg.html`, `lounge-mix.html`, `host-and-round-v2.html`, `paper-and-choice.html`, `anim-compare.html` (A).
 
+## Status / pending revision (2026-10-31)
+
+- The user chose **subagent-driven** execution. Building is **paused at the user's request** ("아직 디벨롭이 필요해서 나중에"). Resume from Task 1.
+- **No Supabase for now. Deploy to Vercel only.** Revise the plan before starting:
+  - Add a **preview mode** (user choice "가"): the whole event runs inside one browser.
+    - The browser keeps state with a client-side `EventStore` persisted to `localStorage`.
+    - The page reuses the same `commands.ts` and `views.ts` in the browser.
+    - A role switcher (진행자 / 큰 화면 / 참가자 n명) lets one person rehearse the full flow.
+  - Keep `supabaseStore.ts` and the broadcast code out until Supabase is connected. The `EventStore` interface stays, so plugging Supabase in later is a store swap.
+  - Task 14 deploys to Vercel without the cron. Add keep-alive and retention back when Supabase is added.
+
 ## Global Constraints
 
 - All UI is portrait-only and Korean-only. Write "남은 시간", never "remaining".
