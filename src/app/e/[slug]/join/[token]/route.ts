@@ -12,6 +12,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     return NextResponse.redirect(url, 303);
   }
   const res = NextResponse.redirect(url, 303);
-  res.cookies.set({ name: inviteCookie(event.id), value: token, httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: `/e/${slug}`, maxAge: 60 * 60 * 24 * 120 });
+  res.cookies.set({ name: inviteCookie(event.id), value: token, httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 24 * 120 });
   return res;
 }

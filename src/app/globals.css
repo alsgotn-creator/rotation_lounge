@@ -107,8 +107,9 @@ a{color:inherit;text-decoration:none}
 .pg{flex:1;height:4px;border-radius:2px;background:var(--line);margin:0 20px 0 4px;overflow:hidden}
 .pg i{display:block;height:100%;border-radius:2px;background:var(--acc);transition:width .4s cubic-bezier(.2,.8,.2,1)}
 .nb .tt{flex:1;text-align:center;font-size:16px;font-weight:700;margin-right:44px}
-.bd{padding:18px 24px 150px;animation:stepin .35s cubic-bezier(.2,.8,.2,1) both}
-@keyframes stepin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.bd{position:relative;padding:18px 24px 150px;animation:stepin .35s cubic-bezier(.2,.8,.2,1) both}
+/* transform 금지: 안쪽 position:fixed 하단 버튼이 화면 대신 .bd에 붙는다 */
+@keyframes stepin{from{opacity:0;left:16px}to{opacity:1;left:0}}
 h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.035em}
 .ds{margin:10px 0 0;font-size:15px;line-height:1.6;color:var(--mute);font-weight:500}
 .ds b{color:var(--text)}
@@ -249,5 +250,44 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .alert .ic{color:var(--warn);width:18px;height:18px;margin-top:2px}
 .alert b{display:block;color:var(--warn);font-size:14px}
 .alert u{color:var(--text);text-decoration:none;font-weight:700}
+
+/* ---------- 캐릭터 (계획서 Task 1) ---------- */
+.chr{position:relative;flex:none}
+.chr-body{position:absolute;inset:0;transform:var(--shape);}
+.chr-body img{position:absolute;inset:0;width:100%;height:100%;transform-origin:50% 92%;animation:chrBreathe 3.6s ease-in-out var(--d) infinite}
+.chr-face{-webkit-mask-image:radial-gradient(42% 22% at 50% 40%,#000 70%,transparent 100%);mask-image:radial-gradient(42% 22% at 50% 40%,#000 70%,transparent 100%);opacity:0}
+.chr-smile{animation:chrBreathe 3.6s ease-in-out var(--d) infinite,chrSmile 7s var(--d) infinite!important}
+.chr-blink{animation:chrBreathe 3.6s ease-in-out var(--d) infinite,chrBlink 4.6s var(--d) infinite!important}
+.chr-prop{position:absolute;transform:rotate(12deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+@keyframes chrBreathe{0%,100%{transform:none}50%{transform:scale(1.035,.965)}}
+@keyframes chrSmile{0%,45%,90%,100%{opacity:0}50%,85%{opacity:1}}
+@keyframes chrBlink{0%,91%,96%,100%{opacity:0}92%,95%{opacity:1}}
+
+/* ---------- 사전 등록 ---------- */
+.orb{width:190px;height:190px;border-radius:50%;margin:26px auto 22px;background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.75),var(--c) 38%,color-mix(in srgb,var(--c) 70%,#000) 100%);box-shadow:0 0 60px -6px var(--c),0 0 120px -30px var(--c);animation:orbIn .9s cubic-bezier(.3,1.4,.5,1) both,orbGlow 4s ease-in-out 1s infinite}
+@keyframes orbIn{from{transform:scale(.4);opacity:0}}
+@keyframes orbGlow{50%{box-shadow:0 0 80px 0 var(--c),0 0 140px -20px var(--c)}}
+.phr{text-align:center;font-size:16px;font-weight:700;line-height:2;letter-spacing:-.02em}
+.rec{margin-top:22px;border:1.5px dashed var(--line);border-radius:18px;padding:16px;text-align:center;font-size:14px;color:var(--mute);line-height:1.6}
+.scale{display:flex;align-items:center;justify-content:space-between;margin-top:56px;padding:0 4px}
+.scale button{border-radius:50%;border:2px solid var(--mute);background:none;cursor:pointer;padding:0;transition:transform .15s,background .2s,border-color .2s}
+.scale button:active{transform:scale(.9)}
+.scale button.on{background:radial-gradient(circle at 35% 30%,#fff,var(--acc));border-color:var(--acc);box-shadow:0 0 16px var(--accbg)}
+.scale-l{display:flex;justify-content:space-between;margin-top:14px;font-size:13px;font-weight:700;color:var(--mute)}
+.qno{font-size:14px;font-weight:800;color:var(--acc)}
+.mbti{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mbti button{height:52px;border-radius:14px;border:2px solid transparent;background:var(--surf);font-size:15px;font-weight:800;cursor:pointer;line-height:1.2}
+.mbti button small{display:block;font-size:11px;font-weight:600;color:var(--mute)}
+.mbti button.on{border-color:var(--acc);background:var(--accbg);color:var(--acc)}
+.kw{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.kw span{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 8px 0 14px;border-radius:19px;background:var(--accbg);color:var(--acc);font-size:14px;font-weight:800}
+.kw span button{border:0;background:none;color:inherit;width:24px;height:24px;cursor:pointer;display:grid;place-items:center;padding:0}
+.kw span button .ic{width:14px;height:14px;stroke-width:3}
+.shapes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:20px}
+.shapes button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 12px;border-radius:18px;background:var(--surf);border:2px solid transparent;cursor:pointer;font-size:13px;font-weight:700;color:var(--mute)}
+.shapes button.on{border-color:var(--acc);background:var(--accbg);color:var(--acc)}
+.preview-chr{display:grid;place-items:center;margin:16px 0 4px}
+.given{margin-top:22px;border-radius:16px;background:var(--surf);padding:6px 16px}
+.given .kv:first-child{border-top:0}
 
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.fin .big .ic{stroke-dashoffset:0}}
