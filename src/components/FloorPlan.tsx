@@ -6,7 +6,7 @@ type P = { gender: 'f' | 'm'; number: number | null; shape: string; prop: string
 export type TablePair = { table: number; f: P; m: P };
 
 function Seat({ p, label, faces }: { p: P; label: string; faces: boolean }) {
-  if (!p) return <div className="fp-seat empty"><span>{label} 쉼</span></div>;
+  if (!p) return <div className="fp-seat empty" aria-label={`${label} 빈자리`}><span>빈자리</span></div>;
   return (
     <div className="fp-seat">
       {faces && <Character shape={p.shape as Shape} color={p.color} prop={p.prop as Prop} size={40} delay={(p.number ?? 0) * 0.7} />}

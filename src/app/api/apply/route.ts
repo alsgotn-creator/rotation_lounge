@@ -6,12 +6,12 @@ import { isBirth, isEmail, isName, isPhone, formatPhone } from '../../../lib/sig
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
-// shortcut: 인스턴스별 메모리 제한이라 서버가 여러 대면 느슨해짐. 악용이 보이면 Supabase 테이블로 옮기기.
+// shortcut: 같은 주소에서 1시간 10건. 인스턴스별 메모리 제한이라 서버가 여러 대면 느슨해짐. 악용이 보이면 Supabase 테이블로 옮기기.
 const hits = new Map<string, number[]>();
 function limited(ip: string) {
   const now = Date.now(), list = (hits.get(ip) ?? []).filter((t) => now - t < 3600_000);
   list.push(now); hits.set(ip, list);
-  return list.length > 5;
+  return process.env.NODE_ENV === 'production' && list.length > 10; // 개발 중에는 막지 않는다
 }
 
 export async function POST(req: Request) {
