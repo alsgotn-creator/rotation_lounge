@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>플러팅 라운지 신청 시안 v6</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;background:#efebe7;color:#2a2533;-webkit-font-smoothing:antialiased}
+.page{max-width:1600px;margin:0 auto;padding:28px 24px 80px}
+.page>h1{font-size:22px;margin:0 0 6px;letter-spacing:-.02em}
+.page>.sub,.sec>.sub{color:#6d6577;margin:0 0 18px;font-size:14px;line-height:1.6}
+.sec{margin-top:40px}
+.sec>h2{font-size:16px;margin:0 0 4px}
+.row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.cap{font-size:13px;font-weight:700;color:#2a2533;margin:0 0 4px;text-align:center}
+.capd{font-size:12px;color:#7a7183;margin:0 0 12px;text-align:center;max-width:360px;line-height:1.5;min-height:36px}
+.cap b{display:inline-block;min-width:22px;padding:0 6px;height:22px;line-height:22px;border-radius:11px;background:#2a2533;color:#fff;font-size:12px;margin-right:6px}
+.phone{width:360px;height:760px;border-radius:46px;padding:10px;background:#111;box-shadow:0 30px 60px -20px rgba(30,20,40,.4),0 0 0 1px #000}
+.scr{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden}
+.scroll{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.status{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600;position:relative;z-index:5}
+.status i{width:18px;height:10px;border:1.5px solid currentColor;border-radius:3px;display:inline-block;position:relative}
+.status i:after{content:"";position:absolute;inset:1.5px;right:4px;background:currentColor;border-radius:1px}
+.jua{font-weight:900}
+@keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-8px) scale(1.02,.98)}}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-10px) rotate(var(--r,0deg))}}
+@keyframes blink{0%,92%,100%{opacity:0}94%,98%{opacity:1}}
+.heart{position:absolute;width:var(--s,18px);height:var(--s,18px);animation:floaty 3.4s ease-in-out infinite}
+.heart svg{width:100%;height:100%}
+.cta{position:absolute;left:0;right:0;bottom:0;padding:26px 20px 30px;z-index:6}
+.cta button{width:100%;height:56px;border:0;border-radius:20px;font-family:inherit;font-weight:800;font-size:17px;cursor:pointer;letter-spacing:-.01em}
+.cta small{display:block;text-align:center;font-size:12px;margin-bottom:10px;font-weight:600}
+
+/* 버전 탭 */
+.ver{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+.ver a{height:34px;line-height:34px;padding:0 14px;border-radius:17px;background:#fff;color:#6d6577;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 2px 8px -4px rgba(0,0,0,.2)}
+.ver a.on{background:#2a2533;color:#fff}
+
+/* ---------- 남색 라운지 첫 화면 ---------- */
+.L{--navy:#0a122f;background:var(--navy);color:#fff4ee}
+.L.v0{--navy:#0a102d}
+.L .nav{position:relative;z-index:3;display:flex;justify-content:space-between;align-items:center;padding:4px 20px 0;animation:up .7s .1s both}
+.L .logo{font-weight:900;font-size:17px;letter-spacing:-.04em;color:#fff4ee}
+.L .logo i{font-style:normal;color:#ff8fa3}
+.L .nav a{font-size:13px;color:#aab0cc;text-decoration:none;font-weight:700}
+.L .title{position:relative;z-index:3;text-align:center;margin-top:18px}
+.L .title p{margin:0;font-size:12px;font-weight:800;letter-spacing:.18em;color:#ffb89a;animation:up .7s .25s both}
+.L .title h1{margin:8px 0 0;font-weight:900;font-size:40px;line-height:1.1;letter-spacing:-.05em;color:#fff;animation:up .8s .35s both;text-shadow:0 0 30px rgba(255,170,130,.25)}
+.L .title span{display:block;margin-top:8px;font-size:15px;font-weight:700;color:#c9cde3;letter-spacing:-.02em;animation:up .8s .5s both}
+.L .art{position:absolute;left:0;right:0;top:78px;z-index:1;animation:enter 1.6s cubic-bezier(.2,.7,.2,1) both}
+.L .art img{display:block;width:100%}
+.L .art:after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:90px;background:linear-gradient(180deg,rgba(10,18,47,0),var(--navy))}
+@keyframes enter{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:none}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+/* 은은한 조명: 이미지 위 빛 번짐 */
+.glow{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;transform:translate(-50%,-50%)}
+.glow.lamp{width:120px;height:120px;background:radial-gradient(circle,rgba(255,214,150,.55) 0%,rgba(255,190,120,.18) 40%,rgba(255,190,120,0) 70%);animation:breathe 4.5s ease-in-out infinite}
+.glow.candle{width:70px;height:70px;background:radial-gradient(circle,rgba(255,200,120,.7) 0%,rgba(255,170,90,0) 70%);animation:flick 1.8s ease-in-out infinite}
+.glow.neon{width:90px;height:90px;background:radial-gradient(circle,rgba(255,90,150,.6) 0%,rgba(255,90,150,0) 70%);animation:neon 5s infinite}
+.glow.spill{width:340px;height:120px;background:radial-gradient(ellipse,rgba(255,170,110,.35) 0%,rgba(255,170,110,0) 70%);animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes flick{0%,100%{opacity:.8;transform:translate(-50%,-50%) scale(1)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}60%{opacity:.7;transform:translate(-50%,-50%) scale(.95)}}
+@keyframes neon{0%,88%,100%{opacity:1}90%{opacity:.35}92%{opacity:1}94%{opacity:.5}96%{opacity:1}}
+.dust{position:absolute;width:3px;height:3px;border-radius:50%;background:#ffd9b0;opacity:0;z-index:2;animation:dust 7s linear infinite}
+@keyframes dust{0%{opacity:0;transform:translateY(0)}20%{opacity:.8}100%{opacity:0;transform:translateY(-120px) translateX(14px)}}
+.tw{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;z-index:2;animation:tw 3.2s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.9}}
+/* 입장권 */
+.L .bottom{position:absolute;left:0;right:0;bottom:112px;z-index:3;padding:0 20px;animation:up .8s .9s both}
+.ticket{position:relative;display:flex;align-items:center;gap:14px;border-radius:18px;padding:14px 16px;background:rgba(20,28,66,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,190,160,.22)}
+.ticket:before,.ticket:after{content:"";position:absolute;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--navy);border:1px solid rgba(255,190,160,.22)}
+.ticket:before{left:-9px;clip-path:inset(0 0 0 50%)}.ticket:after{right:-9px;clip-path:inset(0 50% 0 0)}
+.ticket .dt{font-size:11px;font-weight:900;letter-spacing:.08em;text-align:center;line-height:1.2;padding-right:14px;border-right:1.5px dashed rgba(255,190,160,.35);color:#ffb89a}
+.ticket .dt b{display:block;font-size:26px;letter-spacing:-.03em;color:#fff}
+.ticket .tx{font-size:13px;line-height:1.55;color:#c9cde3;font-weight:600}
+.ticket .tx strong{display:block;font-size:15px;font-weight:800;color:#fff;letter-spacing:-.02em}
+.ticket .tx em{font-style:normal;font-weight:800;color:#ff8fa3;display:inline-flex;align-items:center;gap:5px}
+.ticket .tx em:before{content:"";width:6px;height:6px;border-radius:3px;background:#ff8fa3;animation:ping 1.6s ease-out infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(255,143,163,.7)}100%{box-shadow:0 0 0 8px rgba(255,143,163,0)}}
+.L .cta{background:none;animation:up .8s 1.05s both}
+.L .cta small{display:none}
+.L .cta button{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffc49a 0%,#ff9e9a 50%,#ff8fa3 100%);color:#2b1020;font-weight:900;box-shadow:0 12px 30px -10px rgba(255,150,140,.7)}
+.L .cta button:after{content:"";position:absolute;top:0;bottom:0;width:60px;left:-80px;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.55),rgba(255,255,255,0));transform:skewX(-20deg);animation:shine 4s 2s ease-in-out infinite}
+@keyframes shine{0%{left:-80px}35%,100%{left:120%}}
+.replay{display:block;margin:12px auto 0;border:0;background:#fff;border-radius:12px;height:34px;padding:0 14px;font-family:inherit;font-weight:700;font-size:12px;color:#2a2533;cursor:pointer;box-shadow:0 2px 8px -4px rgba(0,0,0,.25)}
+
+/* ---------- 공통 신청 화면 (테마 토큰) ---------- */
+.flow{--bg:#0a122f;--surf:rgba(255,255,255,.06);--line:rgba(255,190,160,.2);--text:#fff4ee;--mute:#aab0cc;--dim:#6f7699;--acc:#ff8fa3;--accbg:rgba(255,143,163,.13);--btn:linear-gradient(135deg,#ffc49a 0%,#ff9e9a 50%,#ff8fa3 100%);--btntx:#2b1020;--err:#ff8a8a;--ok:#8fd3b6}
+.look .tk{width:96px;height:96px;margin:4px auto 16px;border-radius:28px;display:grid;place-items:center;background:var(--accbg)}
+.look .tk svg{width:46px;height:46px;stroke:var(--acc);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.flow .scr{background:var(--bg);color:var(--text)}
+.top{display:flex;align-items:center;height:44px;padding:4px 14px 0}
+.back{width:40px;height:40px;border:0;background:none;display:grid;place-items:center;cursor:pointer}
+.back svg{width:22px;height:22px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.top .t{flex:1;text-align:center;font-size:15px;font-weight:700;margin-right:40px}
+.prog{display:flex;gap:6px;padding:10px 20px 0}
+.prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.prog i.on{background:var(--acc)}
+.fb{padding:22px 20px 150px}
+.no{font-size:13px;font-weight:700;color:var(--acc)}
+.fb h2{font-weight:900;font-size:24px;line-height:1.38;letter-spacing:-.03em;margin:6px 0}
+.fb .desc{font-size:14px;color:var(--mute);margin:0 0 24px;line-height:1.6}
+.lb{display:block;font-size:13px;font-weight:700;margin:0 0 8px}
+.lb em{font-style:normal;font-weight:500;color:var(--dim);margin-left:4px}
+.fd{margin-bottom:20px}
+.in{width:100%;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--surf);color:var(--text);font-family:inherit;font-size:16px;font-weight:500;padding:0 16px;outline:none}
+.in::placeholder{color:var(--dim)}
+.in:focus{border-color:var(--acc)}
+.help{font-size:12px;color:var(--mute);margin-top:7px;line-height:1.55}
+.bar{position:absolute;left:0;right:0;bottom:0;padding:24px 20px 30px;background:linear-gradient(180deg,transparent,var(--bg) 30%);z-index:6}
+.btn{width:100%;height:56px;border:0;border-radius:18px;background:var(--btn);color:var(--btntx);font-family:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.btn.gh{background:transparent;border:1.5px solid var(--line);color:var(--text)}
+.btn[disabled]{background:var(--line);color:var(--mute)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* 지인 피하기 */
+.avoid{border:1.5px dashed var(--line);border-radius:18px;padding:16px;background:var(--surf)}
+.avoid .hd{display:flex;align-items:center;gap:10px}
+.avoid .hd svg{width:22px;height:22px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.avoid .hd b{font-size:15px}
+.avoid .hd small{margin-left:auto;font-size:11px;font-weight:700;color:var(--mute);border:1px solid var(--line);border-radius:8px;padding:3px 7px}
+.avoid p{margin:8px 0 12px;font-size:13px;color:var(--mute);line-height:1.6}
+.person{display:flex;align-items:center;gap:8px;height:44px;border-radius:12px;background:var(--accbg);padding:0 12px;font-size:14px;font-weight:600;margin-bottom:8px}
+.person span{color:var(--mute);font-weight:500;font-size:13px}
+.person button{margin-left:auto;border:0;background:none;color:var(--mute);font-size:18px;cursor:pointer;width:28px;height:28px}
+.add{width:100%;height:44px;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--acc);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.lock{display:flex;gap:6px;align-items:flex-start;font-size:12px;color:var(--mute);margin-top:10px;line-height:1.5}
+.lock svg{width:14px;height:14px;flex:none;margin-top:2px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* 사진 */
+.ph{display:grid;grid-template-columns:1.25fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:270px}
+.slot{position:relative;border-radius:18px;border:1.5px dashed var(--line);background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:var(--mute);cursor:pointer;overflow:hidden}
+.slot.big{grid-row:1/3}
+.slot svg{width:26px;height:26px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round}
+.slot .req{position:absolute;left:10px;top:10px;font-size:11px;font-weight:800;color:var(--btntx);background:var(--acc);padding:3px 8px;border-radius:8px}
+.slot.filled{border:0;background:linear-gradient(160deg,#f6d3c6,#e3a9b4 55%,#b98aa8)}
+.slot.filled .face{width:86px;height:86px;border-radius:50%;background:rgba(255,255,255,.55);position:relative;margin-top:30px}
+.slot.filled .face:after{content:"";position:absolute;left:-30px;right:-30px;top:96px;height:120px;border-radius:70px 70px 0 0;background:rgba(255,255,255,.55)}
+.slot.filled .chg{position:absolute;right:10px;bottom:10px;font-size:12px;font-weight:700;color:#3a2a33;background:rgba(255,255,255,.9);border-radius:10px;padding:6px 10px}
+.slot.filled .ok{position:absolute;left:10px;top:10px;width:26px;height:26px;border-radius:13px;background:#fff;display:grid;place-items:center}
+.slot.filled .ok svg{width:16px;height:16px;stroke:var(--ok);stroke-width:2.6}
+.guide{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.guide div{display:flex;gap:7px;align-items:center;font-size:13px;font-weight:600;border-radius:12px;background:var(--surf);border:1px solid var(--line);padding:10px 11px}
+.guide svg{width:16px;height:16px;flex:none;stroke:var(--ok);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.guide .x svg{stroke:var(--err)}
+.privacy{margin-top:16px;border-radius:16px;background:var(--accbg);padding:14px 16px;font-size:13px;line-height:1.65}
+.privacy b{color:var(--acc)}
+
+/* 조회 */
+.look{padding:30px 20px 150px}
+.look .ill{width:120px;display:block;margin:4px auto 10px;animation:bob 2.8s ease-in-out infinite}
+.look h2{font-weight:900;text-align:center;font-size:23px;margin:0 0 6px;letter-spacing:-.03em}
+.look .desc{text-align:center;font-size:14px;color:var(--mute);margin:0 0 26px;line-height:1.6}
+.stat{border-radius:22px;background:var(--surf);border:1.5px solid var(--line);padding:18px}
+.stat .hd{display:flex;justify-content:space-between;align-items:center}
+.stat .hd b{font-size:17px;letter-spacing:-.02em}
+.badge{font-size:12px;font-weight:800;padding:5px 10px;border-radius:10px;background:var(--accbg);color:var(--acc)}
+.stat .m{font-size:13px;color:var(--mute);margin-top:4px}
+.tl{margin-top:18px}
+.tl div{display:flex;gap:12px;align-items:flex-start;position:relative;padding-bottom:16px}
+.tl div:not(:last-child):before{content:"";position:absolute;left:11px;top:26px;bottom:2px;width:2px;background:var(--line)}
+.tl div.done:not(:last-child):before{background:var(--acc)}
+.tl i{width:24px;height:24px;border-radius:12px;flex:none;border:2px solid var(--line);background:var(--bg);display:grid;place-items:center}
+.tl .done i{background:var(--acc);border-color:var(--acc)}
+.tl .done i:after{content:"";width:5px;height:9px;border:solid var(--btntx);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.tl .now i{border-color:var(--acc);box-shadow:0 0 0 4px var(--accbg)}
+.tl .now i:after{content:"";width:8px;height:8px;border-radius:4px;background:var(--acc)}
+.tl b{display:block;font-size:14px;margin-top:2px}
+.tl small{font-size:12px;color:var(--mute)}
+.tl .now b{color:var(--acc)}
+.pay{margin-top:4px;border-radius:16px;background:var(--accbg);padding:14px 16px}
+.pay .r{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0}
+.pay .r span{color:var(--mute)}
+.copy{border:0;border-radius:10px;background:var(--surf);color:var(--acc);font-family:inherit;font-weight:800;font-size:12px;padding:7px 10px;cursor:pointer;border:1px solid var(--line)}
+.cancel{display:block;margin:18px auto 0;border:0;background:none;color:var(--mute);font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+/* ================= v6 · 토스식 흐름 ================= */
+.rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:0 0 8px}
+.rules div{background:#fff;border-radius:16px;padding:14px 16px;font-size:13px;line-height:1.55;color:#6d6577;box-shadow:0 2px 10px -6px rgba(0,0,0,.2)}
+.rules b{display:block;color:#2a2533;font-size:14px;margin-bottom:2px}
+.T{--bg:#0a122f;--surf:rgba(255,255,255,.06);--surf2:rgba(255,255,255,.1);--line:rgba(255,255,255,.12);--text:#fff4ee;--mute:#aab0cc;--dim:#6f7699;--acc:#ff8fa3;--accbg:rgba(255,143,163,.14);--btn:linear-gradient(135deg,#ffc49a 0%,#ff9e9a 50%,#ff8fa3 100%);--btntx:#2b1020;--ok:#8fd3b6;--err:#ff8a8a;background:var(--bg);color:var(--text)}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* 상단: 뒤로 + 진행 막대 */
+.nb{display:flex;align-items:center;height:48px;padding:0 8px;position:relative;z-index:4}
+.bk{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;color:var(--text);cursor:pointer}
+.bk .ic{width:24px;height:24px}
+.pg{flex:1;height:4px;border-radius:2px;background:var(--line);margin:0 20px 0 4px;overflow:hidden}
+.pg i{display:block;height:100%;border-radius:2px;background:var(--acc);width:var(--p)}
+.nb .tt{flex:1;text-align:center;font-size:16px;font-weight:700;margin-right:44px}
+/* 본문 */
+.bd{padding:22px 24px 0}
+.T h2{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.035em}
+.T .ds{margin:10px 0 0;font-size:15px;line-height:1.6;color:var(--mute);font-weight:500}
+.T .ds b{color:var(--text)}
+/* 하단 버튼 하나 */
+.ft{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:14px 20px 28px;background:linear-gradient(180deg,rgba(10,18,47,0),var(--bg) 22px)}
+.ft .note{text-align:center;font-size:13px;font-weight:600;color:var(--mute);margin:0 0 10px}
+.ft .note em{font-style:normal;color:var(--acc)}
+.T .btn{display:block;width:100%;height:56px;border:0;border-radius:16px;background:var(--btn);color:var(--btntx);font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:-.01em}
+.T .btn.off{background:var(--surf2);color:var(--dim)}
+.T .btn.sub{background:var(--surf2);color:var(--text)}
+.T .btn.flat{border-radius:0}
+.btn2{display:grid;grid-template-columns:1fr 1.7fr;gap:8px}
+.lnk{display:block;margin:14px auto 0;border:0;background:none;color:var(--mute);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+/* 선택지 카드 */
+.opt{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:var(--surf);margin-top:10px;border:2px solid transparent}
+.opt.on{border-color:var(--acc);background:var(--accbg)}
+.opt.x{opacity:.4}
+.opt .d{width:46px;text-align:center;font-size:11px;font-weight:800;color:var(--mute);line-height:1.2;letter-spacing:.04em}
+.opt .d b{display:block;font-size:22px;color:var(--text);letter-spacing:-.02em}
+.opt .t{flex:1;font-size:13px;color:var(--mute);font-weight:600;line-height:1.55}
+.opt .t strong{display:block;font-size:16px;color:var(--text);font-weight:800;letter-spacing:-.02em}
+.opt .t em{font-style:normal;color:var(--acc);font-weight:800}
+.opt .end{font-size:13px;font-weight:800;color:var(--dim)}
+.opt>.ic{color:var(--dim);width:20px;height:20px}
+.chk{width:24px;height:24px;border-radius:12px;border:2px solid var(--dim);flex:none;display:grid;place-items:center}
+.on .chk{border-color:var(--acc);background:var(--acc)}
+.on .chk:after{content:"";width:5px;height:10px;border:solid var(--btntx);border-width:0 2.4px 2.4px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.hint{display:flex;gap:6px;align-items:center;margin-top:16px;font-size:13px;color:var(--mute);font-weight:600}
+.hint .ic{width:16px;height:16px;color:var(--acc)}
+/* 성별 타일 */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:34px}
+.tile{height:156px;border-radius:22px;background:var(--surf);border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:20px;font-weight:800}
+.tile small{font-size:13px;font-weight:700;color:var(--mute)}
+.tile small em{font-style:normal;color:var(--acc)}
+.tile.on{border-color:var(--acc);background:var(--accbg)}
+.tile .sym{width:44px;height:44px;border-radius:22px;background:var(--surf2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
+/* 토스식 쌓이는 입력칸 */
+.fld{margin-top:28px}
+.kpf .fld{margin-top:18px}
+.kpf .fld .v{height:44px}
+.fld label{display:block;font-size:13px;font-weight:600;color:var(--mute)}
+.fld .v{display:flex;align-items:center;height:50px;border-bottom:2px solid var(--line);font-size:22px;font-weight:700;letter-spacing:-.02em}
+.fld .v .pl{color:var(--dim);font-weight:600}
+.fld .v .x{margin-left:auto;width:22px;height:22px;border-radius:11px;background:var(--surf2);display:grid;place-items:center;color:var(--mute)}
+.fld .v .x .ic{width:12px;height:12px;stroke-width:3}
+.fld.on label{color:var(--acc)}
+.fld.on .v{border-color:var(--acc)}
+.fld .msg{font-size:13px;margin-top:8px;color:var(--mute)}
+.fld.err label,.fld.err .msg{color:var(--err)}
+.fld.err .v{border-color:var(--err)}
+.caret{display:inline-block;width:2px;height:26px;background:var(--acc);margin-left:2px;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.fld.new{animation:fldin .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fldin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+/* 숫자 키패드 */
+.kp{position:absolute;left:0;right:0;bottom:0;z-index:7;background:#060b20;padding:6px 8px 24px;display:grid;grid-template-columns:repeat(3,1fr)}
+.kp span{height:54px;display:grid;place-items:center;font-size:24px;font-weight:600;color:var(--text)}
+.kp span .ic{width:24px;height:24px}
+.kpbtn{position:absolute;left:0;right:0;bottom:246px;z-index:7}
+/* 이메일 도메인 */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chips span{height:36px;padding:0 14px;border-radius:18px;background:var(--surf2);font-size:14px;font-weight:700;display:inline-flex;align-items:center;color:var(--text)}
+.chips span.on{background:var(--accbg);color:var(--acc)}
+/* 지인 */
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:26px}
+.yn div{height:56px;border-radius:16px;background:var(--surf);border:2px solid transparent;display:grid;place-items:center;font-size:16px;font-weight:800}
+.yn div.on{border-color:var(--acc);background:var(--accbg);color:var(--acc)}
+.pp{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:var(--surf);margin-top:10px}
+.pp .av{width:36px;height:36px;border-radius:18px;background:var(--surf2);display:grid;place-items:center;color:var(--mute)}
+.pp .av .ic{width:18px;height:18px}
+.pp b{display:block;font-size:15px}
+.pp span{font-size:13px;color:var(--mute)}
+.pp .rm{margin-left:auto;font-size:13px;font-weight:700;color:var(--mute)}
+.addp{display:flex;align-items:center;justify-content:center;gap:6px;height:52px;border-radius:16px;border:1.5px dashed var(--line);margin-top:10px;font-size:15px;font-weight:700;color:var(--acc)}
+.addp .ic{width:18px;height:18px}
+.safe{display:flex;gap:10px;margin-top:18px;padding:14px 16px;border-radius:16px;background:var(--accbg);font-size:13px;line-height:1.6;font-weight:500}
+.safe .ic{width:18px;height:18px;color:var(--acc);margin-top:2px}
+/* 사진 (토스식 간단 버전) */
+.T .ph{margin-top:26px;height:250px}
+.mini{display:flex;gap:16px;margin-top:16px;font-size:13px;font-weight:600;color:var(--mute)}
+.mini span{display:flex;align-items:center;gap:5px}
+.mini .ic{width:16px;height:16px;color:var(--ok);stroke-width:2.6}
+.mini .no .ic{color:var(--err)}
+/* 확인 바텀시트 */
+.dim{position:absolute;inset:0;background:rgba(3,6,18,.62);z-index:8}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:9;background:#141d45;border-radius:28px 28px 0 0;padding:10px 22px 28px;animation:sheet .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sheet{from{transform:translateY(40%);opacity:0}to{transform:none;opacity:1}}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 18px}
+.sheet h3{margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em}
+.sheet .ds{font-size:14px!important;margin-top:6px!important}
+.sum{margin:18px 0 0;padding:4px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sum div{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:14px}
+.sum dt{color:var(--mute);font-weight:600}
+.sum dd{margin:0;font-weight:700;text-align:right}
+.agree{display:flex;align-items:center;gap:12px;padding:16px 0;font-size:15px;font-weight:700}
+.agree .ic{margin-left:auto;color:var(--dim);width:18px;height:18px}
+/* 완료 */
+.fin{padding:70px 24px 0;text-align:center}
+.fin .big{width:84px;height:84px;border-radius:42px;background:var(--acc);margin:0 auto 26px;display:grid;place-items:center;animation:pop .6s cubic-bezier(.3,1.6,.5,1) .1s both;box-shadow:0 0 0 12px var(--accbg)}
+.fin .big .ic{width:42px;height:42px;color:var(--btntx);stroke-width:3;stroke-dasharray:30;stroke-dashoffset:30;animation:draw .45s .55s ease-out forwards}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fin h2{text-align:center}
+.card{margin:30px 0 0;text-align:left;border-radius:20px;background:var(--surf);padding:18px 18px 4px}
+.card .tl{margin-top:0}
+/* 내역 */
+.st{padding:14px 24px 0}
+.st .badge{display:inline-block}
+.st h2{margin-top:12px}
+.acct{margin-top:24px;border-radius:20px;background:var(--surf);padding:18px}
+.acct .r{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:5px 0}
+.acct .r span{color:var(--mute);font-weight:600}
+.acct .r b{font-weight:700}
+.acct .btn{margin-top:12px;height:48px;font-size:15px;border-radius:14px}
+.sm{font-size:13px;color:var(--mute);margin-top:10px;line-height:1.55}
+/* 소개 페이지 아래쪽 */
+.phone.tall{height:auto}
+.phone.tall .scr{height:auto;padding-bottom:132px}
+.lsec{padding:34px 24px 0}
+.lsec h3{margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1.4}
+.lsec>.ds{font-size:14px!important}
+.lsec .eb{font-size:13px;font-weight:800;color:var(--acc);margin:0 0 6px}
+.fact{display:flex;gap:14px;align-items:center;padding:12px 0}
+.fact i{width:46px;height:46px;border-radius:15px;background:var(--accbg);display:grid;place-items:center;flex:none;color:var(--acc)}
+.fact b{display:block;font-size:16px;letter-spacing:-.02em}
+.fact span{font-size:13px;color:var(--mute);font-weight:500}
+.stp{counter-reset:s;margin-top:14px}
+.stp div{position:relative;padding:0 0 18px 40px}
+.stp div:before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:13px;background:var(--surf2);font-size:13px;font-weight:800;display:grid;place-items:center;color:var(--acc)}
+.stp div:not(:last-child):after{content:"";position:absolute;left:12px;top:30px;bottom:4px;width:2px;background:var(--line)}
+.stp b{display:block;font-size:15px}
+.stp span{font-size:13px;color:var(--mute)}
+.price{margin-top:14px;border-radius:20px;background:var(--surf);padding:18px}
+.price .amt{font-size:28px;font-weight:900;letter-spacing:-.03em}
+.price .amt small{font-size:14px;font-weight:700;color:var(--mute);margin-left:4px}
+.price .r{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-top:1px solid var(--line)}
+.price .r:first-of-type{margin-top:12px}
+.price .r span{color:var(--mute);font-weight:600}
+.price .r b{font-weight:700}
+.rvs{display:flex;gap:10px;margin:14px -24px 0;padding:0 24px;overflow:hidden}
+.rv{flex:none;width:236px;border-radius:20px;background:var(--surf);padding:16px;font-size:14px;line-height:1.6;font-weight:500}
+.rv small{display:block;margin-top:10px;font-size:12px;color:var(--mute);font-weight:600}
+.tag{display:inline-block;font-size:11px;font-weight:800;color:var(--mute);border:1px solid var(--line);border-radius:7px;padding:2px 6px;margin-left:6px;vertical-align:3px}
+.qa{margin-top:10px}
+.qa div{border-bottom:1px solid var(--line);padding:16px 0}
+.qa b{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:700}
+.qa b .ic{width:18px;height:18px;color:var(--dim)}
+.qa p{margin:8px 0 0;font-size:14px;color:var(--mute);line-height:1.6}
+.biz{margin:30px 0 0;padding:20px 24px 0;font-size:11px;color:var(--dim);line-height:1.7;border-top:1px solid var(--line)}
+.flowrow .phone{flex:none}
+
+/* 메일 */
+.em{width:380px;border-radius:18px;background:#fff;box-shadow:0 20px 40px -18px rgba(30,20,40,.3);overflow:hidden;color:#1c2140}
+.emh{padding:14px 18px;border-bottom:1px solid #eee;font-size:12px;color:#8a8fa8}
+.emh b{display:block;font-size:14px;color:#1c2140;margin-bottom:3px}
+.emt{position:relative;height:180px;background:#0a122f;overflow:hidden}
+.emt img{position:absolute;left:50%;top:-118px;width:300px;transform:translateX(-50%)}
+.emt:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,47,.1),rgba(10,18,47,0) 50%,#0a122f)}
+.lg{position:absolute;left:18px;top:14px;z-index:2;font-weight:900;font-size:16px;color:#fff4ee;letter-spacing:-.04em}
+.lg i,.logo2 i{font-style:normal;color:#ff8fa3}
+.emc{padding:24px 22px 8px}
+.emc h3{margin:8px 0 10px;font-size:24px;line-height:1.35;font-weight:800;letter-spacing:-.035em}
+.emc p{margin:0;font-size:14px;line-height:1.7;color:#5b6180}
+.emc p b{color:#1c2140}
+.ebadge{display:inline-block;font-size:12px;font-weight:800;padding:4px 9px;border-radius:8px;background:#ffe8ec;color:#e0506e}
+.ebadge.ok{background:#e3f6ee;color:#1f8a5e}
+.emb{margin:18px 0 0;border-radius:14px;background:#f4f5f9;padding:6px 14px}
+.emb div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;font-size:13px}
+.emb div+div{border-top:1px solid #e6e8ef}
+.emb dt{color:#8a8fa8;font-weight:600}.emb dd{margin:0;font-weight:700;text-align:right}
+.ebtn{display:block;margin:18px 0 0;height:52px;line-height:52px;border-radius:14px;text-align:center;text-decoration:none;font-weight:800;font-size:16px;background:linear-gradient(135deg,#ffc49a,#ff9e9a 50%,#ff8fa3);color:#2b1020}
+.ebtn.sub{background:#f0f1f6;color:#1c2140}
+.emsm{font-size:12px!important;color:#8a8fa8!important;margin-top:10px!important;text-align:center}
+.emf{margin-top:18px;padding:14px 22px 18px;font-size:11px;line-height:1.6;color:#9a9fb5;border-top:1px solid #f0f0f4}
+/* 호스트 */
+.ah{display:flex;align-items:center;justify-content:space-between;padding:8px 24px 0}
+.logo2{font-weight:900;font-size:18px;letter-spacing:-.04em}
+.host{font-size:12px;font-weight:800;color:var(--acc);background:var(--accbg);border-radius:8px;padding:4px 8px}
+.evs{display:flex;align-items:center;justify-content:space-between;border-radius:16px;background:var(--surf);padding:12px 16px;margin-top:10px}
+.evs b{display:block;font-size:15px}.evs small{font-size:12px;color:var(--mute)}
+.evs .ic{color:var(--mute);width:18px}
+.seat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.seat div{border-radius:16px;background:var(--surf);padding:12px 14px;position:relative}
+.seat span{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.seat b{font-size:22px;font-weight:800}.seat em{font-style:normal;font-size:14px;color:var(--dim)}
+.seat i{display:block;height:4px;border-radius:2px;margin-top:6px;background:linear-gradient(90deg,var(--acc) var(--p),var(--line) var(--p))}
+.tabs2{display:flex;gap:6px;margin:18px 0 6px;overflow:hidden}
+.tabs2 span{flex:none;height:34px;line-height:34px;padding:0 12px;border-radius:17px;background:var(--surf);font-size:13px;font-weight:700;color:var(--mute)}
+.tabs2 span.on{background:var(--text);color:var(--bg)}
+.ap2{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ap2>.ic{color:var(--dim);width:18px}
+.av2{width:52px;height:52px;border-radius:16px;flex:none;background:linear-gradient(160deg,#f6d3c6,#e3a9b4 60%,#b98aa8)}
+.av2.m{background:linear-gradient(160deg,#c9d6f2,#8ea3d6 60%,#6b7cb3)}.av2.m2{background:linear-gradient(160deg,#d6e6dc,#9cc2ad 60%,#6f9a85)}
+.in2{flex:1;min-width:0}
+.in2 b{display:block;font-size:15px}.in2 b small{font-size:12px;color:var(--mute);font-weight:600;margin-left:4px}
+.in2 span{display:block;font-size:12px;color:var(--mute);margin-top:2px}
+.warn{display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-style:normal;font-size:11px;font-weight:800;color:#ffc16b;background:rgba(255,193,107,.13);border-radius:7px;padding:3px 7px}
+.warn .ic{width:12px;height:12px;stroke-width:2.6}
+.toast2{position:absolute;left:20px;right:20px;bottom:30px;z-index:9;display:flex;align-items:center;gap:10px;border-radius:16px;padding:14px 16px;background:#1d2752;font-size:14px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.45);animation:up .5s 1s both}
+.toast2 .ic{color:var(--ok);width:18px;height:18px;stroke-width:2.6}
+.pics{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:6px;height:230px;padding:0 20px}
+.pics div{border-radius:16px;background:linear-gradient(160deg,#f6d3c6,#e3a9b4 60%,#b98aa8)}
+.pics .p1{grid-row:1/3}.pics .p2{opacity:.8}.pics .p3{opacity:.6}
+.sx{font-size:14px;color:var(--mute);font-weight:600;margin-left:4px}
+.alert{display:flex;gap:10px;margin-top:14px;padding:14px;border-radius:16px;background:rgba(255,193,107,.12);font-size:13px;line-height:1.6;color:var(--mute)}
+.alert .ic{color:#ffc16b;width:18px;height:18px;margin-top:2px}
+.alert b{display:block;color:#ffc16b;font-size:14px}
+.alert u{color:var(--text);text-decoration:none;font-weight:700}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>플러팅 라운지 · 신청 페이지 시안 v6</h1>
+  <div class="ver"><a href="/files/apply-draft-v1.html">v1 고급 남색</a><a href="/files/apply-draft-v2.html">v2 수정본</a><a href="/files/apply-draft-v3.html">v3 귀여운 캐릭터</a><a href="/files/apply-draft-v4.html">v4 라운지 3종</a><a href="/files/apply-draft-v5.html">v5 남색 라운지</a><a class="on" href="/files/apply-draft-v6.html">v6 B-1 · 토스식 흐름 (지금)</a></div>
+  <p class="sub">B-1 아치 입구로 정하고, 소개 페이지부터 신청·내역 확인·안내 메일·호스트 관리까지 전부 이어서 만들었어요. 토스 앱의 사용 원칙을 빌려왔고, 색과 그림은 플러팅 라운지 그대로예요. 일정·가격·후기는 예시예요.</p>
+  <div class="rules">
+    <div><b>한 화면에 질문 하나</b>신청서를 7개 짧은 화면으로 나눴어요. 한 번에 하나만 생각하면 돼요.</div>
+    <div><b>말 걸듯 묻는 제목</b>‘성별’ 대신 ‘성별을 골라주세요’처럼 크게 물어봐요.</div>
+    <div><b>버튼은 아래에 하나</b>엄지가 닿는 곳에 다음 할 일 버튼 하나만 둬요.</div>
+    <div><b>고르면 바로 다음</b>일정·성별처럼 하나만 고르는 질문은 누르는 순간 넘어가요.</div>
+    <div><b>입력은 최소로</b>전화번호는 숫자 키패드, 이메일은 주소 버튼으로 덜 치게 해요.</div>
+    <div><b>보내기 전에 한 번 더</b>마지막에 입력한 내용을 한 장에 모아 보여주고 고칠 수 있게 해요.</div>
+  </div>
+
+  <!-- ===== 1. 소개 페이지 ===== -->
+  <div class="sec">
+    <h2>1. 소개 페이지</h2>
+    <p class="sub">첫 화면은 B-1 그대로예요. 아래로 내리면 꼭 알아야 할 것만 순서대로 나와요. 신청 버튼은 화면 아래에 계속 붙어 있어요.</p>
+    <div class="row flowrow">
+      <div>
+        <p class="cap"><b>1-1</b>첫 화면</p>
+        <p class="capd">날짜·장소·남은 자리를 입장권 하나로 보여줘요. 누르면 바로 일정 고르기로 가요.</p>
+        <div class="phone"><div class="scr L" data-anim>
+          <span class="tw" style="left:12%;top:120px"></span><span class="tw" style="left:86%;top:150px;animation-delay:1.2s"></span><span class="tw" style="left:20%;top:330px;animation-delay:2.1s"></span><span class="tw" style="left:82%;top:300px;animation-delay:.6s"></span>
+          <div class="art">
+            <img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xhz4xiKRLe1mXA7TmhnNaGomC/hf_20261103_001319_6e11ed69-8eb1-4b23-837f-7d1aa54e4c34.png" alt="아치 문 너머로 보이는 분홍 소파 라운지">
+            <span class="glow lamp" style="left:37.5%;top:44%"></span>
+            <span class="glow lamp" style="left:43.7%;top:39%;animation-delay:1.5s"></span>
+            <span class="glow candle" style="left:50.3%;top:70%"></span>
+            <span class="glow neon" style="left:60%;top:55.6%"></span>
+            <span class="glow spill" style="left:50%;top:92%"></span>
+            <span class="dust" style="left:42%;top:72%"></span><span class="dust" style="left:56%;top:76%;animation-delay:2.4s"></span><span class="dust" style="left:48%;top:80%;animation-delay:4.6s"></span>
+          </div>
+          <div class="status"><span>9:41</span><i></i></div>
+          <div class="nav"><span class="logo">플러팅<i>.</i>라운지</span><a href="#">신청 내역</a></div>
+          <div class="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>
+          <div class="bottom"><div class="ticket"><div class="dt">NOV<b>15</b>SAT</div><div class="tx"><strong>오후 7:30 · 성수 라운지</strong>94~99년생 · 7:7 · <em>여성 1자리 남음</em></div></div></div>
+          <div class="cta"><button>라운지 입장 신청하기</button></div>
+        </div></div>
+        <button class="replay" data-replay>모션 다시 보기</button>
+      </div>
+
+      <div>
+        <p class="cap"><b>1-2</b>아래로 내리면 (긴 화면)</p>
+        <p class="capd">어떤 자리인지 → 일정 → 진행 순서 → 참가비 → 후기 → 질문 순서예요. 설명은 한두 줄로 줄였어요.</p>
+        <div class="phone tall"><div class="scr T">
+          <div class="lsec" style="padding-top:30px">
+            <p class="eb">이런 자리예요</p>
+            <h3>한 저녁에 일곱 명과<br>천천히 대화해요</h3>
+            <div class="fact" style="margin-top:10px"><i><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></i><div><b>15분씩, 일곱 번</b><span>자리를 옮기며 한 명씩 깊게 이야기해요</span></div></div>
+            <div class="fact"><i><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></i><div><b>서로 고른 사람만 연결돼요</b><span>한쪽만 고르면 아무 일도 일어나지 않아요</span></div></div>
+            <div class="fact"><i><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 9 6 9 6a17 17 0 0 1-2.6 3.2M6.6 6.6C4.3 8.1 3 12 3 12s4 6 9 6a8.6 8.6 0 0 0 4.4-1.2"/></svg></i><div><b>몇 명이 나를 골랐는지 몰라요</b><span>결과는 ‘매칭되었어요’ 한 줄만 보여요</span></div></div>
+          </div>
+          <div class="lsec">
+            <p class="eb">일정</p>
+            <h3>오실 날을 골라주세요</h3>
+            <div class="opt"><div class="d">NOV<b>15</b>SAT</div><div class="t"><strong>오후 7:30 · 성수</strong>94~99년생<br><em>여성 1 · 남성 3자리 남음</em></div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></div>
+            <div class="opt"><div class="d">NOV<b>22</b>SAT</div><div class="t"><strong>오후 7:30 · 성수</strong>90~95년생<br>여성 4 · 남성 2자리 남음</div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></div>
+            <div class="opt x"><div class="d">NOV<b>08</b>SAT</div><div class="t"><strong>오후 7:30 · 성수</strong>94~99년생</div><span class="end">마감</span></div>
+          </div>
+          <div class="lsec">
+            <p class="eb">진행 순서</p>
+            <h3>신청은 1분, 결제는<br>확인받은 뒤에 해요</h3>
+            <div class="stp">
+              <div><b>신청하기</b><span>사진 한 장과 기본 정보만 받아요</span></div>
+              <div><b>호스트 확인 후 메일 받기</b><span>보통 하루 안에 입금 안내가 와요</span></div>
+              <div><b>입금하고 사전 등록하기</b><span>메일 속 링크로 나를 소개하는 질문에 답해요</span></div>
+              <div><b>당일, 라운지에서 만나요</b><span>휴대폰 하나만 들고 오세요</span></div>
+            </div>
+          </div>
+          <div class="lsec">
+            <p class="eb">참가비</p>
+            <div class="price">
+              <div class="amt">30,000원<small>1인</small></div>
+              <div class="r"><span>3일 전까지 취소</span><b>전액 환불</b></div>
+              <div class="r"><span>2일 전~전날 취소</span><b>50% 환불</b></div>
+              <div class="r"><span>당일 취소</span><b>환불 없음</b></div>
+            </div>
+          </div>
+          <div class="lsec">
+            <p class="eb">다녀온 분들 이야기<span class="tag">예시</span></p>
+            <div class="rvs">
+              <div class="rv">어색할 줄 알았는데 15분이 금방 가요. 마지막에 매칭됐다는 메시지 보고 소리 질렀어요.<small>29세 · 여성</small></div>
+              <div class="rv">질문 카드가 있어서 말이 끊기지 않았어요. 분위기가 생각보다 훨씬 편했어요.<small>31세 · 남성</small></div>
+            </div>
+          </div>
+          <div class="lsec">
+            <p class="eb">자주 묻는 질문</p>
+            <div class="qa">
+              <div><b>혼자 가도 괜찮나요? <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></b><p>모두 혼자 와요. 친구와 함께 신청하면 같은 날 다른 테이블에 앉아요.</p></div>
+              <div><b>아는 사람을 만나면 어떡하죠? <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></b></div>
+              <div><b>사진은 누가 보나요? <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></b></div>
+              <div><b>연락처는 언제 공개되나요? <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></b></div>
+            </div>
+          </div>
+          <div class="biz">상호 플러팅 라운지 · 대표 OOO · 사업자등록번호 000-00-00000<br>문의 hello@example.com · 이용약관 · 개인정보처리방침</div>
+          <div class="ft"><p class="note">11월 15일 · <em>여성 1자리 남음</em></p><button class="btn">라운지 입장 신청하기</button></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2. 신청하기 ===== -->
+  <div class="sec">
+    <h2>2. 신청하기 · 7개 짧은 화면</h2>
+    <p class="sub">위쪽 막대가 얼마나 남았는지 알려줘요. 뒤로 가도 입력한 내용은 그대로 남아요. 결제는 여기서 하지 않아요.</p>
+    <div class="row flowrow">
+
+      <div>
+        <p class="cap"><b>2-1</b>일정 고르기</p>
+        <p class="capd">하나만 고르는 질문이라 누르면 바로 다음 화면으로 넘어가요. 마감된 날은 흐리게 보여요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:14%"><i></i></div></div>
+          <div class="bd">
+            <h2>어느 날 오실래요?</h2>
+            <p class="ds">남은 자리는 실시간이에요.</p>
+            <div style="margin-top:22px">
+              <div class="opt on"><div class="d">NOV<b>15</b>SAT</div><div class="t"><strong>오후 7:30 · 성수</strong>94~99년생<br><em>여성 1 · 남성 3자리 남음</em></div><span class="chk"></span></div>
+              <div class="opt"><div class="d">NOV<b>22</b>SAT</div><div class="t"><strong>오후 7:30 · 성수</strong>90~95년생<br>여성 4 · 남성 2자리 남음</div><span class="chk"></span></div>
+              <div class="opt x"><div class="d">NOV<b>08</b>SAT</div><div class="t"><strong>오후 7:30 · 성수</strong>94~99년생</div><span class="end">마감</span></div>
+            </div>
+            <p class="hint"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>나이대가 맞는 날만 신청할 수 있어요</p>
+          </div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-2</b>성별</p>
+        <p class="capd">고른 날의 남은 자리를 같이 보여줘요. 이것도 누르면 바로 넘어가요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:28%"><i></i></div></div>
+          <div class="bd">
+            <h2>성별을 골라주세요</h2>
+            <p class="ds">11월 15일(토) 오후 7:30 · 성수</p>
+            <div class="tiles">
+              <div class="tile on"><span class="sym">♀</span>여성<small><em>1자리</em> 남음</small></div>
+              <div class="tile"><span class="sym">♂</span>남성<small>3자리 남음</small></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-3</b>이름 · 출생연도 · 번호</p>
+        <p class="capd">하나를 다 쓰면 다음 칸이 위에 새로 생겨요. 쓴 칸은 아래에 쌓여서 바로 고칠 수 있어요. 번호는 숫자 키패드로 떠요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:43%"><i></i></div></div>
+          <div class="bd kpf">
+            <h2 style="font-size:24px">휴대폰 번호를 알려주세요</h2>
+            <div class="fld on new"><label>휴대폰 번호</label><div class="v">010-1234-56<span class="caret"></span><span class="x"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></div></div>
+            <div class="fld"><label>출생연도</label><div class="v">1997</div></div>
+            <div class="fld"><label>이름</label><div class="v">김민지</div></div>
+          </div>
+          <div class="kpbtn"><button class="btn off flat">확인</button></div>
+          <div class="kp"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span></span><span>0</span><span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11v12H9l-6-6z"/><path d="M13 10l4 4M17 10l-4 4"/></svg></span></div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-4</b>이메일</p>
+        <p class="capd">입금 안내와 결과가 이 주소로 가요. 자주 쓰는 주소는 버튼으로 붙여요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:57%"><i></i></div></div>
+          <div class="bd">
+            <h2>안내 메일을 받을<br>이메일을 알려주세요</h2>
+            <div class="fld on"><label>이메일</label><div class="v">minji<span class="caret"></span><span class="pl">@</span></div></div>
+            <div class="chips"><span class="on">@gmail.com</span><span>@naver.com</span><span>@kakao.com</span><span>@daum.net</span></div>
+            <p class="hint"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>신청 안내 말고는 메일을 보내지 않아요</p>
+          </div>
+          <div class="ft"><button class="btn off">다음</button></div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-5</b>하는 일</p>
+        <p class="capd">입력칸 하나, 예시 한 줄. 회사 이름은 묻지 않아요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:71%"><i></i></div></div>
+          <div class="bd">
+            <h2>어떤 일을 하세요?</h2>
+            <p class="ds">직군 정도면 충분해요. 대화 7분째에 맞은편 한 사람에게만 보여요.</p>
+            <div class="fld on"><label>하는 일</label><div class="v">UX 디자이너<span class="caret"></span><span class="x"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></div></div>
+            <div class="chips"><span>개발자</span><span>교사</span><span>간호사</span><span>마케터</span><span>공무원</span></div>
+          </div>
+          <div class="ft"><button class="btn">다음</button></div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-6</b>사진</p>
+        <p class="capd">한 장만 있으면 넘어갈 수 있어요. 누가 보는지, 언제 지우는지를 바로 아래에 적었어요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:86%"><i></i></div></div>
+          <div class="bd">
+            <h2>얼굴이 잘 보이는<br>사진을 올려주세요</h2>
+            <p class="ds">한 장은 꼭, 두 장 더는 원하면요.</p>
+            <div class="ph">
+              <div class="slot big filled"><span class="ok"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span><span class="face"></span><span class="chg">바꾸기</span></div>
+              <div class="slot"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>추가</div>
+              <div class="slot"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>추가</div>
+            </div>
+            <div class="mini"><span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>정면 얼굴</span><span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>최근 6개월</span><span class="no"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>선글라스</span></div>
+            <div class="safe"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><div>사진은 <b>호스트만</b> 봐요. 다른 참가자에게 보여주지 않고, 행사 30일 뒤 지워요.</div></div>
+          </div>
+          <div class="ft"><button class="btn">다음</button></div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-7</b>피하고 싶은 지인</p>
+        <p class="capd">‘없어요’를 누르면 바로 끝나요. ‘있어요’를 누른 사람만 이름을 적어요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:100%"><i></i></div></div>
+          <div class="bd">
+            <h2>마주치고 싶지 않은<br>지인이 있나요?</h2>
+            <p class="ds">적어주시면 같은 날 배정하지 않아요.</p>
+            <div class="yn"><div>없어요</div><div class="on">있어요</div></div>
+            <div class="pp"><span class="av"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span><div><b>이서준</b><span>전 직장 동료 · 95년생</span></div><span class="rm">삭제</span></div>
+            <div class="addp"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>한 명 더 적기</div>
+            <div class="safe"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><div>상대에게는 <b>절대 알리지 않아요.</b> 호스트만 확인하고 행사가 끝나면 지워요.</div></div>
+          </div>
+          <div class="ft"><button class="btn">다음</button></div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-8</b>마지막 확인</p>
+        <p class="capd">보내기 전에 한 장으로 모아 보여줘요. 줄을 누르면 그 화면으로 돌아가 고칠 수 있어요. 약관은 한 번에 동의해요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="pg" style="--p:100%"><i></i></div></div>
+          <div class="bd"><h2>마주치고 싶지 않은<br>지인이 있나요?</h2></div>
+          <div class="dim"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <h3>이대로 신청할까요?</h3>
+            <p class="ds">지금은 돈을 내지 않아요. 호스트가 확인한 뒤 입금 안내를 보내드려요.</p>
+            <dl class="sum">
+              <div><dt>일정</dt><dd>11월 15일(토) 오후 7:30</dd></div>
+              <div><dt>이름</dt><dd>김민지 · 여성 · 1997</dd></div>
+              <div><dt>휴대폰</dt><dd>010-1234-5678</dd></div>
+              <div><dt>이메일</dt><dd>minji@gmail.com</dd></div>
+              <div><dt>하는 일</dt><dd>UX 디자이너</dd></div>
+              <div><dt>사진 · 지인</dt><dd>1장 · 1명</dd></div>
+            </dl>
+            <div class="agree on"><span class="chk"></span>필수 약관에 모두 동의해요<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></div>
+            <button class="btn">신청하기</button>
+          </div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>2-9</b>신청 완료</p>
+        <p class="capd">체크가 톡 튀어나오고, 다음에 무슨 일이 일어나는지 한눈에 보여줘요.</p>
+        <div class="phone"><div class="scr T" data-anim>
+          <div class="status"><span>9:41</span><i></i></div>
+          <div class="fin">
+            <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+            <h2>신청을 마쳤어요</h2>
+            <p class="ds">호스트가 확인하면<br><b>minji@gmail.com</b>으로 입금 안내를 보내드려요.</p>
+            <div class="card"><div class="tl">
+              <div class="done"><i></i><span><b>신청 완료</b><small>방금</small></span></div>
+              <div class="now"><i></i><span><b>호스트 확인 중</b><small>보통 하루 안에 끝나요</small></span></div>
+              <div><i></i><span><b>입금하고 사전 등록</b><small>메일로 안내해드려요</small></span></div>
+            </div></div>
+          </div>
+          <div class="ft"><button class="btn">확인</button><button class="lnk">신청 내역 보기</button></div>
+        </div></div>
+        <button class="replay" data-replay>모션 다시 보기</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== 3. 신청 내역 ===== -->
+  <div class="sec">
+    <h2>3. 신청 내역</h2>
+    <p class="sub">로그인 없이 이메일로 들어와요. 지금 해야 할 일 하나를 맨 위에 크게 보여줘요.</p>
+    <div class="row flowrow">
+
+      <div>
+        <p class="cap"><b>3-1</b>내역 찾기</p>
+        <p class="capd">비밀번호 없이, 신청한 이메일로 확인 링크를 보내요. 이름과 번호만으로는 볼 수 없게 했어요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button></div>
+          <div class="bd">
+            <h2>신청한 이메일을<br>알려주세요</h2>
+            <p class="ds">확인 링크를 보내드려요. 링크는 30분 동안 쓸 수 있어요.</p>
+            <div class="fld on"><label>이메일</label><div class="v">minji@gmail.com<span class="caret"></span><span class="x"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></div></div>
+          </div>
+          <div class="ft"><button class="btn">링크 받기</button></div>
+        </div></div>
+      </div>
+
+      <div>
+        <p class="cap"><b>3-2</b>입금 기다리는 중</p>
+        <p class="capd">금액과 마감일을 제목으로, 계좌 복사는 버튼 하나로. 진행 상황은 아래에 작게 둬요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="tt">신청 내역</div></div>
+          <div class="st">
+            <span class="badge">입금 대기</span>
+            <h2>30,000원을<br>입금해주세요</h2>
+            <p class="ds"><b>11월 10일(월)까지</b> 입금하면 자리가 확정돼요.</p>
+            <div class="acct">
+              <div class="r"><span>받는 계좌</span><b>토스뱅크 1000-4168-0942</b></div>
+              <div class="r"><span>받는 분</span><b>민시훈</b></div>
+              <div class="r"><span>보내는 분 이름</span><b>김민지</b></div>
+              <button class="btn">계좌번호 복사하기</button>
+            </div>
+            <div class="tl" style="margin-top:22px">
+              <div class="done"><i></i><span><b>신청 완료</b><small>11월 3일</small></span></div>
+              <div class="done"><i></i><span><b>호스트 확인</b><small>11월 4일</small></span></div>
+              <div class="now"><i></i><span><b>입금 대기</b><small>입금이 확인되면 사전 등록 링크를 보내드려요</small></span></div>
+            </div>
+            <button class="cancel" style="margin-top:0">신청 취소하기</button>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+  <!-- ===== 4. 안내 메일 ===== -->
+  <div class="sec">
+    <h2>4. 안내 메일 3종 (Resend)</h2>
+    <p class="sub">메일 앱은 어두운 배경을 마음대로 바꿔서 본문은 밝게, 위쪽만 남색 라운지로 했어요. 메일마다 제목 하나, 버튼 하나예요.</p>
+    <div class="row">
+      <div><p class="cap"><b>①</b>신청 직후</p><p class="capd">지금은 할 일이 없다는 걸 먼저 알려줘요.</p>
+        <div class="em"><div class="emh"><b>[플러팅 라운지] 신청을 받았어요</b>플러팅 라운지 · 오전 10:24</div>
+          <div class="emt"><span class="lg">플러팅<i>.</i>라운지</span><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xhz4xiKRLe1mXA7TmhnNaGomC/hf_20261103_001319_6e11ed69-8eb1-4b23-837f-7d1aa54e4c34.png" alt=""></div>
+          <div class="emc"><h3>민지님,<br>신청을 받았어요</h3><p>호스트가 확인하고 <b>하루 안에</b> 입금 안내를 보내드려요. 지금은 하실 일이 없어요.</p>
+            <dl class="emb"><div><dt>일정</dt><dd>11월 15일(토) 오후 7:30</dd></div><div><dt>장소</dt><dd>성수 · 확정되면 알려드려요</dd></div></dl>
+            <a class="ebtn sub" href="#">신청 내역 보기</a></div>
+          <div class="emf">신청하신 분께만 보내는 메일이에요 · 문의 hello@example.com</div></div>
+      </div>
+      <div><p class="cap"><b>②</b>호스트 확인 · 입금 안내</p><p class="capd">금액과 마감일이 제목이에요. 계좌는 크게, 복사는 내역 화면에서 한 번에.</p>
+        <div class="em"><div class="emh"><b>[플러팅 라운지] 자리를 잡아뒀어요 · 입금 안내</b>플러팅 라운지 · 오후 2:10</div>
+          <div class="emt"><span class="lg">플러팅<i>.</i>라운지</span><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xhz4xiKRLe1mXA7TmhnNaGomC/hf_20261103_001319_6e11ed69-8eb1-4b23-837f-7d1aa54e4c34.png" alt=""></div>
+          <div class="emc"><span class="ebadge">입금 대기</span><h3>30,000원을<br>입금해주세요</h3><p><b>11월 10일(월)까지</b> 입금하면 자리가 확정돼요. 보내는 분 이름은 <b>김민지</b>로 해주세요.</p>
+            <dl class="emb"><div><dt>받는 계좌</dt><dd>토스뱅크 1000-4168-0942</dd></div><div><dt>받는 분</dt><dd>민시훈</dd></div><div><dt>금액</dt><dd>30,000원</dd></div></dl>
+            <a class="ebtn" href="#">계좌번호 복사하러 가기</a>
+            <p class="emsm">기한이 지나면 다음 신청자에게 자리가 넘어가요.</p></div>
+          <div class="emf">환불: 3일 전까지 전액 · 2일 전~전날 50% · 당일 없음</div></div>
+      </div>
+      <div><p class="cap"><b>③</b>입금 확인 · 사전 등록</p><p class="capd">확정됐다는 기쁜 소식과, 남은 할 일 하나(사전 등록)만 있어요.</p>
+        <div class="em"><div class="emh"><b>[플러팅 라운지] 자리가 확정됐어요</b>플러팅 라운지 · 오후 6:02</div>
+          <div class="emt"><span class="lg">플러팅<i>.</i>라운지</span><img src="https://d8j0ntlcm91z4.cloudfront.net/user_38xhz4xiKRLe1mXA7TmhnNaGomC/hf_20261103_001319_6e11ed69-8eb1-4b23-837f-7d1aa54e4c34.png" alt=""></div>
+          <div class="emc"><span class="ebadge ok">확정</span><h3>자리가 확정됐어요.<br>라운지에서 만나요</h3><p>오기 전에 나를 소개할 키워드와 연애 질문 15개에 답해주세요. 답을 바탕으로 민지님의 연애 컬러를 알려드려요.</p>
+            <a class="ebtn" href="#">사전 등록 시작하기 · 약 5분</a>
+            <dl class="emb"><div><dt>장소</dt><dd>성수동 OO 라운지</dd></div><div><dt>시간</dt><dd>11월 15일(토) 7:30 · 10분 전 도착</dd></div></dl></div>
+          <div class="emf">11월 14일까지 등록해주세요. 이 링크는 민지님 전용이라 공유하지 말아주세요.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 5. 호스트 ===== -->
+  <div class="sec">
+    <h2>5. 호스트 신청 관리</h2>
+    <p class="sub">휴대폰으로 관리해요. 버튼 하나로 메일 ②·③이 나가고, 지인 겹침은 호스트에게만 경고로 보여요.</p>
+    <div class="row flowrow">
+      <div><p class="cap"><b>5-1</b>신청자 목록</p><p class="capd">위에 자리 현황, 아래에 할 일 순서로 탭. 카드마다 버튼은 하나만 강조해요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div>
+          <div class="ah"><span class="logo2">플러팅<i>.</i>라운지</span><span class="host">호스트</span></div>
+          <div class="bd" style="padding-top:8px">
+            <div class="evs"><div><b>11월 15일(토) · 성수</b><small>7:7 · 94~99년생</small></div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
+            <div class="seat"><div><span>여성 확정</span><b>6<em> / 7</em></b><i style="--p:86%"></i></div><div><span>남성 확정</span><b>4<em> / 7</em></b><i style="--p:57%"></i></div></div>
+            <div class="tabs2"><span class="on">새 신청 3</span><span>입금 대기 2</span><span>확정 10</span><span>기타</span></div>
+            <div class="ap2"><div class="av2 f"></div><div class="in2"><b>김민지 <small>여 · 97</small></b><span>UX 디자이너 · 10분 전</span><em class="warn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>지인 주의</em></div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></div>
+            <div class="ap2"><div class="av2 m"></div><div class="in2"><b>이도윤 <small>남 · 95</small></b><span>개발자 · 1시간 전</span></div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></div>
+            <div class="ap2"><div class="av2 m2"></div><div class="in2"><b>박지훈 <small>남 · 94</small></b><span>회계사 · 3시간 전</span></div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></div>
+          </div>
+          <div class="toast2"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>최하은님께 입금 안내 메일을 보냈어요</div>
+        </div></div>
+      </div>
+      <div><p class="cap"><b>5-2</b>신청자 자세히</p><p class="capd">사진을 크게 보고 바로 결정해요. 피하고 싶은 지인과 겹칠 수 있는 신청자를 찾아서 알려줘요.</p>
+        <div class="phone"><div class="scr T">
+          <div class="status"><span>9:41</span><i></i></div><div class="nb"><button class="bk" aria-label="뒤로"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="tt">신청자</div></div>
+          <div class="pics"><div class="p1"></div><div class="p2"></div><div class="p3"></div></div>
+          <div class="bd" style="padding-top:16px">
+            <h2 style="font-size:22px">김민지 <small class="sx">여 · 1997년생</small></h2>
+            <dl class="sum" style="margin-top:12px"><div><dt>하는 일</dt><dd>UX 디자이너</dd></div><div><dt>연락처</dt><dd>010-1234-5678</dd></div><div><dt>이메일</dt><dd>minji@gmail.com</dd></div></dl>
+            <div class="alert"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div><b>피하고 싶은 지인 1명</b>이서준 · 전 직장 동료 · 95년생<br><u>11월 15일 신청자 ‘이서준’과 이름이 같아요</u></div></div>
+          </div>
+          <div class="ft"><div class="btn2"><button class="btn sub">보류</button><button class="btn">확정하고 입금 안내</button></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('[data-replay]').forEach(b=>b.addEventListener('click',()=>{
+  const scr=b.previousElementSibling.querySelector('[data-anim]'); const c=scr.cloneNode(true); scr.replaceWith(c);}));
+</script>
+</body>
+</html>
