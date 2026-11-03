@@ -1,6 +1,7 @@
 import 'server-only';
 import { db } from './supabase';
 import { pairs, type Round, type Seated } from '../domain/seating';
+import { compactNumbers } from '../signup/rules';
 
 export type Phase = 'before' | 'talk' | 'choice' | 'closing';
 export const PHASES: Phase[] = ['before', 'talk', 'choice', 'closing'];
@@ -40,9 +41,11 @@ export type HostCmd =
   | { type: 'nextRound' } | { type: 'endRound' } | { type: 'pause' } | { type: 'resume' }
   | { type: 'settings'; roundDurationSec?: number; tableCount?: number; maxPicks?: number }
   | { type: 'setNumber'; participantId: string; number: number | null }
-  | { type: 'exclude'; participantId: string; excluded: boolean };
+  | { type: 'exclude'; participantId: string; excluded: boolean }
+  | { type: 'compact' };
 
-type Result = { ok: true } | { ok: false; message: string };
+export type Moved = { name: string; gender: 'f' | 'm'; from: number | null; to: number | null };
+type Result = { ok: true; moved?: Moved[]; tableCount?: number } | { ok: false; message: string };
 const no = (message: string): Result => ({ ok: false, message });
 
 async function closeOpen(eventId: string, r: Round | null, now: number) {
@@ -110,6 +113,33 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       if (error?.code === '23505') return no('같은 성별에 이미 그 번호가 있어요. 먼저 그 사람 번호를 바꿔주세요.');
       if (error) return no('저장하지 못했어요.');
       return { ok: true };
+    }
+    case 'compact': {
+      if (current) return no('라운드가 시작된 뒤에는 번호를 당길 수 없어요.');
+      // 확정된 신청자 기준 (사전 등록을 안 했어도 번호는 있다). '안 옴'으로 뺀 사람은 번호를 비운다.
+      const { data: apps } = await db().from('applications').select('id,name,gender,number').eq('event_id', eventId).eq('status', 'confirmed');
+      const out = new Set(people.filter((p) => p.excluded).map((p) => p.id));
+      const { data: parts } = await db().from('participants').select('id,application_id').eq('event_id', eventId);
+      const partOf = new Map((parts ?? []).map((p) => [p.application_id as string, p.id as string]));
+      const moved: Moved[] = [];
+      const setNum = async (appId: string, n: number | null) => {
+        await db().from('applications').update({ number: n }).eq('id', appId);
+        const pid = partOf.get(appId); if (pid) await db().from('participants').update({ number: n }).eq('id', pid);
+      };
+      const all = (apps ?? []) as { id: string; name: string; gender: 'f' | 'm'; number: number | null }[];
+      for (const a of all) if (a.number != null && out.has(partOf.get(a.id) ?? '')) { await setNum(a.id, null); moved.push({ name: a.name, gender: a.gender, from: a.number, to: null }); }
+      let k = { f: 0, m: 0 };
+      for (const g of ['f', 'm'] as const) {
+        const act = all.filter((a) => a.gender === g && a.number != null && !out.has(partOf.get(a.id) ?? '')).map((a) => ({ id: a.id, number: a.number! }));
+        k[g] = act.length;
+        for (const [id, to] of compactNumbers(act)) {
+          const a = all.find((x) => x.id === id)!;
+          await setNum(id, to); moved.push({ name: a.name, gender: g, from: a.number, to });
+        }
+      }
+      const tableCount = Math.max(2, k.f, k.m);
+      await db().from('events').update({ table_count: tableCount }).eq('id', eventId);
+      return { ok: true, moved, tableCount };
     }
     case 'exclude': {
       await db().from('participants').update({ excluded: cmd.excluded }).eq('id', cmd.participantId).eq('event_id', eventId);

@@ -49,3 +49,18 @@ describe('random number', () => {
     expect(pickNumber([1, 2, 3], 3)).toBeNull();
   });
 });
+
+import { compactNumbers } from '../src/lib/signup/rules';
+describe('compact numbers', () => {
+  test('only people outside 1..k move, into the gaps', () => {
+    // 5명: 1,3,4,6,7 → 6과 7만 2와 5로
+    const r = compactNumbers([{ id: 'a', number: 1 }, { id: 'b', number: 3 }, { id: 'c', number: 4 }, { id: 'd', number: 6 }, { id: 'e', number: 7 }]);
+    expect(r).toEqual([['d', 2], ['e', 5]]);
+  });
+  test('already packed → no change', () => expect(compactNumbers([{ id: 'a', number: 2 }, { id: 'b', number: 1 }])).toEqual([]));
+  test('result has no gaps and no duplicates', () => {
+    const ppl = [{ id: 'a', number: 7 }, { id: 'b', number: 5 }, { id: 'c', number: 2 }];
+    const moved = new Map(compactNumbers(ppl));
+    expect(ppl.map((p) => moved.get(p.id) ?? p.number).sort()).toEqual([1, 2, 3]);
+  });
+});

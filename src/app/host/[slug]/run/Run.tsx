@@ -5,7 +5,7 @@ import { Icon } from '../../../../components/Icon';
 import { FloorPlan } from '../../../../components/FloorPlan';
 import { RoundTimer } from '../../../../components/RoundTimer';
 import type { Round } from '../../../../lib/domain/seating';
-import type { HostCmd, Person, Phase } from '../../../../lib/server/run';
+import type { HostCmd, Moved, Person, Phase } from '../../../../lib/server/run';
 
 type View = {
   ev: { slug: string; phase: Phase; table_count: number; round_duration_sec: number; max_picks: number; screen_key: string };
@@ -20,6 +20,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState('');
   const [custom, setCustom] = useState('');
+  const [moved, setMoved] = useState<Moved[] | null>(null);
 
   const load = useCallback(async () => {
     const t0 = Date.now();
@@ -38,7 +39,11 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
     setBusy(false);
     if (!j.ok) show(j.message);
     await load();
+    return j;
   };
+  const compact = async () => { const j = await send({ type: 'compact' }); if (j.ok) setMoved(j.moved); };
+  const hoOf = (g: 'f' | 'm', n: number | null) => (n == null ? '번호 없음' : `${g === 'f' ? '여' : '남'}${n}호`);
+  const movedText = (moved ?? []).filter((m) => m.to != null).map((m) => `[플러팅 라운지] ${m.name}님, 오늘 번호가 ${hoOf(m.gender, m.to)}로 바뀌었어요. 첫 대화는 ${m.to}번 테이블이에요.`).join('\n\n');
 
   if (!v) return <main className="bd"><p className="ds">불러오는 중…</p></main>;
   const { ev, current } = v;
@@ -72,6 +77,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </section>
 
         <p className="eb" style={{ marginTop: 26 }}>{current ? `${current.no}라운드 테이블` : '1라운드 테이블 (같은 번호끼리)'}</p>
+        {!current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={compact}>번호 당기기 · 빈 번호 없애기</button>}
         <FloorPlan pairs={v.pairs.map((x) => ({ table: x.table, f: x.f && { ...x.f, nickname: x.f.nickname }, m: x.m && { ...x.m, nickname: x.m.nickname } }))} faces={false} />
 
         <p className="eb" style={{ marginTop: 26 }}>설정</p>
@@ -116,6 +122,21 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           <a className="btn" href={screenUrl} target="_blank" rel="noreferrer">큰 화면 열기</a>
         </div>
       </div>
+      {moved && <>
+        <div className="dim" onClick={() => setMoved(null)} />
+        <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="mv">
+          <div className="grab" />
+          <h3 id="mv">{moved.length ? `${moved.filter((m) => m.to != null).length}명의 번호가 바뀌었어요` : '이미 빈 번호가 없어요'}</h3>
+          <p className="ds">테이블은 {ev.table_count}개로 맞췄어요.{moved.some((m) => m.to != null) && ' 바뀐 분께 아래 문구를 보내주세요.'}</p>
+          {moved.length > 0 && <div className="given" style={{ marginTop: 14 }}>
+            {moved.map((m) => <div className="kv" key={m.name + m.from}><span>{m.name}</span><b>{hoOf(m.gender, m.from)} → {hoOf(m.gender, m.to)}</b></div>)}
+          </div>}
+          <div className="btn2" style={{ marginTop: 18, gridTemplateColumns: movedText ? '1fr 1.6fr' : '1fr' }}>
+            <button className="btn sub" onClick={() => setMoved(null)}>닫기</button>
+            {movedText && <button className="btn" onClick={async () => { try { await navigator.clipboard.writeText(movedText); show('복사했어요. 카톡이나 문자로 보내주세요'); } catch { show('복사하지 못했어요'); } }}>안내 문구 복사</button>}
+          </div>
+        </div>
+      </>}
       {toast && <div className="toast" role="status" style={{ bottom: 30 }}><Icon name="info" />{toast}</div>}
     </main>
   );

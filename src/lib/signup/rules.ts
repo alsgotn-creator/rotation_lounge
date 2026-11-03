@@ -62,3 +62,15 @@ export function pickNumber(taken: number[], capacity: number, rand = Math.random
   return free.length ? free[Math.floor(rand() * free.length)] : null;
 }
 export const hoLabel = (g: Gender, n: number) => `${g === 'f' ? '여' : '남'}${n}호`;
+
+/**
+ * 빈 번호 없이 1..k로 당기기 (k = 사람 수). 이미 1..k 안에 있는 사람은 그대로 두고,
+ * 바깥 번호인 사람만 빈 번호로 옮긴다 → 알려야 할 사람이 가장 적다. 반환: 바뀌는 사람만 [id, 새 번호]
+ */
+export function compactNumbers(people: { id: string; number: number }[]): [string, number][] {
+  const k = people.length;
+  const keep = new Set(people.filter((p) => p.number <= k).map((p) => p.number));
+  const gaps = Array.from({ length: k }, (_, i) => i + 1).filter((n) => !keep.has(n));
+  const movers = people.filter((p) => p.number > k).sort((a, b) => a.number - b.number);
+  return movers.map((p, i) => [p.id, gaps[i]]);
+}

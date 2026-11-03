@@ -27,7 +27,7 @@ export default function NewEvent() {
       <div className="btn2" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
         <label className="fld"><span>몇 년생부터</span><input inputMode="numeric" value={f.birthFrom} onChange={set('birthFrom')} maxLength={4} /></label>
         <label className="fld"><span>몇 년생까지</span><input inputMode="numeric" value={f.birthTo} onChange={set('birthTo')} maxLength={4} /></label>
-        <label className="fld"><span>성별당 인원</span><input inputMode="numeric" value={f.capacity} onChange={set('capacity')} maxLength={2} /></label>
+        <label className="fld"><span>인원 (2~12)</span><input inputMode="numeric" value={f.capacity} onChange={set('capacity')} maxLength={2} /></label>
       </div>
       {err && <p className="msg e" role="alert" style={{ color: 'var(--err)', fontSize: 13 }}>{err}</p>}
       <div className="row"><button className="btn" disabled={busy || !f.date}>{busy ? '만드는 중…' : '일정 만들기'}</button></div>

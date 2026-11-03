@@ -62,6 +62,12 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
     try { await navigator.clipboard.writeText(msg!.text); show('복사했어요. 카톡이나 문자로 보내주세요'); setMsg(null); setOpenId(null); }
     catch { show('길게 눌러서 복사해주세요'); }
   };
+  const setCapacity = async (cap: number) => {
+    const r = await fetch('/api/host/events', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: event.id, capacity: cap }) });
+    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    if (!j.ok) show(j.message); else show(`${cap}:${cap}로 바꿨어요`);
+    router.refresh();
+  };
   const toggleApply = async () => {
     await fetch('/api/host/events', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: event.id, applyOpen: !event.applyOpen }) });
     router.refresh();
@@ -107,6 +113,12 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
       <div className="bd" style={{ paddingTop: 4, animation: 'none' }}>
         <div className="evs"><div><b>{session.dateLabel} {session.time} · {session.place}</b><small>{session.birthFrom}~{session.birthTo}년생 · {event.capacity}:{event.capacity}</small></div>
           <button className="host" style={{ border: 0, cursor: 'pointer' }} onClick={toggleApply}>{event.applyOpen ? '신청 받는 중' : '신청 닫힘'}</button></div>
+        <div className="kv" style={{ borderTop: 0, marginTop: 8, alignItems: 'center' }}><span>인원 (성별당)</span>
+          <div className="chips" style={{ margin: 0 }}>
+            <button disabled={event.capacity <= 2} onClick={() => setCapacity(event.capacity - 1)} aria-label="인원 줄이기">−</button>
+            <b style={{ minWidth: 44, textAlign: 'center', alignSelf: 'center' }}>{event.capacity}:{event.capacity}</b>
+            <button disabled={event.capacity >= 12} onClick={() => setCapacity(event.capacity + 1)} aria-label="인원 늘리기">+</button>
+          </div></div>
         <div className="seat">
           {(['f', 'm'] as const).map((g) => {
             const v = filled(g);
