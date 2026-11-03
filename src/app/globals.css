@@ -364,7 +364,7 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .sb-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh}
 
 /* ---------- 대화 라운드 (참가자) ---------- */
-.rnd{padding-bottom:60px}
+.rnd{padding-bottom:120px}
 .rnd-head{text-align:center;margin-top:10px}
 .rnd-head h1{margin:0;font-size:30px;font-weight:900;letter-spacing:-.04em}
 .rnd-head h1 em{font-style:normal;color:var(--dim);font-size:20px}
