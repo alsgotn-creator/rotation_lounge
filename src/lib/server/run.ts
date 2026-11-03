@@ -3,6 +3,7 @@ import { db } from './supabase';
 import { pairs, type Round, type Seated } from '../domain/seating';
 import { eventLayout } from './signup';
 import { compactNumbers } from '../signup/rules';
+import { mutualPairs } from '../domain/matching';
 
 export type Phase = 'before' | 'talk' | 'choice' | 'closing';
 export const PHASES: Phase[] = ['before', 'talk', 'choice', 'closing'];
@@ -15,7 +16,7 @@ export type Person = { id: string; gender: 'f' | 'm'; number: number | null; exc
 
 export async function loadRun(eventId: string) {
   const [{ data: ev }, { data: rr }, { data: ps }] = await Promise.all([
-    db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks,screen_key').eq('id', eventId).single(),
+    db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks,screen_key,recommendation_open,results_open').eq('id', eventId).single(),
     db().from('rounds').select('*').eq('event_id', eventId).order('no'),
     db().from('participants').select('id,gender,number,excluded,nickname,shape,prop,love_type,keywords,applications(name)').eq('event_id', eventId).order('number', { nullsFirst: false }),
   ]);
@@ -44,7 +45,10 @@ export type HostCmd =
   | { type: 'settings'; roundDurationSec?: number; tableCount?: number; maxPicks?: number }
   | { type: 'setNumber'; participantId: string; number: number | null }
   | { type: 'exclude'; participantId: string; excluded: boolean }
-  | { type: 'compact' };
+  | { type: 'compact' }
+  | { type: 'openResults'; open: boolean }
+  | { type: 'openRecommendation'; open: boolean }
+  | { type: 'hideNote'; noteId: string; hidden: boolean };
 
 export type Moved = { name: string; gender: 'f' | 'm'; from: number | null; to: number | null };
 type Result = { ok: true; moved?: Moved[]; tableCount?: number } | { ok: false; message: string };
@@ -144,9 +148,35 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       await db().from('events').update({ table_count: tableCount }).eq('id', eventId);
       return { ok: true, moved, tableCount };
     }
+    case 'openResults':
+      await db().from('events').update({ results_open: !!cmd.open }).eq('id', eventId);
+      return { ok: true };
+    case 'openRecommendation':
+      await db().from('events').update({ recommendation_open: !!cmd.open }).eq('id', eventId);
+      return { ok: true };
+    case 'hideNote':
+      await db().from('notes').update({ hidden: !!cmd.hidden }).eq('id', cmd.noteId).eq('event_id', eventId);
+      return { ok: true };
     case 'exclude': {
       await db().from('participants').update({ excluded: cmd.excluded }).eq('id', cmd.participantId).eq('event_id', eventId);
       return { ok: true };
     }
   }
+}
+
+/** 호스트만 보는 최종 선택 현황·매칭 커플·쪽지 (참가자/큰 화면 응답에는 절대 넣지 않는다). 표가 아직 없으면 빈 값. */
+export async function loadHostExtras(eventId: string, people: Person[]) {
+  const [ch, nt, dn] = await Promise.all([
+    db().from('choices').select('from_id,to_id').eq('event_id', eventId),
+    db().from('notes').select('id,round,from_id,to_id,body,hidden').eq('event_id', eventId).order('created_at'),
+    db().from('participants').select('id,choice_done_at').eq('event_id', eventId),
+  ]);
+  const choices = ch.error ? [] : (ch.data ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string }));
+  const active = people.filter((p) => !p.excluded && p.number != null);
+  const picks = active.map((p) => ({ id: p.id, to: choices.filter((c) => c.fromId === p.id).map((c) => c.toId) }));
+  const done = dn.error ? picks.filter((x) => x.to.length).length : (dn.data ?? []).filter((d) => d.choice_done_at && active.some((p) => p.id === d.id)).length;
+  return {
+    picks, matches: mutualPairs(choices), done, total: active.length,
+    notes: nt.error ? [] : (nt.data ?? []).filter((n) => n.body != null).map((n) => ({ id: n.id as string, round: n.round as number, fromId: n.from_id as string, toId: n.to_id as string, body: n.body as string, hidden: !!n.hidden })),
+  };
 }

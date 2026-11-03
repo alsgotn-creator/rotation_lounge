@@ -401,4 +401,39 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .paper textarea::placeholder{color:#b8a98f}
 .paper .cnt{position:absolute;right:14px;bottom:8px;font-size:12px;font-weight:700;color:#a89874}
 
+/* ---------- 최종 선택 · 마무리 ---------- */
+.chc{padding-bottom:130px}
+.chc-head{padding:14px 24px 0;position:relative}
+.chc-count{position:absolute;right:24px;top:22px;font-size:18px;font-weight:900;color:var(--acc);font-variant-numeric:tabular-nums}
+.chc-count.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.chc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:20px 16px 0}
+.chc-cell{position:relative}
+.chc-pick{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 4px 12px;border-radius:20px;background:var(--surf);border:2px solid transparent;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s}
+.chc-pick b{font-size:15px;font-weight:900}
+.chc-pick span{font-size:11px;font-weight:700;color:var(--mute);max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chc-cell.on .chc-pick{border-color:var(--acc);background:var(--accbg);box-shadow:0 0 22px -4px rgba(255,143,163,.55)}
+.chc-heart{position:absolute;right:8px;top:6px;color:var(--acc);font-size:16px}
+.chc-info{position:absolute;left:6px;top:6px;width:28px;height:28px;border-radius:14px;border:0;background:var(--surf2);color:var(--mute);display:grid;place-items:center;cursor:pointer}
+.chc-info .ic{width:16px;height:16px}
+.chc-msg{margin:14px 24px 0;text-align:center;color:var(--err);font-size:14px;font-weight:700}
+.cls{padding-bottom:130px}
+.cls-wait{display:grid;place-items:center;margin-bottom:6px;opacity:.9}
+.cls-match{margin:22px 20px 0;padding:22px 16px;border-radius:26px;background:var(--accbg);border:1px solid rgba(255,143,163,.3);text-align:center}
+.cls-pair{display:flex;align-items:center;justify-content:center;gap:6px}
+.cls-heart{color:var(--acc);font-size:30px;animation:pop .8s cubic-bezier(.3,1.6,.5,1) both}
+.cls-match h3{margin:10px 0 4px;font-size:20px;font-weight:900;letter-spacing:-.03em}
+.cls-match p{margin:0;font-size:14px;color:var(--mute)}
+.lg-rec{margin:10px 0 0;font-size:13px;font-weight:700;color:var(--mute)}
+.lg-rec.on{color:#ffd1d9}.lg-rec b{color:var(--acc)}
+.sb-prog{margin-top:5vh;text-align:center;font-size:9vh;font-weight:900;font-variant-numeric:tabular-nums}
+.sb-prog em{font-style:normal;font-size:3vh;color:var(--mute)}
+/* 롤링페이퍼 편지지 */
+.rp{padding:8px 16px 40px}
+.rp-sheet{position:relative;min-height:560px;border-radius:12px;background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0 31px,rgba(122,38,56,.07) 31px 32px),#fbf3e3;box-shadow:0 24px 50px -24px rgba(0,0,0,.7);overflow:hidden;transform:rotate(-.4deg)}
+.rp-note{position:absolute;margin:0;max-width:46%;font-family:"Nanum Pen Script","Pretendard Variable",cursive;line-height:1.25;word-break:keep-all;transform-origin:left top}
+.rp-heart{position:absolute;color:#b9546a;font-size:16px}
+.rp-empty{position:absolute;inset:0;display:grid;place-items:center;margin:0;font-family:"Nanum Pen Script",cursive;font-size:26px;color:#a89874}
+.rp-foot{text-align:center;margin:16px 0 0;font-size:13px;font-weight:700;color:var(--mute)}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.fin .big .ic{stroke-dashoffset:0}}

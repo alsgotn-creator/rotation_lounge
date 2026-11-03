@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isHost } from '../../../../../lib/server/auth';
 import { getEvent } from '../../../../../lib/server/signup';
-import { loadRun, runHostCmd, tablePairs, type HostCmd } from '../../../../../lib/server/run';
+import { loadHostExtras, loadRun, runHostCmd, tablePairs, type HostCmd } from '../../../../../lib/server/run';
 
 export const dynamic = 'force-dynamic';
 const nope = () => NextResponse.json({ ok: false, message: '다시 로그인해주세요.' }, { status: 401 });
@@ -11,7 +11,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const event = await getEvent({ slug: (await params).slug });
   if (!event) return NextResponse.json({ ok: false }, { status: 404 });
   const run = await loadRun(event.id);
-  return NextResponse.json({ ok: true, serverNow: Date.now(), view: { ...run, pairs: tablePairs(run) } }, { headers: { 'cache-control': 'no-store' } });
+  return NextResponse.json({ ok: true, serverNow: Date.now(), view: { ...run, pairs: tablePairs(run), extras: await loadHostExtras(event.id, run.people) } }, { headers: { 'cache-control': 'no-store' } });
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {

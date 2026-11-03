@@ -8,9 +8,10 @@ import type { Round } from '../../../../lib/domain/seating';
 import type { HostCmd, Moved, Person, Phase } from '../../../../lib/server/run';
 
 type View = {
-  ev: { slug: string; phase: Phase; table_count: number; per_table: number; round_duration_sec: number; max_picks: number; screen_key: string };
+  ev: { slug: string; phase: Phase; table_count: number; per_table: number; recommendation_open: boolean; results_open: boolean; round_duration_sec: number; max_picks: number; screen_key: string };
   current: Round | null; people: Person[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
+  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
 };
 const PHASE_KO: [Phase, string][] = [['before', '시작 전'], ['talk', '대화'], ['choice', '최종 선택'], ['closing', '마무리']];
 
@@ -47,6 +48,8 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
 
   if (!v) return <main className="bd"><p className="ds">불러오는 중…</p></main>;
   const { ev, current } = v;
+  const byId = new Map(v.people.map((p) => [p.id, p]));
+  const label = (p: Person) => `${p.gender === 'f' ? '여' : '남'}${p.number ?? '-'}호`;
   const open = current && !current.closedAt;
   const screenUrl = typeof window === 'undefined' ? '' : `${location.origin}/screen/${slug}?k=${encodeURIComponent(ev.screen_key)}`;
   const seated = v.people.filter((p) => p.number != null && !p.excluded);
@@ -115,6 +118,46 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
             {v.people.filter((p) => p.gender === g).length === 0 && <p className="empty" style={{ padding: '12px 0' }}>{g === 'f' ? '여성' : '남성'} 사전 등록자가 아직 없어요</p>}
           </div>
         ))}
+
+        <p className="eb" style={{ marginTop: 26 }}>공개 설정</p>
+        <div className="addf" style={{ paddingTop: 12 }}>
+          <div className="kv" style={{ borderTop: 0 }}><span>가장 비슷한 사람 추천</span>
+            <div className="chips" style={{ margin: 0 }}>
+              {[[true, '공개'], [false, '숨김']].map(([o, l]) => <button key={String(o)} aria-pressed={ev.recommendation_open === o} style={ev.recommendation_open === o ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => ev.recommendation_open !== o && send({ type: 'openRecommendation', open: o as boolean })}>{l as string}</button>)}
+            </div></div>
+          <div className="kv"><span>최종 선택 결과 (참가자에게)</span>
+            <div className="chips" style={{ margin: 0 }}>
+              {[[true, '공개'], [false, '숨김']].map(([o, l]) => <button key={String(o)} aria-pressed={ev.results_open === o} style={ev.results_open === o ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => ev.results_open !== o && send({ type: 'openResults', open: o as boolean })}>{l as string}</button>)}
+            </div></div>
+        </div>
+
+        {(ev.phase === 'choice' || ev.phase === 'closing') && <>
+          <p className="eb" style={{ marginTop: 26 }}>최종 선택 · {v.extras.done}/{v.extras.total}명 완료</p>
+          <div className="people">
+            {v.extras.picks.map((x) => { const p = byId.get(x.id)!; return (
+              <div key={x.id} className="person-row" style={{ alignItems: 'flex-start' }}>
+                <b style={{ minWidth: 52, fontSize: 14 }}>{label(p)}</b>
+                <div><b>{p.nickname}</b><span>{x.to.length ? x.to.map((t) => label(byId.get(t)!)).join(', ') : '아직 / 아무도 안 골랐어요'}</span></div>
+              </div>); })}
+          </div>
+          <p className="eb" style={{ marginTop: 22 }}>매칭 커플 ({v.extras.matches.length}) · 연락처 전달용</p>
+          <div className="people">
+            {v.extras.matches.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>아직 서로 고른 커플이 없어요</p>}
+            {v.extras.matches.map(([a, b]) => { const pa = byId.get(a)!, pb = byId.get(b)!; return (
+              <div key={a + b} className="person-row"><div><b>{label(pa)} ♥ {label(pb)}</b><span>{pa.nickname}({pa.name}) · {pb.nickname}({pb.name})</span></div></div>); })}
+          </div>
+        </>}
+
+        {v.extras.notes.length > 0 && <>
+          <p className="eb" style={{ marginTop: 26 }}>롤링페이퍼 검토 · {v.extras.notes.length}장</p>
+          <div className="people">
+            {v.extras.notes.map((n) => (
+              <div key={n.id} className={`person-row${n.hidden ? ' off' : ''}`} style={{ alignItems: 'flex-start' }}>
+                <div><b style={{ fontSize: 12, color: 'var(--mute)' }}>R{n.round} · {label(byId.get(n.fromId)!)} → {label(byId.get(n.toId)!)}</b><span style={{ display: 'block', fontSize: 14, color: 'var(--text)', lineHeight: 1.5 }}>{n.body}</span></div>
+                <button className="lnk" style={{ margin: 0 }} onClick={() => send({ type: 'hideNote', noteId: n.id, hidden: !n.hidden })}>{n.hidden ? '다시 보이기' : '숨기기'}</button>
+              </div>))}
+          </div>
+        </>}
 
         <p className="eb" style={{ marginTop: 26 }}>큰 화면</p>
         <div className="btn2">

@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import Lounge from './Lounge';
 import Round from './Round';
 import NoteWrite from './NoteWrite';
+import Choice from './Choice';
+import Closing from './Closing';
 import type { LoungeView } from '../../../lib/server/lounge';
 import type { PlayView } from '../../../lib/server/play';
 
@@ -28,6 +30,8 @@ export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: s
   }, [load]);
 
   if (v?.pending) return <NoteWrite key={`${v.pending.round}-${v.pending.to.id}`} slug={slug} pending={v.pending} onDone={load} />;
+  if (v?.phase === 'closing' && v.paper) return <Closing view={v} me={lounge.cards.find((c) => c.me) ?? null} />;
+  if (v?.phase === 'choice' && v.choice) return <Choice key="choice" slug={slug} view={v} onSaved={load} />;
   if (v?.round) return <Round key={v.round.no} view={v} offsetMs={offset} onRefresh={load} />;
-  return <Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} />;
+  return <Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} recommendation={v?.recommendation ?? null} />;
 }

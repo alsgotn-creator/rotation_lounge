@@ -4,10 +4,11 @@ import { Character } from '../../../components/Character';
 import { PALETTE, phrases } from '../../../lib/domain/loveType';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
+import type { PlayView } from '../../../lib/server/play';
 
 const ho = (g: 'f' | 'm', n: number) => `${g === 'f' ? '여' : '남'}${n}호`;
 
-export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug: string; initial: LoungeView; when: string; loveType: number; onEdit: () => void }) {
+export default function Lounge({ slug, initial, when, loveType, onEdit, recommendation }: { slug: string; initial: LoungeView; when: string; loveType: number; onEdit: () => void; recommendation?: PlayView['recommendation'] }) {
   const [v, setV] = useState(initial);
   const me = v.cards.find((c) => c.me)!;
   const others = v.cards.filter((c) => !c.me);
@@ -38,6 +39,9 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
         <p>ROTATION LOUNGE</p>
         <h1>오늘의 라운지</h1>
         <span>{when} · 여 {v.counts.f} · 남 {v.counts.m}</span>
+        {recommendation && (typeof recommendation === 'string'
+          ? <p className="lg-rec">가장 비슷한 사람은 모두 모이면 알려드릴게요 ✦</p>
+          : <p className="lg-rec on">당신과 가장 비슷한 사람은 <b>{ho(recommendation.gender, recommendation.number!)}</b>분이에요!</p>)}
       </header>
 
       <section className="lg-me">

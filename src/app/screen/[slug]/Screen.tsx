@@ -7,7 +7,7 @@ import type { Round } from '../../../lib/domain/seating';
 import type { Prop, Shape } from '../../../lib/domain/register';
 
 type Pub = { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; keywords: string[] };
-type View = { phase: 'before' | 'talk' | 'choice' | 'closing'; total: number; round: Round | null; pairs: TablePair[]; resting: Pub[]; lounge: Pub[] };
+type View = { phase: 'before' | 'talk' | 'choice' | 'closing'; total: number; round: Round | null; pairs: TablePair[]; resting: Pub[]; lounge: Pub[]; choiceProgress: { done: number; total: number } };
 
 /** 진행자 큰 화면 (세로, 버튼 없음). 매칭 결과는 절대 보여주지 않는다. */
 export default function Screen({ slug, k }: { slug: string; k: string }) {
@@ -53,7 +53,7 @@ export default function Screen({ slug, k }: { slug: string; k: string }) {
         </div>
       </>}
 
-      {v.phase === 'choice' && <div className="sb-center"><h1 className="sb-title">최종 선택 중이에요</h1><p className="sb-move">마음이 간 분을 휴대폰에서 골라주세요</p></div>}
+      {v.phase === 'choice' && <div className="sb-center"><h1 className="sb-title">최종 선택 중이에요</h1><p className="sb-move">마음이 간 분을 휴대폰에서 골라주세요</p><p className="sb-prog">{v.choiceProgress.done} <em>/ {v.choiceProgress.total}명 완료</em></p></div>}
       {v.phase === 'closing' && <div className="sb-center"><h1 className="sb-title">오늘 함께해 주셔서 고마워요</h1>
         <div className="sb-lounge" style={{ marginTop: 30 }}>{v.lounge.slice(0, 12).map((p, i) => <Character key={i} shape={p.shape as Shape} color={p.color} prop={p.prop as Prop} size={80} delay={i * 0.8} />)}</div></div>}
     </main>

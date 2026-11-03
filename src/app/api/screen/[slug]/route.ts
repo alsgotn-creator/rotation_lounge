@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { getEvent } from '../../../../lib/server/signup';
-import { loadRun, tablePairs, type Person } from '../../../../lib/server/run';
+import { loadHostExtras, loadRun, tablePairs, type Person } from '../../../../lib/server/run';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +16,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const a = Buffer.from(k), b = Buffer.from(run.ev.screen_key);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return NextResponse.json({ ok: false }, { status: 404 });
   const tp = tablePairs(run);
+  const extras = await loadHostExtras(event.id, run.people); // 진행 인원 수만 꺼내 쓴다
   return NextResponse.json({
     ok: true, serverNow: Date.now(),
     view: {
@@ -23,6 +24,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
       pairs: tp.map((x) => ({ table: x.table, f: x.f.map(pub), m: x.m.map(pub) })),
       resting: tp.flatMap((x) => (x.f.length && !x.m.length ? x.f : x.m.length && !x.f.length ? x.m : [])).map(pub),
       lounge: run.people.filter((p) => !p.excluded).map(pub),
+      choiceProgress: { done: extras.done, total: extras.total },
     },
   }, { headers: { 'cache-control': 'no-store' } });
 }

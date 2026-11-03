@@ -26,7 +26,7 @@ function Ring({ round, offsetMs }: { round: NonNullable<PlayView['round']>; offs
   );
 }
 
-function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
+export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
   return (
     <div className="rv-box">
       {fresh && <span className="rv-new">✦ 방금 공개</span>}
