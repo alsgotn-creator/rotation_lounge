@@ -58,3 +58,11 @@ export async function photoUrls(paths: string[]) {
   const { data } = await db().storage.from(PHOTO_BUCKET).createSignedUrls(paths, 3600);
   return (data ?? []).map((d) => d.signedUrl ?? '');
 }
+
+/** 테이블 수와 한 테이블 인원. per_table 칸이 아직 없으면(마이그레이션 전) 1:1로 본다. */
+export async function eventLayout(eventId: string) {
+  const a = await db().from('events').select('table_count,per_table').eq('id', eventId).single();
+  if (!a.error && a.data) return { tables: a.data.table_count as number, perTable: a.data.per_table as number };
+  const b = await db().from('events').select('table_count').eq('id', eventId).single();
+  return { tables: (b.data?.table_count as number) ?? 7, perTable: 1 };
+}

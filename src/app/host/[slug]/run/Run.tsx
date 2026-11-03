@@ -8,9 +8,9 @@ import type { Round } from '../../../../lib/domain/seating';
 import type { HostCmd, Moved, Person, Phase } from '../../../../lib/server/run';
 
 type View = {
-  ev: { slug: string; phase: Phase; table_count: number; round_duration_sec: number; max_picks: number; screen_key: string };
+  ev: { slug: string; phase: Phase; table_count: number; per_table: number; round_duration_sec: number; max_picks: number; screen_key: string };
   current: Round | null; people: Person[];
-  pairs: { table: number; f: Person | null; m: Person | null }[];
+  pairs: { table: number; f: Person[]; m: Person[] }[];
 };
 const PHASE_KO: [Phase, string][] = [['before', '시작 전'], ['talk', '대화'], ['choice', '최종 선택'], ['closing', '마무리']];
 
@@ -56,7 +56,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
     <main>
       <div className="nb"><Link className="bk" aria-label="신청 관리" href={`/host/${slug}`}><Icon name="back" /></Link><div className="tt">진행</div></div>
       <div className="bd" style={{ paddingTop: 4, animation: 'none', paddingBottom: 60 }}>
-        <p className="ds" style={{ margin: 0, fontSize: 13 }}>{when} · 착석 여 {nf} · 남 {nm}</p>
+        <p className="ds" style={{ margin: 0, fontSize: 13 }}>{when} · 한 테이블 {ev.per_table}:{ev.per_table} · 착석 여 {nf} · 남 {nm}</p>
 
         <div className="phases" role="tablist" aria-label="단계">
           {PHASE_KO.map(([p, label]) => (
@@ -78,7 +78,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
 
         <p className="eb" style={{ marginTop: 26 }}>{current ? `${current.no}라운드 테이블` : '1라운드 테이블 (같은 번호끼리)'}</p>
         {!current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={compact}>번호 당기기 · 빈 번호 없애기</button>}
-        <FloorPlan pairs={v.pairs.map((x) => ({ table: x.table, f: x.f && { ...x.f, nickname: x.f.nickname }, m: x.m && { ...x.m, nickname: x.m.nickname } }))} faces={false} />
+        <FloorPlan pairs={v.pairs} faces={false} />
 
         <p className="eb" style={{ marginTop: 26 }}>설정</p>
         <div className="addf" style={{ paddingTop: 12 }}>
@@ -106,7 +106,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
                 <select aria-label={`${p.nickname} 번호`} value={p.number ?? ''} disabled={busy}
                   onChange={(e) => send({ type: 'setNumber', participantId: p.id, number: e.target.value ? Number(e.target.value) : null })}>
                   <option value="">번호 없음</option>
-                  {Array.from({ length: ev.table_count }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{g === 'f' ? '여' : '남'}{n}호</option>)}
+                  {Array.from({ length: ev.table_count * ev.per_table }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{g === 'f' ? '여' : '남'}{n}호</option>)}
                 </select>
                 <div><b>{p.nickname}</b><span>{p.name}</span></div>
                 <button className="lnk" style={{ margin: 0 }} onClick={() => send({ type: 'exclude', participantId: p.id, excluded: !p.excluded })}>{p.excluded ? '다시 넣기' : '안 옴 · 빼기'}</button>

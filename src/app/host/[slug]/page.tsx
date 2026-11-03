@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { isHost } from '../../../lib/server/auth';
-import { getEvent, listApplications, photoUrls } from '../../../lib/server/signup';
+import { eventLayout, getEvent, listApplications, photoUrls } from '../../../lib/server/signup';
 import { avoidHits, toSession } from '../../../lib/signup/rules';
 import Applicants, { type Row } from './Applicants';
 
@@ -14,6 +14,7 @@ export default async function HostEvent({ params }: { params: Promise<{ slug: st
   const event = await getEvent({ slug });
   if (!event) notFound();
   const apps = await listApplications(event.id);
+  const layout = await eventLayout(event.id);
   const urls = await photoUrls(apps.flatMap((a) => a.photo_paths));
   let k = 0;
   const rows: Row[] = apps.map((a) => ({
@@ -24,5 +25,5 @@ export default async function HostEvent({ params }: { params: Promise<{ slug: st
     // 다른 신청자가 이 사람을 피하고 싶다고 적은 경우도 호스트에게 알려준다 (누가 적었는지만)
     avoidedBy: apps.filter((o) => o.id !== a.id && o.status !== 'cancelled' && avoidHits(o, [a]).length).map((o) => o.name),
   }));
-  return <Applicants event={{ id: event.id, slug: event.slug, applyOpen: event.apply_open, capacity: event.capacity_per_gender, price: event.price }} session={toSession(event, apps)} rows={rows} />;
+  return <Applicants event={{ id: event.id, slug: event.slug, applyOpen: event.apply_open, capacity: event.capacity_per_gender, tables: layout.tables, perTable: layout.perTable, price: event.price }} session={toSession(event, apps)} rows={rows} />;
 }

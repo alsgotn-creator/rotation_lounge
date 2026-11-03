@@ -1,6 +1,7 @@
 import 'server-only';
 import { db } from './supabase';
 import { pairs, type Round, type Seated } from '../domain/seating';
+import { eventLayout } from './signup';
 import { compactNumbers } from '../signup/rules';
 
 export type Phase = 'before' | 'talk' | 'choice' | 'closing';
@@ -26,14 +27,15 @@ export async function loadRun(eventId: string) {
   }));
   const seated: Seated[] = people.filter((p) => p.number != null && !p.excluded).map((p) => ({ id: p.id, gender: p.gender, number: p.number! }));
   const current = rounds.at(-1) ?? null;
-  return { ev: ev!, rounds, current, people, seated };
+  const { perTable } = await eventLayout(eventId);
+  return { ev: { ...ev!, per_table: perTable }, rounds, current, people, seated };
 }
 
-/** 이번(또는 곧 시작할 1라운드) 테이블별 짝 */
+/** 이번(또는 곧 시작할 1라운드) 테이블별 앉는 사람들 */
 export function tablePairs(run: Awaited<ReturnType<typeof loadRun>>) {
   const no = run.current?.no ?? 1;
   const byId = new Map(run.people.map((p) => [p.id, p]));
-  return pairs(no, run.ev.table_count, run.seated).map((x) => ({ table: x.table, f: x.f ? byId.get(x.f.id)! : null, m: x.m ? byId.get(x.m.id)! : null }));
+  return pairs(no, run.ev.table_count, run.seated, run.ev.per_table).map((x) => ({ table: x.table, f: x.f.map((p) => byId.get(p.id)!), m: x.m.map((p) => byId.get(p.id)!) }));
 }
 
 export type HostCmd =
@@ -97,6 +99,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
         if (!(cmd.tableCount >= 2 && cmd.tableCount <= 12)) return no('테이블은 2~12개예요.');
         if (current) return no('라운드가 시작된 뒤에는 테이블 수를 바꿀 수 없어요.');
         patch.table_count = cmd.tableCount;
+        patch.capacity_per_gender = cmd.tableCount * ev.per_table;
       }
       if (cmd.maxPicks !== undefined) {
         if (cmd.maxPicks !== 2 && cmd.maxPicks !== 3) return no('최종 선택은 2명 또는 3명이에요.');
@@ -108,7 +111,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
     case 'setNumber': {
       const p = people.find((x) => x.id === cmd.participantId);
       if (!p) return no('참가자를 찾지 못했어요.');
-      if (cmd.number !== null && !(Number.isInteger(cmd.number) && cmd.number >= 1 && cmd.number <= ev.table_count)) return no(`번호는 1~${ev.table_count}예요.`);
+      if (cmd.number !== null && !(Number.isInteger(cmd.number) && cmd.number >= 1 && cmd.number <= ev.table_count * ev.per_table)) return no(`번호는 1~${ev.table_count * ev.per_table}예요.`);
       const { error } = await db().from('participants').update({ number: cmd.number }).eq('id', p.id);
       if (error?.code === '23505') return no('같은 성별에 이미 그 번호가 있어요. 먼저 그 사람 번호를 바꿔주세요.');
       if (error) return no('저장하지 못했어요.');
@@ -137,7 +140,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
           await setNum(id, to); moved.push({ name: a.name, gender: g, from: a.number, to });
         }
       }
-      const tableCount = Math.max(2, k.f, k.m);
+      const tableCount = Math.max(2, Math.ceil(Math.max(k.f, k.m) / ev.per_table));
       await db().from('events').update({ table_count: tableCount }).eq('id', eventId);
       return { ok: true, moved, tableCount };
     }

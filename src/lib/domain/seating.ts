@@ -1,30 +1,38 @@
-// 자리·타이머 규칙 (계획서 Task 3). 여자는 자기 번호 테이블에 그대로, 남자는 라운드마다 시계 방향으로 한 칸.
+// 자리·타이머 규칙 (계획서 Task 3).
+// 한 테이블에 여자 g명 + 남자 g명(g = 1, 2, 3)이 앉는다. 호 번호 1..T*g 중 같은 '조'(g명씩 묶음)는 한 테이블이다.
+// 여자 조는 자기 테이블에 그대로, 남자 조는 라운드마다 시계 방향으로 한 테이블씩 옮긴다.
 export type Gender = 'f' | 'm';
 export type Seated = { id: string; gender: Gender; number: number };
 export type Round = { no: number; startedAt: number; pausedAt: number | null; pausedTotalMs: number; durationSec: number; closedAt: number | null };
 
-export const tableOf = (p: Seated, round: number, T: number) =>
-  p.gender === 'f' ? p.number : ((p.number - 1 + round - 1) % T) + 1;
+/** 호 번호가 속한 조 (g=2: 1·2호 → 1조, 3·4호 → 2조) */
+export const groupOf = (number: number, g = 1) => Math.ceil(number / g);
 
-export function pairs(round: number, T: number, seated: Seated[]) {
+export const tableOf = (p: Seated, round: number, T: number, g = 1) => {
+  const grp = groupOf(p.number, g);
+  return p.gender === 'f' ? grp : ((grp - 1 + round - 1) % T) + 1;
+};
+
+export function pairs(round: number, T: number, seated: Seated[], g = 1) {
   return Array.from({ length: T }, (_, i) => {
     const table = i + 1;
     return {
       table,
-      f: seated.find((p) => p.gender === 'f' && tableOf(p, round, T) === table) ?? null,
-      m: seated.find((p) => p.gender === 'm' && tableOf(p, round, T) === table) ?? null,
+      f: seated.filter((p) => p.gender === 'f' && tableOf(p, round, T, g) === table),
+      m: seated.filter((p) => p.gender === 'm' && tableOf(p, round, T, g) === table),
     };
   });
 }
 
-export function partnerOf(p: Seated, round: number, T: number, seated: Seated[]) {
-  const t = tableOf(p, round, T);
-  return seated.find((o) => o.gender !== p.gender && tableOf(o, round, T) === t) ?? null;
-}
+/** 같은 테이블의 이성 모두 (g=1이면 최대 1명) */
+export const partnersOf = (p: Seated, round: number, T: number, seated: Seated[], g = 1) => {
+  const t = tableOf(p, round, T, g);
+  return seated.filter((o) => o.gender !== p.gender && tableOf(o, round, T, g) === t);
+};
 
-/** 1..round 중 상대가 있었던 라운드 수 ("N번째 이성") */
-export const ordinal = (p: Seated, round: number, T: number, seated: Seated[]) =>
-  Array.from({ length: round }, (_, i) => i + 1).filter((r) => partnerOf(p, r, T, seated)).length;
+/** 1..round 중 상대가 있었던 라운드 수 ("N번째 만남") */
+export const ordinal = (p: Seated, round: number, T: number, seated: Seated[], g = 1) =>
+  Array.from({ length: round }, (_, i) => i + 1).filter((r) => partnersOf(p, r, T, seated, g).length > 0).length;
 
 /** 일시정지를 뺀 진행 시간 (0..duration) */
 export function elapsedMs(r: Round, now: number) {
