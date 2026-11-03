@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-No application code yet. Design is approved: spec `docs/superpowers/specs/2026-10-31-flirting-lounge-design.md`, plan `docs/superpowers/plans/2026-10-31-flirting-lounge.md` (read its "Status / pending revision" section first — Supabase deferred, Vercel-only preview mode, building paused by the user). Add build/test commands here once the app is scaffolded. `.superpowers/` holds brainstorm mockups and is gitignored.
+No application code yet. Design is approved: spec `docs/superpowers/specs/2026-10-31-flirting-lounge-design.md`, plan `docs/superpowers/plans/2026-10-31-flirting-lounge.md` (read its "Status / pending revision" section first — Supabase deferred, Vercel-only preview mode, building paused by the user). The **signup site** (preview mode, no backend yet) is scaffolded: `npm run dev`, `npm run build`, `npm test` (Vitest). Pages: `/` landing, `/apply` 7-step flow, `/status` + `/status/demo`, `/admin` (mock host list). Example data, fee and deposit account live in `src/lib/signup/data.ts`. Use relative imports (the `@/` alias failed to resolve in this Windows path). Keep TypeScript on 5.x: Next 15 rejects TS 7. `.superpowers/` holds brainstorm mockups and is gitignored.
 
 ## What this is
 
