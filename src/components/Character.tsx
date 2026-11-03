@@ -1,7 +1,23 @@
 import type { CSSProperties } from 'react';
 import type { Prop, Shape } from '../lib/domain/register';
+import { PALETTE } from '../lib/domain/loveType';
 
 const HAS_ASSETS = process.env.NEXT_PUBLIC_CHARACTER_ASSETS === '1';
+
+const BASE_HUE = 2; // 임시 그림(분홍)의 평균 색상각, 실측
+function hue(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  if (!d) return 0;
+  const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+}
+/** 임시 그림을 연애 컬러 쪽으로 돌리는 필터 (밝기도 대충 맞춘다) */
+export function tint(color: number) {
+  const c = PALETTE[color];
+  const light = [1, 3, 5].reduce((s, i) => s + parseInt(c.slice(i, i + 2), 16), 0) / (3 * 255);
+  return `hue-rotate(${Math.round(hue(c) - BASE_HUE)}deg) brightness(${(0.75 + light * 0.4).toFixed(2)})`;
+}
 
 export function characterSrc(shape: Shape, color: number, frame: 'base' | 'smile' | 'blink', hasAssets = HAS_ASSETS) {
   return hasAssets ? `/characters/${shape}/${String(color).padStart(2, '0')}-${frame}.webp` : `/characters/placeholder-${frame}.webp`;
@@ -23,7 +39,7 @@ const PROP_SVG: Record<Exclude<Prop, 'none'>, React.ReactNode> = {
 
 export function Character({ shape, color, prop, size = 120, delay = 0 }: { shape: Shape; color: number; prop: Prop; size?: number; delay?: number }) {
   const a = PROP_ANCHOR[shape];
-  const style = { width: size, height: size, '--d': `${-delay}s`, '--shape': SHAPE_FAKE[shape], filter: HAS_ASSETS ? undefined : `hue-rotate(${color * 22}deg)` } as CSSProperties;
+  const style = { width: size, height: size, '--d': `${-delay}s`, '--shape': SHAPE_FAKE[shape], filter: HAS_ASSETS ? undefined : tint(color) } as CSSProperties;
   return (
     <div className="chr" style={style} aria-hidden="true">
       <div className="chr-body">
@@ -32,7 +48,7 @@ export function Character({ shape, color, prop, size = 120, delay = 0 }: { shape
         <img className="chr-face chr-blink" src={characterSrc(shape, color, 'blink')} alt="" />
       </div>
       {prop !== 'none' && (
-        <svg className="chr-prop" viewBox="0 0 64 64" style={{ left: `${a.x}%`, top: `${a.y}%`, width: `${a.w}%`, filter: HAS_ASSETS ? undefined : `hue-rotate(${-color * 22}deg)` }}>{PROP_SVG[prop]}</svg>
+        <svg className="chr-prop" viewBox="0 0 64 64" style={{ left: `${a.x}%`, top: `${a.y}%`, width: `${a.w}%`, filter: HAS_ASSETS ? undefined : `hue-rotate(${-Math.round(hue(PALETTE[color]) - BASE_HUE)}deg)` }}>{PROP_SVG[prop]}</svg>
       )}
     </div>
   );
