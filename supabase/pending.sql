@@ -1,5 +1,5 @@
 -- 아직 Supabase에 실행하지 않았다면 이 파일을 통째로 SQL Editor에 붙여넣고 Run (여러 번 실행해도 안전).
--- 0005 한 테이블 인원 · 0006 롤링페이퍼 · 0007 최종 선택
+-- 0005 한 테이블 인원 · 0006 롤링페이퍼 · 0007 최종 선택 · 0008 페어 게임 (0005~0007은 이미 실행했다면 0008 부분만 실행해도 된다)
 
 alter table events add column if not exists per_table int not null default 1;
 alter table events drop constraint if exists events_per_table_check;
@@ -30,3 +30,26 @@ create table if not exists choices (
 );
 alter table choices enable row level security;
 alter table participants add column if not exists choice_done_at timestamptz;
+
+-- 0008 선택형 페어 게임
+create table if not exists game_plays (
+  event_id uuid not null references events(id) on delete cascade,
+  round int not null,
+  table_no int not null,
+  card_id text not null,
+  drawn_by uuid references participants(id) on delete set null,
+  created_at timestamptz not null default now(),
+  primary key (event_id, round, table_no)
+);
+alter table game_plays enable row level security;
+
+create table if not exists game_answers (
+  event_id uuid not null references events(id) on delete cascade,
+  round int not null,
+  table_no int not null,
+  participant_id uuid not null references participants(id) on delete cascade,
+  answer text not null,
+  created_at timestamptz not null default now(),
+  primary key (event_id, round, table_no, participant_id)
+);
+alter table game_answers enable row level security;

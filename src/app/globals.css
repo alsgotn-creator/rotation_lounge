@@ -436,4 +436,20 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .rp-empty{position:absolute;inset:0;display:grid;place-items:center;margin:0;font-family:"Nanum Pen Script",cursive;font-size:26px;color:#a89874}
 .rp-foot{text-align:center;margin:16px 0 0;font-size:13px;font-weight:700;color:var(--mute)}
 
+/* ---------- 페어 게임 ---------- */
+.gm-ping{animation:gmping 1.6s ease-in-out infinite;color:var(--acc)}
+@keyframes gmping{50%{box-shadow:0 0 0 6px rgba(255,143,163,.18)}}
+.gm-scrim{position:fixed;inset:0;z-index:50;background:rgba(5,8,22,.6);display:flex;align-items:flex-end;justify-content:center}
+.gm-sheet{width:100%;max-width:480px;max-height:88vh;overflow:auto;background:var(--sheet);border-radius:28px 28px 0 0;padding:12px 20px 28px;animation:gmup .3s cubic-bezier(.2,.9,.3,1)}
+@keyframes gmup{from{transform:translateY(40px);opacity:0}}
+.gm-grab{display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 16px}
+.gm-kind{margin:0;text-align:center;font-size:13px;font-weight:800;color:var(--acc)}
+.gm-prompt{margin:8px 0 0;text-align:center;font-size:21px;line-height:1.4;font-weight:900;letter-spacing:-.03em;word-break:keep-all}
+.gm-hint{margin:8px 0 0;text-align:center;font-size:13px;color:var(--mute)}
+.gm-opts{margin-top:12px}.gm-opts .opt{justify-content:center;text-align:center;font-size:17px;font-weight:800;min-height:64px}
+.gm-wait{margin:22px 0 4px;text-align:center;color:var(--mute);line-height:1.7;font-size:15px}.gm-wait b{color:var(--text)}
+.gm-ans{display:grid;gap:10px;margin-top:16px}
+.gm-ans div{padding:14px 16px;border-radius:18px;background:var(--surf)}.gm-ans div.me{background:var(--accbg)}
+.gm-ans small{display:block;font-size:12px;font-weight:800;color:var(--mute);margin-bottom:4px}.gm-ans b{font-size:16px;line-height:1.5;word-break:keep-all}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.fin .big .ic{stroke-dashoffset:0}}

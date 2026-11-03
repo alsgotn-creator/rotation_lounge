@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import GameSheet from './GameSheet';
 import { Character } from '../../../components/Character';
 import { useNow } from '../../../components/RoundTimer';
 import { elapsedMs, REVEAL_MS } from '../../../lib/domain/seating';
@@ -41,8 +42,10 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
   );
 }
 
-export default function Round({ view, offsetMs, onRefresh }: { view: PlayView; offsetMs: number; onRefresh: () => void }) {
+export default function Round({ slug, view, offsetMs, onRefresh }: { slug: string; view: PlayView; offsetMs: number; onRefresh: () => void }) {
   const round = view.round!;
+  const [gameOpen, setGameOpen] = useState(false);
+  const g = view.game, waiting = !!g && !g.mine; // 상대가 카드를 뽑았고 아직 내가 답 전
   const now = useNow(offsetMs);
   const revealedLocally = elapsedMs(round.timer, now) >= REVEAL_MS;
   const hasProfile = round.partners.some((p) => view.met[p.id]);
@@ -99,6 +102,13 @@ export default function Round({ view, offsetMs, onRefresh }: { view: PlayView; o
           ))}
         </section>
       )}
+
+      {round.partners.length > 0 && (
+        <div className="ft">
+          <button className={`btn sub${waiting ? ' gm-ping' : ''}`} onClick={() => setGameOpen(true)}>{waiting ? '✦ 카드가 도착했어요' : '✦ 같이 해보기'}</button>
+        </div>
+      )}
+      {gameOpen && <GameSheet slug={slug} game={g} onClose={() => setGameOpen(false)} onChange={onRefresh} />}
     </main>
   );
 }

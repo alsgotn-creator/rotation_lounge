@@ -1,7 +1,8 @@
 import 'server-only';
 import { db } from './supabase';
 import { loadRun, type Person } from './run';
-import { partnersOf, ordinal, type Round } from '../domain/seating';
+import { partnersOf, ordinal, tableOf, type Round } from '../domain/seating';
+import { cardById } from '../domain/cards';
 import { metIds, pendingNotes, type Pending } from '../domain/turns';
 import { phrases, recommend } from '../domain/loveType';
 import { mutualMatches } from '../domain/matching';
@@ -19,6 +20,7 @@ export type PlayView = {
   choice: null | { max: number; picks: string[]; done: boolean; candidates: PublicCard[] };
   paper: null | { notes: { id: string; body: string }[] };   // 마무리 단계에서 내가 받은 쪽지 (쓴 사람은 없다)
   resultsOpen: boolean;
+  game: null | { cardId: string; kind: string; prompt: string; options: string[] | null; hint: string | null; mine: string | null; answered: number; total: number; answers: null | { gender: 'f' | 'm'; number: number; me: boolean; text: string }[] };
   result: null | { matches: PublicCard[] };                  // 서로 고른 사람만. 나를 고른 사람 수·이름은 어디에도 없다.
 };
 
@@ -41,6 +43,24 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
       ordinal: ordinal(me, current.no, T, seated, g),
       oppositeCount: seated.filter((s) => s.gender !== me.gender).length,
     };
+  }
+
+  // 선택형 페어 게임: 이 테이블의 카드와 답. 테이블 사람이 모두 답해야 서로의 답이 보인다. 표가 없으면(마이그레이션 전) 건너뛴다.
+  let game: PlayView['game'] = null;
+  const table = me && round ? tableOf(me, round.no, T, g) : null;
+  if (me && round && table && round.partners.length) {
+    const key = { event_id: eventId, round: round.no, table_no: table };
+    const { data: play, error } = await db().from('game_plays').select('card_id').match(key).maybeSingle();
+    const c = !error && play ? cardById(play.card_id as string) : null;
+    if (c) {
+      const { data: ans } = await db().from('game_answers').select('participant_id,answer').match(key);
+      const total = round.partners.length + 1, mine = (ans ?? []).find((a) => a.participant_id === meId)?.answer ?? null;
+      const done = (ans ?? []).length >= total;
+      game = {
+        cardId: c.id, kind: c.kind, prompt: c.prompt, options: c.options, hint: c.hint ?? null, mine, answered: (ans ?? []).length, total,
+        answers: done ? (ans ?? []).map((a) => { const p = byId.get(a.participant_id as string)!; return { gender: p.gender, number: p.number!, me: p.id === meId, text: a.answer as string }; }).sort((x, y) => Number(y.me) - Number(x.me) || x.number - y.number) : null,
+      };
+    }
   }
 
   const met: PlayView['met'] = {};
@@ -92,8 +112,8 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   }
 
   const view: PlayView = {
-    serverNow: now, phase: ev.phase, noNumber: !me, round, met, recommendation, choice, paper, result, resultsOpen: !!ev.results_open,
+    serverNow: now, phase: ev.phase, noNumber: !me, round, met, recommendation, choice, paper, result, resultsOpen: !!ev.results_open, game,
     pending: first && byId.get(first.toId) ? { round: first.round, to: card(byId.get(first.toId)!) } : null,
   };
-  return { view, pendingAll, opposite };
+  return { view, pendingAll, opposite, table };
 }
