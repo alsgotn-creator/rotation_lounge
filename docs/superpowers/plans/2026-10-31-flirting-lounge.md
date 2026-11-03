@@ -10,7 +10,49 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-31-flirting-lounge-design.md`. Visual mockups live in `.superpowers/brainstorm/2664-1793417169/content/` (gitignored, local only). Match them: `splash-v2.html` (A), `prereg.html`, `lounge-mix.html`, `host-and-round-v2.html`, `paper-and-choice.html`, `anim-compare.html` (A).
 
-## Status / pending revision (2026-10-31)
+## Status (2026-11-03)
+
+- Supabase project created: `https://bdygooqxwvultoqhunqd.supabase.co`. The URL is in `.env.local` (gitignored); the user fills in the keys and `HOST_PASSWORD` locally and in Vercel. **This replaces the 2026-10-31 "no Supabase / browser-only preview mode" decision** — skip that preview mode.
+- A public **signup site** already exists in this repo (commits `f9d456d`…`f691dba`, pushed to `github.com/alsgotn-creator/rotation_lounge`): `/` landing, `/apply` 7-step flow, `/status` + `/status/demo`, `/admin` mock. It is UI-only (no storage). Its design (navy `#0a122f`, Toss-style one-question-per-screen) is approved; draft `docs/design/signup-draft-v6.html`.
+- Execution: subagent-driven. **Wait for the user to approve this revision before building.**
+
+## Revision 2026-11-03: signup site + invite-only lounge (overrides the tasks below where they conflict)
+
+**Intent (user):** connect the signup site with the in-event lounge app so that the lounge screens are visible **only to participants and the host** — one site, public signup outside, locked lounge inside.
+
+**Decided with the user**
+- One Next.js app, one Supabase project for both signup and lounge.
+- Host name "옷깃" shown top-right of the landing; business info (대표 민시훈, 697-67-00622, alsgotn@naver.com) in the footer — already done.
+- Fee 30,000원, deposit to 토스뱅크 1000-4168-0942 민시훈 (`src/lib/signup/data.ts`).
+- Order: apply → host confirms → deposit request → host confirms deposit → participant gets a personal lounge link.
+
+**My calls (stated to the user, open to change)**
+- **Personal invite link replaces the shared pre-registration link.** Spec line "사전 등록은 공유 링크" and the walk-in-via-same-link rule change: `/e/[slug]` without a valid cookie shows only "입장 링크가 필요해요". Walk-ins: host adds them in the host screen, which creates a confirmed application and shows their link.
+- **PIN + nickname recovery is dropped.** The invite link itself can be reopened on any device and re-sets the cookie. (Forwarding the link lets someone else in; accepted for a 14–18 person event.)
+- **Registration is prefilled from the application**: gender, age (event year − birth year), job. The participant still enters nickname, area, MBTI, keywords, 15 answers, character.
+- **No email until Resend + a domain exist.** Each host action shows a "메시지 복사" button with ready-to-send text (deposit info, or the invite link) for KakaoTalk/SMS. The applicant's done screen shows a personal status link `/status/[token]` to save. The email lookup on `/status` shows "신청 완료 화면의 링크로 확인해요 · 분실 시 alsgotn@naver.com" until Resend is wired.
+- Seats shown on the landing = capacity − applications in `awaiting_payment` or `confirmed` per gender. `new` does not hold a seat.
+- Photos are resized in the browser (long edge 1280 px, JPEG ~0.82) and uploaded with the form to the server, which stores them in a **private** Storage bucket; the host sees them via 1-hour signed URLs.
+
+**Data (add to `0001_init.sql`)**
+- `events` gains: `birth_from int`, `birth_to int`, `capacity_per_gender int default 7`, `apply_open bool default true`, `price int default 30000`, `payment_due_days int default 3`. A signup "일정" is an `events` row.
+- `applications`: `id uuid pk`, `event_id → events on delete cascade`, `gender 'f'|'m'`, `name`, `birth_year int`, `phone`, `email`, `job`, `photo_paths text[]` (1–3), `avoid jsonb` (`[{name, note}]`), `status 'new'|'held'|'awaiting_payment'|'confirmed'|'cancelled'`, `status_token_hash text unique`, `invite_token_hash text unique null`, `payment_due date null`, `created_at`, `updated_at`. RLS on, no policies.
+- `participants` gains `application_id uuid unique null → applications`; drop `pin_hash`.
+- Storage bucket `applicant-photos` (private). The daily cron (Task 14) also deletes applications and their photos 30 days after the event.
+- Privacy: application fields (name, phone, email, photos, avoid list) never appear in participant or screen views — add this to the Task 6 privacy test.
+
+**New tasks (run before the lounge tasks; Task 5's store/migration work starts here)**
+
+- **A1. Schema + Supabase client + apply API.** Migration as above; `src/lib/server/supabase.ts` (service-role client); `POST /api/apply` (multipart): re-validate with `src/lib/signup/validate.ts`, check `apply_open`, birth range and seats, honeypot field, rate-limit by IP (5/hour, in-memory is fine), upload photos, insert, return `{statusToken}`. `GET /api/events/public` returns open events with seats left. Landing and `/apply` read events from it instead of `SESSIONS`. Tests: validation and seat counting as pure functions.
+- **A2. Host login + applicants.** `/host` password login (Task 7's `fl_host` cookie, moved earlier). `/host/[slug]/applicants` replaces the public `/admin` (delete it): tabs 새 신청 / 입금 대기 / 확정 / 보류·취소; detail with signed photo URLs; **지인 주의** when an avoid-name matches another non-cancelled applicant's name in the same event (normalize spaces/case); actions 확정→`awaiting_payment` (sets `payment_due`), 입금 확인→`confirmed` (creates invite token), 보류, 취소; each shows "메시지 복사". Test: avoid-name matching.
+- **A3. Applicant status.** `/status/[token]`: real status, deposit box only in `awaiting_payment`, 신청 취소 (→ `cancelled`, only before `confirmed`; after that, show the refund rule and the contact email).
+- **A4. Invite entry.** `/e/[slug]/join/[token]` checks the hash against a `confirmed` application, creates or finds the participant, sets the `fl_{eventId}` cookie, redirects to `/e/[slug]`. Task 7's `register` takes the application's gender/age/job; `recover` and PIN are removed; Task 8's consent text stays, the basic-info step loses gender/age/job.
+
+**Deferred:** Resend emails (needs a sending domain), email magic-link lookup, Supabase keep-alive is still Task 14.
+
+**Flag for the user:** Vercel Hobby is non-commercial; paid events need Vercel Pro ($20/mo) — Task 14 README already notes this.
+
+## Superseded status (2026-10-31)
 
 - The user chose **subagent-driven** execution. Building is **paused at the user's request** ("아직 디벨롭이 필요해서 나중에"). Resume from Task 1.
 - **No Supabase for now. Deploy to Vercel only.** Revise the plan before starting:
@@ -30,7 +72,7 @@
 - Participant numbers always end in 호: "여1호", "남6호".
 - Love type is shown as a real color only. Never show letters or a color name.
 - Never include the line "너는? 꼭 되물어주기".
-- The app never collects or shows contact info. The match message reads exactly "진행자가 연락처를 직접 전해드릴 거예요."
+- The lounge app never shows contact info (the signup site collects phone/email for the host only). The match message reads exactly "진행자가 연락처를 직접 전해드릴 거예요."
 - Nothing auto-advances. A timer reaching zero only shows a 종료 state.
 - Defaults: round 15 min (`900` s), reveal at `420` s of un-paused elapsed time, max picks `3` (host sets 2 or 3), 15 questions on a 5-point scale.
 - The participant API must never return, for anyone except the viewer:
