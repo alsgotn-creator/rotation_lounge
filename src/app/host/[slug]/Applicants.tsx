@@ -103,7 +103,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
   const shown = rows.filter((r) => TABS.find((t) => t[0] === tab)![2].includes(r.status));
   return (
     <main>
-      <div className="nb"><Link className="bk" aria-label="일정 목록" href="/host"><Icon name="back" /></Link><div className="tt">신청 관리</div></div>
+      <div className="nb"><Link className="bk" aria-label="일정 목록" href="/host"><Icon name="back" /></Link><div className="tt" style={{ marginRight: 0 }}>신청 관리</div><Link className="host" style={{ marginRight: 12 }} href={`/host/${event.slug}/run`}>진행 화면</Link></div>
       <div className="bd" style={{ paddingTop: 4, animation: 'none' }}>
         <div className="evs"><div><b>{session.dateLabel} {session.time} · {session.place}</b><small>{session.birthFrom}~{session.birthTo}년생 · {event.capacity}:{event.capacity}</small></div>
           <button className="host" style={{ border: 0, cursor: 'pointer' }} onClick={toggleApply}>{event.applyOpen ? '신청 받는 중' : '신청 닫힘'}</button></div>
