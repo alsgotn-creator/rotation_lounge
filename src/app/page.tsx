@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Icon } from '../components/Icon';
-import { SESSIONS, PRICE, won, yy } from '../lib/signup/data';
+import { SESSIONS, PRICE, won, yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
 
 const FAQ = [
   ['혼자 가도 괜찮나요?', '모두 혼자 와요. 친구와 함께 신청하면 같은 날 다른 테이블에 앉아요.'],
@@ -29,7 +29,7 @@ export default function Landing() {
           <span className="dust" style={{ left: '56%', top: '76%', animationDelay: '2.4s' }} />
           <span className="dust" style={{ left: '48%', top: '80%', animationDelay: '4.6s' }} />
         </div>
-        <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><Link href="/status">신청 내역</Link></nav>
+        <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><Link href="/status">신청 내역</Link><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
         <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>
         <div className="bottom">
           <Link className="ticket" href={`/apply?s=${next.id}`}>
@@ -106,7 +106,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="biz">상호 플러팅 라운지 · 대표 OOO · 사업자등록번호 000-00-00000<br />문의 hello@example.com · 이용약관 · 개인정보처리방침</footer>
+      <footer className="biz">상호 플러팅 라운지 · 대표 {BUSINESS.owner} · 사업자등록번호 {BUSINESS.number}<br />문의 <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a> · 이용약관 · 개인정보처리방침</footer>
 
       <div className="ft"><Link className="btn shine" href="/apply">라운지 입장 신청하기</Link></div>
     </main>

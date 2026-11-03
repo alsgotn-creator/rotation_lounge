@@ -16,3 +16,6 @@ export const ACCOUNT = { bank: '토스뱅크', number: '1000-4168-0942', holder:
 
 export const won = (n: number) => n.toLocaleString('ko-KR') + '원';
 export const yy = (y: number) => String(y).slice(2);
+
+export const HOST_NAME = '옷깃';
+export const BUSINESS = { owner: '민시훈', number: '697-67-00622', email: 'alsgotn@naver.com' };
