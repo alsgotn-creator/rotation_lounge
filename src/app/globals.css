@@ -290,4 +290,32 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .given{margin-top:22px;border-radius:16px;background:var(--surf);padding:6px 16px}
 .given .kv:first-child{border-top:0}
 
+/* ---------- 대기실 ---------- */
+.lounge{padding-bottom:190px;background:radial-gradient(120% 60% at 50% 30%,rgba(255,143,163,.08),transparent 70%)}
+.lg-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0}
+.lg-head{text-align:center;margin-top:14px}
+.lg-head p{margin:0;font-size:11px;font-weight:800;letter-spacing:.18em;color:#ffb89a}
+.lg-head h1{margin:6px 0 0;font-size:26px;font-weight:900;letter-spacing:-.04em}
+.lg-head span{display:block;margin-top:6px;font-size:13px;color:var(--mute);font-weight:600}
+.lg-me{display:flex;flex-direction:column;align-items:center;margin-top:22px}
+.lg-me small{font-size:12px;font-weight:800;color:var(--acc);margin-bottom:-4px}
+.lg-ho{margin-top:6px;font-size:12px;font-weight:800;color:var(--btntx);background:var(--acc);border-radius:9px;padding:3px 9px}
+.lg-kw{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.lg-kw span{font-size:12px;font-weight:700;padding:4px 9px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#e9e2ee;white-space:nowrap}
+.lg-kw span.on{border-color:rgba(255,143,163,.5);color:#ffd1d9}
+.lg-crowd{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 6px;padding:26px 14px 0}
+.lg-p{display:flex;flex-direction:column;align-items:center;animation:floaty 4s ease-in-out infinite}
+.lg-p:nth-child(3n+2){margin-top:26px}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.lg-mine{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 14px;border-radius:16px;background:rgba(20,28,66,.85);border:1px solid var(--line);font-size:12px;font-weight:600;color:#d9dcef;line-height:1.5;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.seats{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:20px 6px 6px;padding:14px;border-radius:20px;border:1.5px dashed var(--line)}
+.seat-col{display:flex;flex-direction:column;gap:10px}
+.seat-col:first-child{justify-content:flex-end} /* 왼쪽 열은 아래부터: 4 옆에 5가 오게 (시계 방향) */
+.seat-col button{height:62px;border-radius:16px;border:2px solid transparent;background:var(--surf2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.seat-col button b{font-size:20px;font-weight:900}
+.seat-col button small{font-size:11px;font-weight:700;color:var(--mute)}
+.seat-col button.on{border-color:var(--acc);background:var(--accbg)}
+.seat-col button.on small{color:var(--acc)}
+.seat-col button:disabled{opacity:.35;cursor:default}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.fin .big .ic{stroke-dashoffset:0}}

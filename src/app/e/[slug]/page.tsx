@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Icon } from '../../../components/Icon';
 import { getEvent } from '../../../lib/server/signup';
-import { db, hasDb } from '../../../lib/server/supabase';
+import { hasDb } from '../../../lib/server/supabase';
+import { loungeView } from '../../../lib/server/lounge';
 import { invitedFromCookie, participantOf } from '../../../lib/server/invite';
 import { toSession } from '../../../lib/signup/rules';
 import { BUSINESS } from '../../../lib/signup/data';
@@ -12,7 +13,7 @@ import Entry from './Entry';
 export const metadata: Metadata = { title: '라운지 · 플러팅 라운지', robots: { index: false } };
 export const dynamic = 'force-dynamic';
 
-// 참가자 전용 라운지. 지금은 사전 등록까지. 대기실·라운드 화면은 계획서 Task 9 이후에 이어 붙인다.
+// 참가자 전용 라운지: 사전 등록 → 대기실·자리 고르기. 라운드 화면은 계획서 Task 10에서 이어 붙인다.
 export default async function Lounge({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ bad?: string; step?: string }> }) {
   if (!hasDb()) notFound();
   const { slug } = await params;
@@ -31,11 +32,12 @@ export default async function Lounge({ params, searchParams }: { params: Promise
     </main>
   );
 
-  const [p, { data: ev }] = await Promise.all([participantOf(me.id), db().from('events').select('phase').eq('id', event.id).single()]);
+  const p = await participantOf(me.id);
+  const lounge = p ? await loungeView(event.id, p.id) : null;
   const s = toSession(event, []);
   const given = { gender: me.gender, age: new Date(event.starts_at).getUTCFullYear() - me.birth_year, job: me.job };
   return (
-    <Entry slug={slug} given={given} when={`${s.dateLabel} ${s.time}`} canEdit={ev?.phase === 'before'} devStep={devStep}
+    <Entry slug={slug} given={given} when={`${s.dateLabel} ${s.time}`} devStep={devStep} lounge={lounge}
       me={p && { nickname: p.nickname, area: p.area, mbti: p.mbti, keywords: p.keywords, answers: p.answers, loveType: p.love_type, shape: p.shape as Shape, prop: p.prop as Prop }} />
   );
 }
