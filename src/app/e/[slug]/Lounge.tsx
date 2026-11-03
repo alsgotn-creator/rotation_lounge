@@ -1,9 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { Icon } from '../../../components/Icon';
 import { Character } from '../../../components/Character';
 import { PALETTE, phrases } from '../../../lib/domain/loveType';
-import { seatColumns } from '../../../lib/domain/lounge';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
 
@@ -11,9 +9,6 @@ const ho = (g: 'f' | 'm', n: number) => `${g === 'f' ? '여' : '남'}${n}호`;
 
 export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug: string; initial: LoungeView; when: string; loveType: number; onEdit: () => void }) {
   const [v, setV] = useState(initial);
-  const [seat, setSeat] = useState(false);
-  const [toast, setToast] = useState('');
-  const [busy, setBusy] = useState(false);
   const me = v.cards.find((c) => c.me)!;
   const others = v.cards.filter((c) => !c.me);
 
@@ -31,20 +26,6 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
     return () => { clearInterval(t); document.removeEventListener('visibilitychange', onVis); };
   }, [refresh]);
 
-  // 주소 끝에 #seat 이 있으면 자리 고르기를 바로 연다 (현장 안내용)
-  useEffect(() => { if (location.hash === '#seat' && initial.seatOpen && initial.phase === 'before') setSeat(true); }, [initial.seatOpen, initial.phase]);
-
-  const show = (t: string) => { setToast(t); setTimeout(() => setToast(''), 2400); };
-  const pick = async (table: number) => {
-    setBusy(true);
-    const r = await fetch(`/api/e/${slug}/seat`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ table }) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
-    setBusy(false);
-    await refresh();
-    if (!j.ok) return show(j.message);
-    setSeat(false); show(`${table}번 테이블에 앉았어요 · ${ho(me.gender, table)}`);
-  };
-  const cols = seatColumns(v.tableCount);
   const before = v.phase === 'before';
 
   return (
@@ -82,37 +63,11 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
           <span className="orb" style={{ ['--c' as string]: PALETTE[loveType], width: 28, height: 28, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
           <span>{phrases(loveType).join(' · ')}</span>
         </div>
-        {before && !v.seatOpen && <p className="note" style={{ margin: 0 }}>행사 당일, 테이블에 앉은 뒤 여기서 자리를 골라요</p>}
-        {before && v.seatOpen
-          ? <button className={`btn${me.number != null ? ' sub' : ' shine'}`} onClick={() => setSeat(true)}>
-              {me.number != null ? `${me.number}번 테이블 · 자리 바꾸기` : '내 자리 고르기'}</button>
-          : !before && <p className="note" style={{ margin: 0 }}>곧 호스트가 라운드를 시작해요</p>}
+        {me.number != null && before && (
+          <div className="lg-seat"><b>{ho(me.gender, me.number)}</b><span>첫 대화는 <em>{me.number}번 테이블</em>에서 시작해요</span></div>
+        )}
+        {!before && <p className="note" style={{ margin: 0 }}>곧 호스트가 라운드를 시작해요</p>}
       </div>
-
-      {seat && <>
-        <div className="dim" onClick={() => setSeat(false)} />
-        <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="seat-t">
-          <div className="grab" />
-          <h3 id="seat-t">앉은 테이블을 눌러주세요</h3>
-          <p className="ds">테이블 위의 번호와 같은 곳을 누르면 돼요. 그 번호가 오늘 나의 <b>{me.gender === 'f' ? '여' : '남'}○호</b>가 돼요.</p>
-          <div className="seats">
-            {[cols.left, cols.right].map((col, ci) => (
-              <div className="seat-col" key={ci}>
-                {col.map((n) => {
-                  const mine = me.number === n, taken = v.taken.includes(n);
-                  return (
-                    <button key={n} disabled={busy || taken} className={mine ? 'on' : ''} onClick={() => !mine && pick(n)} aria-label={`${n}번 테이블${taken ? ', 이미 선택됨' : mine ? ', 내 자리' : ''}`}>
-                      <b>{n}</b><small>{mine ? '내 자리' : taken ? '선택됨' : ho(me.gender, n)}</small>
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-          <p className="hint" style={{ justifyContent: 'center' }}><Icon name="info" />남자분은 라운드마다 시계 방향으로 한 칸씩 옮겨요</p>
-        </div>
-      </>}
-      {toast && <div className="toast" role="status"><Icon name="check" />{toast}</div>}
     </main>
   );
 }

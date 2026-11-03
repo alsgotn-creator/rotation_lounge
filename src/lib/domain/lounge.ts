@@ -15,11 +15,7 @@ export function loungeCards(rows: Row[], meId: string): PublicCard[] {
     .sort((a, b) => Number(b.me) - Number(a.me));
 }
 
-/** 같은 성별이 이미 고른 테이블 */
-export const takenTables = (rows: Row[], gender: 'f' | 'm', meId: string) =>
-  rows.filter((r) => r.gender === gender && r.id !== meId && !r.excluded && r.number != null).map((r) => r.number!).sort((a, b) => a - b);
-
-/** 직사각형 배치: 오른쪽 열 1..⌈T/2⌉ 위→아래, 왼쪽 열 나머지 아래→위 (번호순 이동이 시계방향) */
+/** 직사각형 배치 (호스트 큰 화면용): 오른쪽 열 1..⌈T/2⌉ 위→아래, 왼쪽 열 나머지 아래→위 (번호순 이동이 시계방향) */
 export function seatColumns(T: number) {
   const half = Math.ceil(T / 2);
   const right = Array.from({ length: half }, (_, i) => i + 1);

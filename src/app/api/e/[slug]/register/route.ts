@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
   const now = new Date().toISOString();
   const row = {
-    event_id: event.id, application_id: me.id, gender: me.gender, job: me.job,
+    event_id: event.id, application_id: me.id, gender: me.gender, job: me.job, number: me.number,
     age: new Date(event.starts_at).getUTCFullYear() - me.birth_year,
     nickname: b.nickname.trim(), area: b.area.trim(), mbti: b.mbti.toUpperCase(),
     keywords: b.keywords.map((k) => k.trim()).filter(Boolean),

@@ -55,3 +55,10 @@ export function avoidHits(me: { id: string; avoid: { name: string }[] }, others:
   const wanted = new Set(me.avoid.map((a) => norm(a.name)));
   return others.filter((o) => o.id !== me.id && o.status !== 'cancelled' && wanted.has(norm(o.name)));
 }
+
+/** 비어 있는 호 번호 중 하나를 무작위로 (1..capacity). 다 찼으면 null */
+export function pickNumber(taken: number[], capacity: number, rand = Math.random) {
+  const free = Array.from({ length: capacity }, (_, i) => i + 1).filter((n) => !taken.includes(n));
+  return free.length ? free[Math.floor(rand() * free.length)] : null;
+}
+export const hoLabel = (g: Gender, n: number) => `${g === 'f' ? '여' : '남'}${n}호`;

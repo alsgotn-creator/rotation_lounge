@@ -18,7 +18,7 @@ export default async function HostEvent({ params }: { params: Promise<{ slug: st
   let k = 0;
   const rows: Row[] = apps.map((a) => ({
     id: a.id, name: a.name, gender: a.gender, birthYear: a.birth_year, job: a.job, phone: a.phone, email: a.email,
-    status: a.status, paymentDue: a.payment_due, createdAt: a.created_at, avoid: a.avoid,
+    status: a.status, paymentDue: a.payment_due, createdAt: a.created_at, number: a.number, avoid: a.avoid,
     photos: a.photo_paths.map(() => urls[k++]),
     avoidHits: avoidHits(a, apps).map((o) => o.name),
     // 다른 신청자가 이 사람을 피하고 싶다고 적은 경우도 호스트에게 알려준다 (누가 적었는지만)

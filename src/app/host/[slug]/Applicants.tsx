@@ -8,7 +8,7 @@ import type { AppStatus, Session } from '../../../lib/signup/rules';
 
 export type Row = {
   id: string; name: string; gender: 'f' | 'm'; birthYear: number; job: string; phone: string; email: string;
-  status: AppStatus; paymentDue: string | null; createdAt: string; avoid: { name: string; note: string }[];
+  status: AppStatus; paymentDue: string | null; createdAt: string; number: number | null; avoid: { name: string; note: string }[];
   photos: string[]; avoidHits: string[]; avoidedBy: string[];
 };
 type Ev = { id: string; slug: string; applyOpen: boolean; capacity: number; price: number };
@@ -53,7 +53,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
     });
     else if (j.inviteToken) setMsg({
       title: `${r.name}님께 보낼 입장 링크`,
-      text: `[플러팅 라운지] ${r.name}님, 입금 확인됐어요. 자리가 확정됐어요!\n\n아래 링크로 사전 등록을 해주세요 (약 5분).\n${location.origin}/e/${event.slug}/join/${j.inviteToken}\n\n이 링크는 ${r.name}님 전용이에요. 다른 사람과 공유하지 말아주세요.`,
+      text: `[플러팅 라운지] ${r.name}님, 입금 확인됐어요. 자리가 확정됐어요!\n오늘 ${r.name}님은 ${r.gender === 'f' ? '여자' : '남자'} ${j.number}호예요.\n\n아래 링크로 사전 등록을 해주세요 (약 5분).\n${location.origin}/e/${event.slug}/join/${j.inviteToken}\n\n이 링크는 ${r.name}님 전용이에요. 다른 사람과 공유하지 말아주세요.`,
     });
     else { show(`${r.name}님: ${STATUS_KO[j.status as AppStatus]}`); setOpenId(null); }
     router.refresh();
@@ -78,7 +78,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
             : <div key={i} style={{ background: 'var(--surf)' }} />)}
         </div>
         <div className="bd" style={{ paddingTop: 16 }}>
-          <span className="badge">{STATUS_KO[open.status]}</span>
+          <span className="badge">{STATUS_KO[open.status]}{open.number != null && ` · ${open.gender === 'f' ? '여' : '남'}${open.number}호`}</span>
           <h2 className="q" style={{ fontSize: 22, marginTop: 10 }}>{open.name} <small className="ds" style={{ fontSize: 14 }}>{open.gender === 'f' ? '여' : '남'} · {open.birthYear}년생</small></h2>
           <dl className="sum" style={{ marginTop: 12 }}>
             {[['하는 일', open.job], ['연락처', open.phone], ['이메일', open.email], ['신청', ago(open.createdAt)], ...(open.paymentDue ? [['입금 기한', kDue(open.paymentDue)]] : [])]
@@ -123,7 +123,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
           <button className="ap" key={r.id} onClick={() => setOpenId(r.id)}>
             <div className="av2" style={r.photos[0] ? { background: `center/cover url("${r.photos[0]}")` } : { background: 'var(--surf2)' }} />
             <div className="in2"><b>{r.name} <small>{r.gender === 'f' ? '여' : '남'} · {String(r.birthYear).slice(2)}</small></b>
-              <span>{r.job} · {ago(r.createdAt)}{r.status === 'cancelled' && ' · 취소'}{r.status === 'held' && ' · 대기'}</span>
+              <span>{r.number != null && <b style={{ color: 'var(--acc)' }}>{r.gender === 'f' ? '여' : '남'}{r.number}호 · </b>}{r.job} · {ago(r.createdAt)}{r.status === 'cancelled' && ' · 취소'}{r.status === 'held' && ' · 대기'}</span>
               {(r.avoidHits.length > 0 || r.avoidedBy.length > 0) && <em className="warn"><Icon name="info" />지인 주의</em>}</div>
             <Icon name="next" />
           </button>

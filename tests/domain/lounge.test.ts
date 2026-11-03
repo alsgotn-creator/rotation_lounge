@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { loungeCards, seatColumns, takenTables } from '../../src/lib/domain/lounge';
+import { loungeCards, seatColumns } from '../../src/lib/domain/lounge';
 
 const rows = [
   { id: 'a', gender: 'f' as const, number: 1, shape: 'cloud', prop: 'none', love_type: 3, keywords: ['등산'], age: 29, job: '간호사', area: '성동구', mbti: 'INFP', answers: [1, 2, 3] },
@@ -14,11 +14,6 @@ describe('lounge', () => {
   });
   test('me first, excluded people hidden', () => {
     expect(loungeCards(rows, 'b').map((c) => [c.id, c.me])).toEqual([['b', true], ['a', false]]);
-  });
-  test('taken tables: same gender only, not me, not excluded', () => {
-    expect(takenTables(rows, 'f', 'b')).toEqual([1]);
-    expect(takenTables(rows, 'f', 'a')).toEqual([]);
-    expect(takenTables(rows, 'm', 'x')).toEqual([]);
   });
   test('seat columns: right 1..4 top→bottom, left 7,6,5 (clockwise)', () => {
     expect(seatColumns(7)).toEqual({ right: [1, 2, 3, 4], left: [7, 6, 5] });

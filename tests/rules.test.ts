@@ -34,3 +34,18 @@ describe('signup rules', () => {
     expect(avoidHits(me, [...others]).map((o) => o.id)).toEqual(['b']);
   });
 });
+
+import { pickNumber } from '../src/lib/signup/rules';
+describe('random number', () => {
+  test('picks only free numbers within capacity', () => {
+    for (let i = 0; i < 50; i++) {
+      const n = pickNumber([1, 3], 4);
+      expect([2, 4]).toContain(n);
+    }
+  });
+  test('deterministic with given rand; null when full', () => {
+    expect(pickNumber([], 7, () => 0)).toBe(1);
+    expect(pickNumber([], 7, () => 0.999)).toBe(7);
+    expect(pickNumber([1, 2, 3], 3)).toBeNull();
+  });
+});

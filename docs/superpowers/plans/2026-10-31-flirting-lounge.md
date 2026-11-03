@@ -48,6 +48,8 @@
 - **A3. Applicant status.** `/status/[token]`: real status, deposit box only in `awaiting_payment`, 신청 취소 (→ `cancelled`, only before `confirmed`; after that, show the refund rule and the contact email).
 - **A4. Invite entry.** `/e/[slug]/join/[token]` checks the hash against a `confirmed` application, creates or finds the participant, sets the `fl_{eventId}` cookie, redirects to `/e/[slug]`. Task 7's `register` takes the application's gender/age/job; `recover` and PIN are removed; Task 8's consent text stays, the basic-info step loses gender/age/job.
 
+**Change 2026-11-03 (user):** no seat picking. The 호 number is chosen at random among free numbers of that gender when the host presses 입금 확인 (`applications.number`, migration `0003_numbers.sql`), copied to `participants.number` at registration, cleared on cancel. Round 1 pairs equal numbers; men rotate from there. Task 9's `pickSeat` and SeatPicker are dropped; the host can still fix numbers (Task 11 `setSeat`).
+
 **Deferred:** Resend emails (needs a sending domain), email magic-link lookup, Supabase keep-alive is still Task 14.
 
 **Flag for the user:** Vercel Hobby is non-commercial; paid events need Vercel Pro ($20/mo) — Task 14 README already notes this.

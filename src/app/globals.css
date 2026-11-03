@@ -308,14 +308,9 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .lg-p:nth-child(3n+2){margin-top:26px}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .lg-mine{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 14px;border-radius:16px;background:rgba(20,28,66,.85);border:1px solid var(--line);font-size:12px;font-weight:600;color:#d9dcef;line-height:1.5;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.seats{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:20px 6px 6px;padding:14px;border-radius:20px;border:1.5px dashed var(--line)}
-.seat-col{display:flex;flex-direction:column;gap:10px}
-.seat-col:first-child{justify-content:flex-end} /* 왼쪽 열은 아래부터: 4 옆에 5가 오게 (시계 방향) */
-.seat-col button{height:62px;border-radius:16px;border:2px solid transparent;background:var(--surf2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-.seat-col button b{font-size:20px;font-weight:900}
-.seat-col button small{font-size:11px;font-weight:700;color:var(--mute)}
-.seat-col button.on{border-color:var(--acc);background:var(--accbg)}
-.seat-col button.on small{color:var(--acc)}
-.seat-col button:disabled{opacity:.35;cursor:default}
+.lg-seat{display:flex;align-items:center;gap:12px;height:56px;padding:0 18px;border-radius:16px;background:var(--btn);color:var(--btntx)}
+.lg-seat b{font-size:20px;font-weight:900}
+.lg-seat span{font-size:14px;font-weight:700}
+.lg-seat em{font-style:normal;font-weight:900}
 
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.fin .big .ic{stroke-dashoffset:0}}
