@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import Lounge from './Lounge';
+import Play from './Play';
 import type { LoungeView } from '../../../lib/server/lounge';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import Register, { type Initial } from './Register';
@@ -16,5 +16,5 @@ export default function Entry({ slug, given, me, when, devStep, lounge }: { slug
     return <Register slug={slug} given={given} initial={init} onCancel={() => setEdit(false)} />;
   }
   if (!lounge) return null;
-  return <Lounge slug={slug} initial={lounge} when={when} loveType={me.loveType} onEdit={() => { setEdit(true); window.scrollTo(0, 0); }} />;
+  return <Play slug={slug} lounge={lounge} when={when} loveType={me.loveType} onEdit={() => { setEdit(true); window.scrollTo(0, 0); }} />;
 }
