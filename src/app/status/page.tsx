@@ -1,33 +1,17 @@
-'use client';
-import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Icon } from '../../components/Icon';
-import { isEmail } from '../../lib/signup/validate';
+import { BUSINESS } from '../../lib/signup/data';
 
-export default function StatusLookup() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+export default function StatusHelp() {
   return (
     <main>
-      <div className="nb"><button className="bk" aria-label="뒤로" onClick={() => router.push('/')}><Icon name="back" /></button></div>
-      {sent ? (
-        <div className="bd">
-          <h2 className="q">메일함을 확인해주세요</h2>
-          <p className="ds"><b>{email}</b>로 확인 링크를 보냈어요. 링크는 30분 동안 쓸 수 있어요.</p>
-          <p className="preview" style={{ textAlign: 'left', marginTop: 24 }}>미리보기 버전이라 메일은 가지 않아요. 아래 버튼으로 내역 화면을 볼 수 있어요.</p>
-          <div className="ft"><Link className="btn" href="/status/demo">내역 화면 미리보기</Link><button className="lnk" onClick={() => setSent(false)}>다른 이메일로 받기</button></div>
-        </div>
-      ) : (
-        <form className="bd" onSubmit={(e) => { e.preventDefault(); if (isEmail(email)) setSent(true); }}>
-          <h2 className="q">신청한 이메일을<br />알려주세요</h2>
-          <p className="ds">확인 링크를 보내드려요. 비밀번호는 필요 없어요.</p>
-          <label className="fld"><span>이메일</span>
-            <input autoFocus type="email" inputMode="email" autoComplete="email" placeholder="example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value.trim())} /></label>
-          <div className="ft"><button className="btn" disabled={!isEmail(email)}>링크 받기</button></div>
-        </form>
-      )}
+      <div className="nb"><Link className="bk" aria-label="뒤로" href="/"><Icon name="back" /></Link></div>
+      <div className="bd">
+        <h2 className="q">신청 내역은<br />내 링크로 확인해요</h2>
+        <p className="ds">신청을 마칠 때 받은 <b>내 신청 내역 링크</b>를 열어주세요. 로그인 없이 바로 보여요.</p>
+        <div className="safe" style={{ marginTop: 24 }}><Icon name="info" /><div>링크를 잃어버렸다면 신청한 이름과 휴대폰 번호를 적어 <b>{BUSINESS.email}</b>로 보내주세요. 확인 후 다시 보내드려요.</div></div>
+      </div>
+      <div className="ft"><a className="btn" href={`mailto:${BUSINESS.email}?subject=${encodeURIComponent('[플러팅 라운지] 신청 내역 링크 요청')}`}>메일 보내기</a></div>
     </main>
   );
 }

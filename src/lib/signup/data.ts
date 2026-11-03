@@ -1,21 +1,15 @@
-// 미리보기용 예시 데이터. 실제 일정·자리는 나중에 Supabase에서 읽어온다.
-export type Session = {
-  id: string; mon: string; day: string; dow: string; dateLabel: string;
-  time: string; place: string; birthFrom: number; birthTo: number;
-  seatsF: number; seatsM: number; closed?: boolean;
-};
+import type { EventRow } from './rules';
 
-export const SESSIONS: Session[] = [
-  { id: '1115', mon: 'NOV', day: '15', dow: 'SAT', dateLabel: '11월 15일(토)', time: '오후 7:30', place: '성수', birthFrom: 1994, birthTo: 1999, seatsF: 1, seatsM: 3 },
-  { id: '1122', mon: 'NOV', day: '22', dow: 'SAT', dateLabel: '11월 22일(토)', time: '오후 7:30', place: '성수', birthFrom: 1990, birthTo: 1995, seatsF: 4, seatsM: 2 },
-  { id: '1108', mon: 'NOV', day: '08', dow: 'SAT', dateLabel: '11월 8일(토)', time: '오후 7:30', place: '성수', birthFrom: 1994, birthTo: 1999, seatsF: 0, seatsM: 0, closed: true },
+// Supabase 키가 없을 때(로컬 미리보기) 보여줄 예시 일정
+export const SAMPLE_EVENTS: EventRow[] = [
+  { id: 'sample-1114', slug: 'sample-1114', title: '플러팅 라운지', starts_at: '2026-11-14T10:30:00Z', venue: '성수', birth_from: 1994, birth_to: 1999, capacity_per_gender: 7, apply_open: true, price: 30000, payment_due_days: 3 },
+  { id: 'sample-1121', slug: 'sample-1121', title: '플러팅 라운지', starts_at: '2026-11-21T10:30:00Z', venue: '성수', birth_from: 1990, birth_to: 1995, capacity_per_gender: 7, apply_open: true, price: 30000, payment_due_days: 3 },
 ];
 
 export const PRICE = 30000;
 export const ACCOUNT = { bank: '토스뱅크', number: '1000-4168-0942', holder: '민시훈' };
+export const HOST_NAME = '옷깃';
+export const BUSINESS = { owner: '민시훈', number: '697-67-00622', email: 'alsgotn@naver.com' };
 
 export const won = (n: number) => n.toLocaleString('ko-KR') + '원';
 export const yy = (y: number) => String(y).slice(2);
-
-export const HOST_NAME = '옷깃';
-export const BUSINESS = { owner: '민시훈', number: '697-67-00622', email: 'alsgotn@naver.com' };

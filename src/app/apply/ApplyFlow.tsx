@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../../components/Icon';
-import { SESSIONS, yy } from '../../lib/signup/data';
+import { yy } from '../../lib/signup/data';
+import type { Session } from '../../lib/signup/rules';
 import { birthError, digits, formatPhone, isBirth, isEmail, isName, isPhone } from '../../lib/signup/validate';
 
 type Gender = '' | 'f' | 'm';
@@ -12,9 +13,9 @@ const STEPS = 7;
 const DOMAINS = ['@gmail.com', '@naver.com', '@kakao.com', '@daum.net'];
 const JOBS = ['개발자', '교사', '간호사', '마케터', '공무원'];
 
-export default function ApplyFlow({ initialSession }: { initialSession: string | null }) {
+export default function ApplyFlow({ sessions, initialSession }: { sessions: Session[]; initialSession: string | null }) {
   const router = useRouter();
-  const pre = SESSIONS.find((s) => s.id === initialSession && !s.closed);
+  const pre = sessions.find((s) => s.id === initialSession && !s.closed);
   const [step, setStep] = useState(pre ? 1 : 0);
   const [sessionId, setSessionId] = useState(pre?.id ?? '');
   const [gender, setGender] = useState<Gender>('');
@@ -24,35 +25,54 @@ export default function ApplyFlow({ initialSession }: { initialSession: string |
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [job, setJob] = useState('');
-  const [photos, setPhotos] = useState<(string | null)[]>([null, null, null]);
+  const [photos, setPhotos] = useState<(Photo | null)[]>([null, null, null]);
   const [avoidMode, setAvoidMode] = useState<'' | 'no' | 'yes'>('');
   const [avoid, setAvoid] = useState<Avoid[]>([]);
   const [draft, setDraft] = useState<Avoid>({ name: '', note: '' });
   const [sheet, setSheet] = useState(false);
   const [agree, setAgree] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState<string | null>(null); // 신청 내역 토큰
+  const [sending, setSending] = useState(false);
+  const [err, setErr] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const slotRef = useRef(0);
 
-  const s = SESSIONS.find((x) => x.id === sessionId);
+  const s = sessions.find((x) => x.id === sessionId);
   const go = (n: number) => { setStep(n); window.scrollTo(0, 0); };
   // shortcut: 브라우저 뒤로가기는 단계가 아니라 페이지 단위로 동작함. 실제 오픈 전 history 연동 고려.
   const back = () => (step === 0 ? router.push('/') : go(step - 1));
 
-  useEffect(() => () => photos.forEach((p) => p && URL.revokeObjectURL(p)), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => photos.forEach((p) => p && URL.revokeObjectURL(p.url)), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (done) return <Done email={email} />;
+  if (done) return <Done email={email} token={done} />;
 
   const pickPhoto = (i: number) => { slotRef.current = i; fileRef.current?.click(); };
-  const onFile = (f: File | undefined) => {
+  const onFile = async (f: File | undefined) => {
     if (!f) return;
+    const blob = await shrink(f).catch(() => f);
     setPhotos((ps) => {
       const n = [...ps];
       const i = n[slotRef.current] ? slotRef.current : n.findIndex((p) => !p);
-      if (n[i]) URL.revokeObjectURL(n[i]!);
-      n[i] = URL.createObjectURL(f);
+      if (n[i]) URL.revokeObjectURL(n[i]!.url);
+      n[i] = { url: URL.createObjectURL(blob), blob };
       return n;
     });
+  };
+
+  const submit = async () => {
+    if (!s || sending) return;
+    setSending(true); setErr('');
+    const fd = new FormData();
+    Object.entries({ eventId: s.id, gender, name: name.trim(), birth, phone, email, job: job.trim(), avoid: JSON.stringify(avoidMode === 'yes' ? avoid : []) })
+      .forEach(([k, v]) => fd.append(k, v));
+    photos.forEach((p) => p && fd.append('photos', p.blob, 'photo.jpg'));
+    try {
+      const r = await fetch('/api/apply', { method: 'POST', body: fd });
+      const j = await r.json().catch(() => ({ ok: false, message: '잠시 뒤에 다시 시도해주세요.' }));
+      if (!j.ok) { setErr(j.message); return; }
+      setSheet(false); setDone(j.statusToken); window.scrollTo(0, 0);
+    } catch { setErr('인터넷 연결을 확인하고 다시 시도해주세요.'); }
+    finally { setSending(false); }
   };
   const photoCount = photos.filter(Boolean).length;
 
@@ -87,7 +107,8 @@ export default function ApplyFlow({ initialSession }: { initialSession: string |
           <h2 className="q">어느 날 오실래요?</h2>
           <p className="ds">남은 자리는 실시간이에요.</p>
           <div style={{ marginTop: 22 }}>
-            {SESSIONS.map((x) => (
+            {sessions.length === 0 && <p className="ds" style={{ marginTop: 22 }}>지금 열린 일정이 없어요. 곧 다음 일정을 열게요.</p>}
+            {sessions.map((x) => (
               <button type="button" key={x.id} disabled={x.closed} className={`opt${sessionId === x.id ? ' on' : ''}`}
                 onClick={() => { setSessionId(x.id); if (sessionId !== x.id) setGender(''); setTimeout(() => go(1), 180); }}>
                 <div className="d">{x.mon}<b>{x.day}</b>{x.dow}</div>
@@ -152,7 +173,7 @@ export default function ApplyFlow({ initialSession }: { initialSession: string |
             {photos.map((p, i) => (
               <button type="button" key={i} className={`slot${i === 0 ? ' big' : ''}${p ? ' filled' : ''}`} onClick={() => pickPhoto(i)}
                 aria-label={p ? `${i + 1}번째 사진 바꾸기` : `${i + 1}번째 사진 추가`}>
-                {p ? <><img src={p} alt="" /><span className="chg">바꾸기</span></> : <>{i === 0 && <span className="req">필수</span>}<Icon name="plus" />{i === 0 ? '사진 올리기' : '추가'}</>}
+                {p ? <><img src={p.url} alt="" /><span className="chg">바꾸기</span></> : <>{i === 0 && <span className="req">필수</span>}<Icon name="plus" />{i === 0 ? '사진 올리기' : '추가'}</>}
               </button>
             ))}
           </div>
@@ -209,26 +230,46 @@ export default function ApplyFlow({ initialSession }: { initialSession: string |
           </dl>
           <button type="button" className={`agree${agree ? ' on' : ''}`} onClick={() => setAgree(!agree)} aria-pressed={agree}>
             <span className="chk" />필수 약관에 모두 동의해요</button>
-          <button className="btn" disabled={!agree} onClick={() => { setSheet(false); setDone(true); window.scrollTo(0, 0); }}>신청하기</button>
-          <p className="preview">미리보기 버전이라 실제로 접수되지는 않아요</p>
+          {err && <p className="msg e" role="alert" style={{ margin: '0 0 10px', fontSize: 14, textAlign: 'center' }}>{err}</p>}
+          <button className="btn" disabled={!agree || sending} onClick={submit}>{sending ? '보내는 중…' : '신청하기'}</button>
         </div>
       </>}
     </main>
   );
 }
 
-function Done({ email }: { email: string }) {
+type Photo = { url: string; blob: Blob };
+
+/** 긴 변 1280px JPEG로 줄여서 올린다 (업로드 용량·속도) */
+async function shrink(f: File): Promise<Blob> {
+  const img = await createImageBitmap(f);
+  const k = Math.min(1, 1280 / Math.max(img.width, img.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+  return new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error('toBlob'))), 'image/jpeg', 0.82));
+}
+
+function Done({ email, token }: { email: string; token: string }) {
+  const [copied, setCopied] = useState(false);
+  const link = `${typeof window === 'undefined' ? '' : window.location.origin}/status/${token}`;
+  const copy = async () => { try { await navigator.clipboard.writeText(link); setCopied(true); } catch { /* 길게 눌러 복사 */ } };
   return (
     <main className="fin">
       <div className="big"><Icon name="check" /></div>
       <h2 className="q">신청을 마쳤어요</h2>
-      <p className="ds">호스트가 확인하면<br /><b>{email}</b>으로 입금 안내를 보내드려요.</p>
+      <p className="ds">호스트가 확인하면 입금 안내를 보내드려요.<br />아래 <b>내 신청 내역 링크</b>를 꼭 저장해주세요.</p>
+      <div className="card" style={{ paddingBottom: 18 }}>
+        <p className="ds" style={{ margin: 0, fontSize: 13 }}>내 신청 내역 링크</p>
+        <p style={{ margin: '6px 0 12px', fontSize: 13, fontWeight: 700, wordBreak: 'break-all' }}>{link}</p>
+        <button className="btn sub" style={{ height: 44, fontSize: 15 }} onClick={copy}>{copied ? '복사했어요' : '링크 복사하기'}</button>
+      </div>
       <div className="card"><div className="tl">
-        <div className="done"><i /><span><b>신청 완료</b><small>방금</small></span></div>
+        <div className="done"><i /><span><b>신청 완료</b><small>{email}</small></span></div>
         <div className="now"><i /><span><b>호스트 확인 중</b><small>보통 하루 안에 끝나요</small></span></div>
-        <div><i /><span><b>입금하고 사전 등록</b><small>메일로 안내해드려요</small></span></div>
+        <div><i /><span><b>입금하고 입장 링크 받기</b><small>입금이 확인되면 나만의 라운지 링크를 드려요</small></span></div>
       </div></div>
-      <div className="ft"><Link className="btn" href="/">확인</Link><Link className="lnk" href="/status/demo">신청 내역 보기</Link></div>
+      <div className="ft"><Link className="btn" href={`/status/${token}`}>신청 내역 보기</Link><Link className="lnk" href="/">처음으로</Link></div>
     </main>
   );
 }

@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { Icon } from '../components/Icon';
-import { SESSIONS, PRICE, won, yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
+import { PRICE, won, yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
+import { listSessions } from '../lib/server/signup';
+
+export const revalidate = 60; // 남은 자리는 1분마다 새로
 
 const FAQ = [
   ['혼자 가도 괜찮나요?', '모두 혼자 와요. 친구와 함께 신청하면 같은 날 다른 테이블에 앉아요.'],
@@ -9,8 +12,9 @@ const FAQ = [
   ['연락처는 언제 공개되나요?', '서로 고른 두 사람에게만, 행사가 끝난 뒤 알려드려요.'],
 ];
 
-export default function Landing() {
-  const next = SESSIONS.find((s) => !s.closed)!;
+export default async function Landing() {
+  const sessions = await listSessions();
+  const next = sessions.find((s) => !s.closed);
   return (
     <main>
       <section className="hero">
@@ -31,13 +35,13 @@ export default function Landing() {
         </div>
         <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><Link href="/status">신청 내역</Link><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
         <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>
-        <div className="bottom">
+        {next && <div className="bottom">
           <Link className="ticket" href={`/apply?s=${next.id}`}>
             <div className="dt">{next.mon}<b>{next.day}</b>{next.dow}</div>
-            <div className="tx"><strong>{next.time} · {next.place} 라운지</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · 7:7 · <em>여성 {next.seatsF}자리 남음</em></div>
+            <div className="tx"><strong>{next.time} · {next.place} 라운지</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · <em>{next.seatsF <= next.seatsM ? `여성 ${next.seatsF}` : `남성 ${next.seatsM}`}자리 남음</em></div>
             <Icon name="next" />
           </Link>
-        </div>
+        </div>}
       </section>
 
       <section className="lsec" style={{ paddingTop: 8 }}>
@@ -51,7 +55,8 @@ export default function Landing() {
       <section className="lsec">
         <p className="eb">일정</p>
         <h3>오실 날을 골라주세요</h3>
-        {SESSIONS.map((s) => s.closed ? (
+        {sessions.length === 0 && <p className="ds" style={{ fontSize: 14 }}>지금 열린 일정이 없어요. 곧 다음 일정을 열게요.</p>}
+        {sessions.map((s) => s.closed ? (
           <div key={s.id} className="opt" style={{ opacity: .4, cursor: 'default' }}>
             <div className="d">{s.mon}<b>{s.day}</b>{s.dow}</div>
             <div className="t"><strong>{s.time} · {s.place}</strong>{yy(s.birthFrom)}~{yy(s.birthTo)}년생</div>
