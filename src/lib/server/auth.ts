@@ -17,6 +17,7 @@ export function checkHostPassword(pw: string) {
 export const hostCookie = () => ({ name: HOST_COOKIE, value: hostValue(), httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 12 });
 
 export async function isHost() {
+  if (process.env.HOST_OPEN === '1') return true; // shortcut: 시연용 임시 개방. 행사 전에 Vercel에서 HOST_OPEN 값을 지울 것
   if (!process.env.HOST_PASSWORD) return false;
   const v = (await cookies()).get(HOST_COOKIE)?.value ?? '';
   const a = Buffer.from(v), b = Buffer.from(hostValue());
