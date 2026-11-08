@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Icon } from '../components/Icon';
 import { PRICE, won, yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
 import { listSessions } from '../lib/server/signup';
+import { db, hasDb } from '../lib/server/supabase';
 
 export const revalidate = 60; // 남은 자리는 1분마다 새로
 
@@ -14,6 +15,8 @@ const FAQ = [
 
 export default async function Landing() {
   const sessions = await listSessions();
+  const { data: rv } = hasDb() ? await db().from('reviews').select('body,gender,age').order('created_at', { ascending: false }).limit(12) : { data: null };
+  const reviews = (rv ?? []) as { body: string; gender: 'f' | 'm'; age: number }[]; // 테이블이 아직 없으면 빈 목록
   const next = sessions.find((s) => !s.closed);
   return (
     <main>
@@ -94,12 +97,10 @@ export default async function Landing() {
       </section>
 
       <section className="lsec">
-        <p className="eb">다녀온 분들 이야기<span className="tag">예시</span></p>
-        <div className="rvs">
-          <div className="rv">어색할 줄 알았는데 15분이 금방 가요. 마지막에 매칭됐다는 메시지 보고 소리 질렀어요.<small>29세 · 여성</small></div>
-          <div className="rv">질문 카드가 있어서 말이 끊기지 않았어요. 분위기가 생각보다 훨씬 편했어요.<small>31세 · 남성</small></div>
-          <div className="rv">사진을 호스트만 본다고 해서 마음 편하게 신청했어요.<small>27세 · 여성</small></div>
-        </div>
+        <p className="eb">다녀온 분들 이야기</p>
+        {reviews.length === 0
+          ? <p className="ds" style={{ fontSize: 14 }}>첫 후기를 기다리고 있어요. 행사에 다녀온 분이 직접 남기는 한 줄이 여기 모여요.</p>
+          : <div className="rvs">{reviews.map((r, i) => <div className="rv" key={i}>{r.body}<small>{r.age}세 · {r.gender === 'f' ? '여성' : '남성'}</small></div>)}</div>}
       </section>
 
       <section className="lsec">

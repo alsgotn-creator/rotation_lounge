@@ -11,7 +11,26 @@ const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}
 const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} prop={c.prop as Prop} size={size} delay={(c.number ?? 0) * 0.6} />;
 
 /** 마무리: 결과는 호스트가 열어줄 때까지 기다리고, 열리면 서로 고른 사람만 보여준다. 롤링페이퍼는 언제든 볼 수 있다. */
-export default function Closing({ view, me }: { view: PlayView; me: PublicCard | null }) {
+function ReviewBox({ slug }: { slug: string }) {
+  const [text, setText] = useState('');
+  const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
+  const send = async () => {
+    setSt('busy');
+    const r = await fetch(`/api/e/${slug}/review`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ body: text }) }).catch(() => null);
+    setSt(r?.ok ? 'done' : 'err');
+  };
+  return (
+    <section className="cls-rv">
+      <h3>오늘 어땠나요?</h3>
+      <p className="ds">이름 없이 성별·나이만 보여요. 한 번 남기면 고쳐 쓸 수 있어요.</p>
+      <textarea value={text} maxLength={120} rows={3} placeholder="한 줄 후기를 남겨주세요 (120자)" onChange={(e) => { setText(e.target.value); setSt('idle'); }} />
+      <button className="btn" disabled={!text.trim() || st === 'busy'} onClick={send}>{st === 'done' ? '남겼어요 · 고쳐 쓰기' : '후기 남기기'}</button>
+      {st === 'err' && <p className="preview">저장하지 못했어요. 다시 시도해주세요.</p>}
+    </section>
+  );
+}
+
+export default function Closing({ view, me, slug }: { view: PlayView; me: PublicCard | null; slug: string }) {
   const [paper, setPaper] = useState(false);
   const matches = view.result?.matches ?? [];
 
@@ -46,6 +65,8 @@ export default function Closing({ view, me }: { view: PlayView; me: PublicCard |
         <h2 className="q" style={{ textAlign: 'center' }}>이번엔 인연이<br />닿지 않았어요</h2>
         <p className="ds" style={{ textAlign: 'center' }}>그래도 오늘 만난 마음들은 쪽지에 남아 있어요.</p>
       </>}
+
+      <ReviewBox slug={slug} />
 
       <div className="ft"><button className="btn" onClick={() => setPaper(true)}>내 롤링페이퍼 보기{view.paper && view.paper.notes.length > 0 ? ` · ${view.paper.notes.length}장` : ''}</button></div>
     </main>

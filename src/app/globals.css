@@ -453,3 +453,7 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .gm-ans small{display:block;font-size:12px;font-weight:800;color:var(--mute);margin-bottom:4px}.gm-ans b{font-size:16px;line-height:1.5;word-break:keep-all}
 
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.fin .big .ic{stroke-dashoffset:0}}
+.cls-rv{margin:28px 0 120px;padding:18px;border-radius:20px;background:var(--surf)}
+.cls-rv h3{margin:0 0 4px;font-size:16px;font-weight:800}
+.cls-rv textarea{width:100%;margin:10px 0 12px;padding:12px;border-radius:14px;border:1px solid var(--line);background:transparent;color:inherit;font:inherit;font-size:15px;resize:none}
+.cls-rv .btn{position:static;width:100%}
