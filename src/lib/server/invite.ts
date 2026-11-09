@@ -8,11 +8,13 @@ export const inviteCookie = (eventId: string) => `fl_inv_${eventId}`;
 
 export type Invited = { id: string; name: string; gender: 'f' | 'm'; birth_year: number; job: string; number: number | null };
 
-/** 확정된 신청자의 입장 링크인지 확인 */
+/** 확정된 신청자의 입장 링크(또는 신청 내역 링크)인지 확인 */
 export async function findInvited(eventId: string, token: string | undefined) {
   if (!token) return null;
+  const h = hash(token); // hex라 or() 필터에 그대로 넣어도 안전
   const { data } = await db().from('applications').select('id,name,gender,birth_year,job,number')
-    .eq('event_id', eventId).eq('status', 'confirmed').eq('invite_token_hash', hash(token)).maybeSingle();
+    // 호스트가 보낸 입장 링크든, 신청 내역 링크(상태 토큰)든 확정된 본인이면 들어온다
+    .eq('event_id', eventId).eq('status', 'confirmed').or(`invite_token_hash.eq.${h},status_token_hash.eq.${h}`).maybeSingle();
   return data as Invited | null;
 }
 
