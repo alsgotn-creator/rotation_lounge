@@ -5,6 +5,7 @@ import { FloorPlan, type TablePair } from '../../../components/FloorPlan';
 import { RoundTimer } from '../../../components/RoundTimer';
 import type { Round } from '../../../lib/domain/seating';
 import type { Prop, Shape } from '../../../lib/domain/register';
+import { cloud, IDEAL } from '../../../lib/domain/ideal';
 
 type Pub = { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; keywords: string[] };
 type View = { phase: 'before' | 'talk' | 'choice' | 'closing'; total: number; round: Round | null; pairs: TablePair[]; resting: Pub[]; lounge: Pub[]; choiceProgress: { done: number; total: number } };
@@ -51,11 +52,31 @@ export default function Screen({ slug, k }: { slug: string; k: string }) {
             </div>
           ))}
         </div>
+        <IdealCloud title="여자분들이 적은 이상형" lists={IDEAL.f} />
+        <IdealCloud title="남자분들이 적은 이상형" lists={IDEAL.m} />
       </>}
 
       {v.phase === 'choice' && <div className="sb-center"><h1 className="sb-title">최종 선택 중이에요</h1><p className="sb-move">마음이 간 분을 휴대폰에서 골라주세요</p><p className="sb-prog">{v.choiceProgress.done} <em>/ {v.choiceProgress.total}명 완료</em></p></div>}
       {v.phase === 'closing' && <div className="sb-center"><h1 className="sb-title">오늘 함께해 주셔서 고마워요</h1>
         <div className="sb-lounge" style={{ marginTop: 30 }}>{v.lounge.slice(0, 12).map((p, i) => <Character key={i} shape={p.shape as Shape} color={p.color} prop={p.prop as Prop} size={80} delay={i * 0.8} />)}</div></div>}
     </main>
+  );
+}
+
+/** 가장 많이 적힌 키워드를 가운데 크게, 나머지는 주변에 작게. 숫자는 보여주지 않는다. */
+function IdealCloud({ title, lists }: { title: string; lists: string[][] }) {
+  const [top, ...rest] = cloud(lists);
+  if (!top) return null;
+  return (
+    <section className="ic">
+      <h2 className="ic-t">{title}</h2>
+      <div className="ic-box">
+        <b className="ic-top">{top.word}</b>
+        {rest.map((w, i) => {
+          const a = -Math.PI / 2 + (i + 0.5) * (2 * Math.PI / rest.length), r = i % 2 ? 1 : 0.78;
+          return <span key={w.word} className="ic-w" style={{ left: `${50 + 42 * r * Math.cos(a)}%`, top: `${50 + 42 * r * Math.sin(a)}%`, fontSize: `${1.8 + 0.5 * w.count}vh` }}>{w.word}</span>;
+        })}
+      </div>
+    </section>
   );
 }
