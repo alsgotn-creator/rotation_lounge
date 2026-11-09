@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { Character } from '../../../components/Character';
+import { Icon } from '../../../components/Icon';
 import { IdealCloud } from '../../../components/IdealCloud';
 import { IDEAL } from '../../../lib/domain/ideal';
 import { PALETTE, phrases } from '../../../lib/domain/loveType';
@@ -34,6 +35,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, recommen
   return (
     <main className="lounge">
       <div className="lg-top">
+        <a href="/" className="lg-home"><Icon name="back" />홈</a>
         <span className="logo">플러팅<i>.</i>라운지</span>
         {before && <button className="lnk" style={{ margin: 0 }} onClick={onEdit}>내 소개 수정</button>}
       </div>

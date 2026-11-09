@@ -463,8 +463,10 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .cls-wine h3{margin:0 0 4px;font-size:16px;font-weight:800}
 .cls-wine .btn{position:static;width:100%;margin-top:12px}
 /* 라운지: 이상형 키워드 구름 */
-.ic{margin:28px 0 4px;text-align:center}
-.ic-t{font-size:13px;font-weight:800;color:var(--mute);margin-bottom:10px}
-.ic-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 14px;padding:0 8px}
-.ic-row span{display:inline-block;color:var(--mute);font-weight:700}
-.ic-top{display:block;margin:8px 0;font-size:40px;font-weight:900;letter-spacing:-.04em;background:var(--btn);-webkit-background-clip:text;background-clip:text;color:transparent}
+.idc{margin:28px 0 4px;text-align:center}
+.idc-t{font-size:13px;font-weight:800;color:var(--mute);margin-bottom:10px}
+.idc-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 14px;padding:0 8px}
+.idc-row span{display:inline-block;color:var(--mute);font-weight:700}
+.idc-top{display:block;margin:8px 0;font-size:40px;font-weight:900;letter-spacing:-.04em;background:var(--btn);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lg-home{display:inline-flex;align-items:center;gap:2px;color:var(--mute);font-size:14px;font-weight:700;text-decoration:none;padding:6px 0}
+.lg-home .ic{width:18px;height:18px}
