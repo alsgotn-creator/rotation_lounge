@@ -111,7 +111,7 @@ export default async function Landing() {
         </div>
       </section>
 
-      <footer className="biz">상호 플러팅 라운지 · 대표 {BUSINESS.owner} · 사업자등록번호 {BUSINESS.number}<br />문의 <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a> · 이용약관 · 개인정보처리방침</footer>
+      <footer className="biz">상호 플러팅 라운지<br />문의 <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a> · 이용약관 · 개인정보처리방침</footer>
 
       <div className="ft"><Link className="btn shine" href="/apply">라운지 입장 신청하기</Link></div>
     </main>
