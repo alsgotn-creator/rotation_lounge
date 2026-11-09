@@ -11,7 +11,7 @@ type View = {
   ev: { slug: string; phase: Phase; table_count: number; per_table: number; recommendation_open: boolean; results_open: boolean; round_duration_sec: number; max_picks: number; screen_key: string };
   current: Round | null; people: Person[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
-  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
+  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
 };
 const PHASE_KO: [Phase, string][] = [['before', '시작 전'], ['talk', '대화'], ['choice', '최종 선택'], ['closing', '마무리']];
 
@@ -144,7 +144,15 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           <div className="people">
             {v.extras.matches.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>아직 서로 고른 커플이 없어요</p>}
             {v.extras.matches.map(([a, b]) => { const pa = byId.get(a)!, pb = byId.get(b)!; return (
-              <div key={a + b} className="person-row"><div><b>{label(pa)} ♥ {label(pb)}</b><span>{pa.nickname}({pa.name}) · {pb.nickname}({pb.name})</span></div></div>); })}
+              <div key={a + b} className="person-row"><div><b>{label(pa)} ♥ {label(pb)}</b><span>{pa.nickname}({pa.name}) · {v.extras.contacts[a]?.email} · {v.extras.contacts[a]?.phone}</span><span>{pb.nickname}({pb.name}) · {v.extras.contacts[b]?.email} · {v.extras.contacts[b]?.phone}</span></div></div>); })}
+          </div>
+        </>}
+
+        {v.extras.wine.length > 0 && <>
+          <p className="eb" style={{ marginTop: 26 }}>연말 와인모임 단톡방 신청 ({v.extras.wine.length})</p>
+          <div className="people">
+            {v.extras.wine.map((w) => (
+              <div key={w.email + w.phone} className="person-row"><div><b>{w.gender === 'f' ? '여' : '남'}{w.number}호 {w.name} · {w.age}세 · {w.job}</b><span>{w.phone} · {w.email}</span></div></div>))}
           </div>
         </>}
 

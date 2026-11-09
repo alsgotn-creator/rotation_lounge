@@ -18,7 +18,7 @@ export type PlayView = {
   pending: null | { round: number; to: PublicCard };
   recommendation: null | 'pending' | PublicCard;   // 호스트가 '추천 공개'를 누르면 가장 비슷한 이성
   choice: null | { max: number; picks: string[]; done: boolean; candidates: PublicCard[] };
-  paper: null | { notes: { id: string; body: string }[] };   // 마무리 단계에서 내가 받은 쪽지 (쓴 사람은 없다)
+  paper: null | { notes: { id: string; body: string; from: { gender: 'f' | 'm'; number: number | null } }[] };   // 최종선택 전(대화 단계)에만. 보낸 사람은 '여3호'처럼 호만 보인다
   resultsOpen: boolean;
   game: null | { cardId: string; kind: string; prompt: string; options: string[] | null; hint: string | null; mine: string | null; answered: number; total: number; answers: null | { gender: 'f' | 'm'; number: number; me: boolean; text: string }[] };
   result: null | { matches: PublicCard[] };                  // 서로 고른 사람만. 나를 고른 사람 수·이름은 어디에도 없다.
@@ -93,17 +93,20 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   // 최종 선택
   let choice: PlayView['choice'] = null;
   if (me && ev.phase === 'choice') {
-    const { data } = await db().from('choices').select('to_id').eq('event_id', eventId).eq('from_id', meId);
-    const picks = (data ?? []).map((c) => c.to_id as string);
+    let cq = await db().from('choices').select('to_id,rank').eq('event_id', eventId).eq('from_id', meId).order('rank');
+    if (cq.error) cq = (await db().from('choices').select('to_id').eq('event_id', eventId).eq('from_id', meId)) as typeof cq; // rank 칸이 없을 때
+    const picks = (cq.data ?? []).map((c) => c.to_id as string); // 순위 순서
     const d = await db().from('participants').select('choice_done_at').eq('id', meId).single();
     choice = { max: ev.max_picks, picks, done: !d.error ? !!d.data?.choice_done_at : picks.length > 0, candidates: opposite.sort((a, b) => a.number! - b.number!).map(card) };
   }
 
-  // 마무리: 받은 쪽지 + (호스트가 열면) 매칭 결과
+  // 받은 쪽지는 최종선택 전에만 읽는다. 마무리에서는 (호스트가 열면) 매칭 결과만.
   let paper: PlayView['paper'] = null, result: PlayView['result'] = null;
+  if (me && ev.phase === 'talk') {
+    const { data } = await db().from('notes').select('id,body,from_id').eq('event_id', eventId).eq('to_id', meId).eq('hidden', false).not('body', 'is', null).order('created_at');
+    paper = { notes: (data ?? []).map((n) => { const f = byId.get(n.from_id as string); return { id: n.id as string, body: n.body as string, from: { gender: (f?.gender ?? 'f') as 'f' | 'm', number: f?.number ?? null } }; }) };
+  }
   if (me && ev.phase === 'closing') {
-    const { data } = await db().from('notes').select('id,body').eq('event_id', eventId).eq('to_id', meId).eq('hidden', false).not('body', 'is', null).order('created_at');
-    paper = { notes: (data ?? []).map((n) => ({ id: n.id as string, body: n.body as string })) };
     if (ev.results_open) {
       const { data: all } = await db().from('choices').select('from_id,to_id').eq('event_id', eventId);
       const ms = mutualMatches((all ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string })), meId);

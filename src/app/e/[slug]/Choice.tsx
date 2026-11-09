@@ -16,7 +16,7 @@ export default function Choice({ slug, view, onSaved }: { slug: string; view: Pl
   const [shake, setShake] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
-  const dirty = sel.length !== choice.picks.length || sel.some((id) => !choice.picks.includes(id));
+  const dirty = sel.length !== choice.picks.length || sel.some((id, i) => id !== choice.picks[i]);
   const saved = choice.done && !dirty;
 
   const toggle = (id: string) => {
@@ -39,7 +39,7 @@ export default function Choice({ slug, view, onSaved }: { slug: string; view: Pl
       <div className="lg-top"><span className="logo">플러팅<i>.</i>라운지</span></div>
       <header className="chc-head">
         <h1 className="q">마음이 간 분을<br />골라주세요</h1>
-        <p className="ds">서로 고른 경우에만 연결돼요. 아무도 고르지 않아도 괜찮아요.</p>
+        <p className="ds">누른 순서가 1순위, 2순위, 3순위예요. 서로 고른 경우에만 연결돼요. 아무도 고르지 않아도 괜찮아요.</p>
         <span className={`chc-count${shake ? ' shake' : ''}`} aria-live="polite">{sel.length} / {choice.max}</span>
       </header>
       <div className="chc-grid">
@@ -48,7 +48,7 @@ export default function Choice({ slug, view, onSaved }: { slug: string; view: Pl
           return (
             <div key={c.id} className={`chc-cell${on ? ' on' : ''}`}>
               <button className="chc-pick" aria-pressed={on} aria-label={`${ho(c.gender, c.number)} ${on ? '선택 취소' : '선택'}`} onClick={() => toggle(c.id)}>
-                {on && <span className="chc-heart" aria-hidden="true">♥</span>}
+                {on && <span className="chc-heart" aria-hidden="true">{sel.indexOf(c.id) + 1}순위</span>}
                 <Character shape={c.shape as Shape} color={c.color} prop={c.prop as Prop} size={72} delay={(c.number ?? 0) * 0.5} />
                 <b>{ho(c.gender, c.number)}</b>
                 <span>{c.keywords[0]}</span>

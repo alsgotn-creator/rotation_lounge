@@ -11,9 +11,10 @@ describe('seating, 1:1 per table', () => {
     expect(ids(partnersOf(W(1), 1, 7, seated))).toEqual(['m1']);
     expect(ids(partnersOf(W(2), 1, 7, seated))).toEqual(['m2']);
   });
-  test('men move one table clockwise each round, wrapping', () => {
-    expect(tableOf(M(6), 3, 7)).toBe(1);
-    expect(tableOf(M(7), 2, 7)).toBe(1);
+  test('men move one table counter-clockwise each round, wrapping', () => {
+    expect(tableOf(M(6), 3, 7)).toBe(4);
+    expect(tableOf(M(7), 2, 7)).toBe(6);
+    expect(tableOf(M(1), 2, 7)).toBe(7);
     expect(tableOf(W(2), 5, 7)).toBe(2);
   });
   test('uneven counts: someone sits out, ordinal skips that round', () => {

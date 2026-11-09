@@ -37,7 +37,7 @@ export default function Screen({ slug, k }: { slug: string; k: string }) {
         <RoundTimer round={v.round} offsetMs={offset} big />
         <FloorPlan pairs={v.pairs} />
         {v.resting.length > 0 && <p className="sb-rest">이번 라운드 쉬는 분 · {v.resting.map((p) => `${p.gender === 'f' ? '여' : '남'}${p.number}호`).join(', ')}</p>}
-        <p className="sb-move">→ 다음 라운드에는 남자분이 시계 방향으로 한 칸씩 ↻</p>
+        <p className="sb-move">→ 다음 라운드에는 남자분이 반시계 방향으로 한 칸씩 ↺</p>
       </>}
 
       {(v.phase === 'before' || (v.phase === 'talk' && !v.round)) && <>

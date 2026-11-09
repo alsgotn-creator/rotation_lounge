@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
 import { Icon } from '../../../components/Icon';
-import { RollingPaper } from '../../../components/RollingPaper';
 import type { PublicCard } from '../../../lib/domain/lounge';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
@@ -30,23 +29,33 @@ function ReviewBox({ slug }: { slug: string }) {
   );
 }
 
-export default function Closing({ view, me, slug }: { view: PlayView; me: PublicCard | null; slug: string }) {
-  const [paper, setPaper] = useState(false);
-  const matches = view.result?.matches ?? [];
-
-  if (paper) return (
-    <main className="cls">
-      <div className="nb"><button className="bk" aria-label="뒤로" onClick={() => setPaper(false)}><Icon name="back" /></button><div className="tt">내 롤링페이퍼</div></div>
-      <RollingPaper notes={view.paper?.notes ?? []} />
-    </main>
+function WineBox({ slug }: { slug: string }) {
+  const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
+  const join = async () => {
+    setSt('busy');
+    const r = await fetch(`/api/e/${slug}/wine`, { method: 'POST' }).catch(() => null);
+    setSt(r?.ok ? 'done' : 'err');
+  };
+  return (
+    <section className="cls-wine">
+      <h3>연말 와인모임</h3>
+      <p className="ds">연말모임은 모임 때 자세히 안내할게요. 오늘 일정이 안 맞아도 기수제로 이어지니, 연말에 오실 분은 꼭 와주세요.</p>
+      <button className="btn" disabled={st === 'busy' || st === 'done'} onClick={join}>{st === 'done' ? '✓ 단톡방 참가를 신청했어요' : '연말와인모임 단톡방 참가하기'}</button>
+      {st === 'done' && <p className="preview">호스트에게 이름·연락처·이메일이 전달됐어요.</p>}
+      {st === 'err' && <p className="preview">신청하지 못했어요. 다시 시도해주세요.</p>}
+    </section>
   );
+}
+
+export default function Closing({ view, me, slug }: { view: PlayView; me: PublicCard | null; slug: string }) {
+  const matches = view.result?.matches ?? [];
 
   return (
     <main className="cls" style={{ paddingTop: 40 }}>
       {!view.resultsOpen && <>
         <div className="cls-wait" aria-hidden="true">{me && <Face c={me} size={150} />}</div>
         <h2 className="q" style={{ textAlign: 'center' }}>결과는 진행자가<br />곧 공개해요</h2>
-        <p className="ds" style={{ textAlign: 'center' }}>기다리는 동안 받은 쪽지를 읽어볼까요?</p>
+        <p className="ds" style={{ textAlign: 'center' }}>오늘 만나서 반가웠어요.</p>
       </>}
 
       {view.resultsOpen && matches.length > 0 && <>
@@ -63,12 +72,12 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
       {view.resultsOpen && matches.length === 0 && <>
         <div className="cls-wait" aria-hidden="true">{me && <Face c={me} size={130} />}</div>
         <h2 className="q" style={{ textAlign: 'center' }}>이번엔 인연이<br />닿지 않았어요</h2>
-        <p className="ds" style={{ textAlign: 'center' }}>그래도 오늘 만난 마음들은 쪽지에 남아 있어요.</p>
+        <p className="ds" style={{ textAlign: 'center' }}>그래도 오늘 만나서 반가웠어요.</p>
       </>}
 
       <ReviewBox slug={slug} />
 
-      <div className="ft"><button className="btn" onClick={() => setPaper(true)}>내 롤링페이퍼 보기{view.paper && view.paper.notes.length > 0 ? ` · ${view.paper.notes.length}장` : ''}</button></div>
+      <WineBox slug={slug} />
     </main>
   );
 }

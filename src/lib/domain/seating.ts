@@ -1,6 +1,6 @@
 // 자리·타이머 규칙 (계획서 Task 3).
 // 한 테이블에 여자 g명 + 남자 g명(g = 1, 2, 3)이 앉는다. 호 번호 1..T*g 중 같은 '조'(g명씩 묶음)는 한 테이블이다.
-// 여자 조는 자기 테이블에 그대로, 남자 조는 라운드마다 시계 방향으로 한 테이블씩 옮긴다.
+// 여자 조는 자기 테이블에 그대로, 남자 조는 라운드마다 반시계 방향(번호가 줄어드는 쪽)으로 한 테이블씩 옮긴다.
 export type Gender = 'f' | 'm';
 export type Seated = { id: string; gender: Gender; number: number };
 export type Round = { no: number; startedAt: number; pausedAt: number | null; pausedTotalMs: number; durationSec: number; closedAt: number | null };
@@ -10,7 +10,7 @@ export const groupOf = (number: number, g = 1) => Math.ceil(number / g);
 
 export const tableOf = (p: Seated, round: number, T: number, g = 1) => {
   const grp = groupOf(p.number, g);
-  return p.gender === 'f' ? grp : ((grp - 1 + round - 1) % T) + 1;
+  return p.gender === 'f' ? grp : ((((grp - 1 - (round - 1)) % T) + T) % T) + 1;
 };
 
 export function pairs(round: number, T: number, seated: Seated[], g = 1) {

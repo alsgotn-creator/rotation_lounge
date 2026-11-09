@@ -5,6 +5,8 @@ import Round from './Round';
 import NoteWrite from './NoteWrite';
 import Choice from './Choice';
 import Closing from './Closing';
+import { RollingPaper } from '../../../components/RollingPaper';
+import { Icon } from '../../../components/Icon';
 import type { LoungeView } from '../../../lib/server/lounge';
 import type { PlayView } from '../../../lib/server/play';
 
@@ -12,6 +14,7 @@ import type { PlayView } from '../../../lib/server/play';
 export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: string; lounge: LoungeView; when: string; loveType: number; onEdit: () => void }) {
   const [v, setV] = useState<PlayView | null>(null);
   const [offset, setOffset] = useState(0);
+  const [paperOpen, setPaperOpen] = useState(false);
 
   const load = useCallback(async () => {
     const t0 = Date.now();
@@ -30,8 +33,16 @@ export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: s
   }, [load]);
 
   if (v?.pending) return <NoteWrite key={`${v.pending.round}-${v.pending.to.id}`} slug={slug} pending={v.pending} onDone={load} />;
-  if (v?.phase === 'closing' && v.paper) return <Closing slug={slug} view={v} me={lounge.cards.find((c) => c.me) ?? null} />;
+  if (v?.phase === 'talk' && v.paper && paperOpen) return (
+    <main className="cls">
+      <div className="nb"><button className="bk" aria-label="뒤로" onClick={() => setPaperOpen(false)}><Icon name="back" /></button><div className="tt">내 롤링페이퍼</div></div>
+      <RollingPaper notes={v.paper.notes} />
+    </main>
+  );
+  const fab = v?.phase === 'talk' && v.paper
+    ? <button className="pp-fab" onClick={() => setPaperOpen(true)}>롤링페이퍼{v.paper.notes.length > 0 ? ` ${v.paper.notes.length}` : ''}</button> : null;
+  if (v?.phase === 'closing') return <Closing slug={slug} view={v} me={lounge.cards.find((c) => c.me) ?? null} />;
   if (v?.phase === 'choice' && v.choice) return <Choice key="choice" slug={slug} view={v} onSaved={load} />;
-  if (v?.round) return <Round key={v.round.no} slug={slug} view={v} offsetMs={offset} onRefresh={load} />;
-  return <Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} recommendation={v?.recommendation ?? null} />;
+  if (v?.round) return <>{fab}<Round key={v.round.no} slug={slug} view={v} offsetMs={offset} onRefresh={load} /></>;
+  return <>{fab}<Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} recommendation={v?.recommendation ?? null} /></>;
 }

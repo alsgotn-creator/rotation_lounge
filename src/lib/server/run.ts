@@ -166,17 +166,29 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
 
 /** 호스트만 보는 최종 선택 현황·매칭 커플·쪽지 (참가자/큰 화면 응답에는 절대 넣지 않는다). 표가 아직 없으면 빈 값. */
 export async function loadHostExtras(eventId: string, people: Person[]) {
-  const [ch, nt, dn] = await Promise.all([
-    db().from('choices').select('from_id,to_id').eq('event_id', eventId),
+  const [ch0, nt, dn, ap, wn] = await Promise.all([
+    db().from('choices').select('from_id,to_id,rank').eq('event_id', eventId).order('rank'),
     db().from('notes').select('id,round,from_id,to_id,body,hidden').eq('event_id', eventId).order('created_at'),
     db().from('participants').select('id,choice_done_at').eq('event_id', eventId),
+    db().from('participants').select('id,age,job,application_id,applications(name,phone,email)').eq('event_id', eventId),
+    db().from('wine_signups').select('application_id').eq('event_id', eventId), // 표가 없으면 빈 값
   ]);
+  const ch = ch0.error ? await db().from('choices').select('from_id,to_id').eq('event_id', eventId) : ch0; // rank 칸이 없을 때
+  type Ap = { id: string; age: number; job: string; application_id: string; applications: { name: string; phone: string; email: string } | null };
+  const contacts: Record<string, { email: string; phone: string }> = {};
+  const wineIds = new Set((wn.error ? [] : (wn.data ?? [])).map((w) => w.application_id as string));
+  const wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[] = [];
+  for (const a of ((ap.error ? [] : ap.data) ?? []) as unknown as Ap[]) {
+    contacts[a.id] = { email: a.applications?.email ?? '', phone: a.applications?.phone ?? '' };
+    const pp = people.find((x) => x.id === a.id);
+    if (wineIds.has(a.application_id) && pp) wine.push({ gender: pp.gender, number: pp.number, name: a.applications?.name ?? '', age: a.age, job: a.job, phone: a.applications?.phone ?? '', email: a.applications?.email ?? '' });
+  }
   const choices = ch.error ? [] : (ch.data ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string }));
   const active = people.filter((p) => !p.excluded && p.number != null);
   const picks = active.map((p) => ({ id: p.id, to: choices.filter((c) => c.fromId === p.id).map((c) => c.toId) }));
   const done = dn.error ? picks.filter((x) => x.to.length).length : (dn.data ?? []).filter((d) => d.choice_done_at && active.some((p) => p.id === d.id)).length;
   return {
-    picks, matches: mutualPairs(choices), done, total: active.length,
+    picks, matches: mutualPairs(choices), done, total: active.length, contacts, wine,
     notes: nt.error ? [] : (nt.data ?? []).filter((n) => n.body != null).map((n) => ({ id: n.id as string, round: n.round as number, fromId: n.from_id as string, toId: n.to_id as string, body: n.body as string, hidden: !!n.hidden })),
   };
 }

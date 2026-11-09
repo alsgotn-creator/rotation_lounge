@@ -25,7 +25,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const del = await db().from('choices').delete().eq('event_id', event.id).eq('from_id', p.id);
   if (del.error) return fail('저장하지 못했어요. 다시 시도해주세요.', 500);
   if (ids.length) {
-    const ins = await db().from('choices').insert(ids.map((to) => ({ event_id: event.id, from_id: p.id, to_id: to })));
+    // ids 순서가 곧 1·2·3순위. rank 칸이 아직 없으면(SQL 미실행) 순위 없이 저장한다.
+    let ins = await db().from('choices').insert(ids.map((to, i) => ({ event_id: event.id, from_id: p.id, to_id: to, rank: i + 1 })));
+    if (ins.error?.code === '42703' || ins.error?.code === 'PGRST204') ins = await db().from('choices').insert(ids.map((to) => ({ event_id: event.id, from_id: p.id, to_id: to })));
     if (ins.error) return fail('저장하지 못했어요. 다시 시도해주세요.', 500);
   }
   await db().from('participants').update({ choice_done_at: new Date().toISOString() }).eq('id', p.id); // 칸이 없으면 무시된다

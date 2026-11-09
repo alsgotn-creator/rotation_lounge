@@ -457,3 +457,8 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .cls-rv h3{margin:0 0 4px;font-size:16px;font-weight:800}
 .cls-rv textarea{width:100%;margin:10px 0 12px;padding:12px;border-radius:14px;border:1px solid var(--line);background:transparent;color:inherit;font:inherit;font-size:15px;resize:none}
 .cls-rv .btn{position:static;width:100%}
+
+.pp-fab{position:fixed;top:12px;right:12px;z-index:30;border:0;border-radius:999px;padding:8px 14px;background:var(--accbg);color:var(--acc);font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.cls-wine{margin:0 0 120px;padding:18px;border-radius:20px;background:var(--surf)}
+.cls-wine h3{margin:0 0 4px;font-size:16px;font-weight:800}
+.cls-wine .btn{position:static;width:100%;margin-top:12px}
