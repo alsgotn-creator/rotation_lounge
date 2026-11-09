@@ -463,11 +463,24 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .cls-wine h3{margin:0 0 4px;font-size:16px;font-weight:800}
 .cls-wine .btn{position:static;width:100%;margin-top:12px}
 /* 라운지: 이상형 키워드 구름 */
-.idc{margin:28px 0 4px;text-align:center}
-.idc-t{font-size:13px;font-weight:800;color:var(--mute);margin-bottom:10px}
-.idc-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 14px;padding:0 8px}
-.idc-row span{display:inline-block;color:var(--mute);font-weight:700}
-.idc-top{display:block;margin:8px 0;font-size:40px;font-weight:900;letter-spacing:-.04em;background:var(--btn);-webkit-background-clip:text;background-clip:text;color:transparent}
+.idc{margin:22px 16px 0;text-align:center}
+.idc-t{font-size:13px;font-weight:800;color:var(--mute);margin:0 0 8px}
+.idc-card{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 8px;padding:20px 14px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.idc-card span{display:inline-block;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#e9e2ee;font-weight:700;white-space:nowrap}
+.idc-f .idc-card{border-color:rgba(255,143,163,.35);background:rgba(255,143,163,.06)}
+.idc-m .idc-card{border-color:rgba(140,170,255,.35);background:rgba(140,170,255,.06)}
+.idc-card span.hot{border-color:transparent;background:var(--btn);color:var(--btntx);font-weight:900}
+/* 라운지: 캐릭터를 누르면 통통 */
+.poke{background:none;border:0;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+.poke-in{display:block}
+.poke-in.a0{animation:pokeHop .55s ease-out}
+.poke-in.a1{animation:pokeWig .6s ease-in-out}
+.poke-in.a2{animation:pokeSquish .5s ease-out}
+.poke-heart{position:absolute;left:50%;top:0;color:#ff8fa3;font-size:18px;pointer-events:none;animation:pokeHeart .9s ease-out forwards}
+@keyframes pokeHop{0%{transform:none}35%{transform:translateY(-22px) scale(.96,1.06)}60%{transform:translateY(0) scale(1.08,.92)}80%{transform:translateY(-6px)}100%{transform:none}}
+@keyframes pokeWig{0%,100%{transform:none}20%{transform:rotate(-12deg)}45%{transform:rotate(10deg)}70%{transform:rotate(-6deg)}}
+@keyframes pokeSquish{0%{transform:none}30%{transform:scale(1.2,.8)}60%{transform:scale(.88,1.14)}100%{transform:none}}
+@keyframes pokeHeart{0%{opacity:0;transform:translate(-50%,6px) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-34px) scale(1.2)}}
 .lg-home{display:inline-flex;align-items:center;gap:2px;color:var(--mute);font-size:14px;font-weight:700;text-decoration:none;padding:6px 0}
 .lg-home .ic{width:18px;height:18px}
 .enter>b{font-size:16px;font-weight:800}
