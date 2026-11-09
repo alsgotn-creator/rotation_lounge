@@ -1,6 +1,8 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { Character } from '../../../components/Character';
+import { IdealCloud } from '../../../components/IdealCloud';
+import { IDEAL } from '../../../lib/domain/ideal';
 import { PALETTE, phrases } from '../../../lib/domain/loveType';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
@@ -61,6 +63,11 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, recommen
               </div>
             ))}
           </section>}
+
+      {before && <>
+        <IdealCloud title="여자분들이 적은 이상형" lists={IDEAL.f} />
+        <IdealCloud title="남자분들이 적은 이상형" lists={IDEAL.m} />
+      </>}
 
       <div className="ft">
         <div className="lg-mine">
