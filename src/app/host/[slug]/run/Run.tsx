@@ -1,10 +1,10 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '../../../../components/Icon';
 import { FloorPlan } from '../../../../components/FloorPlan';
 import { RoundTimer } from '../../../../components/RoundTimer';
-import type { Round } from '../../../../lib/domain/seating';
+import { notStarted, type Round } from '../../../../lib/domain/seating';
 import type { HostCmd, Moved, Person, Phase } from '../../../../lib/server/run';
 
 type View = {
@@ -46,11 +46,28 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const hoOf = (g: 'f' | 'm', n: number | null) => (n == null ? '번호 없음' : `${g === 'f' ? '여' : '남'}${n}호`);
   const movedText = (moved ?? []).filter((m) => m.to != null).map((m) => `[플러팅 라운지] ${m.name}님, 오늘 번호가 ${hoOf(m.gender, m.to)}로 바뀌었어요. 첫 대화는 ${m.to}번 테이블이에요.`).join('\n\n');
 
+  // 진행 알림: 이번 라운드 롤링페이퍼가 다 모였는지, 최종 선택을 다 냈는지. 완료로 바뀌는 순간 토스트와 진동.
+  const cur = v?.current ?? null;
+  const notesNeed = v && cur ? v.pairs.reduce((s, p) => s + p.f.length * p.m.length * 2, 0) : 0;
+  const notesGot = v && cur ? v.extras.notes.filter((n) => n.round === cur.no).length : 0;
+  const notesShow = !!cur && notesNeed > 0 && (!!cur.closedAt || notesGot > 0);
+  const notesAll = notesShow && notesGot >= notesNeed;
+  const choiceShow = v?.ev.phase === 'choice' && v.extras.total > 0;
+  const choiceAll = choiceShow && v!.extras.done >= v!.extras.total;
+  const was = useRef({ notes: '', choice: false });
+  useEffect(() => {
+    const key = notesAll ? `${cur?.no}` : '';
+    if (key && was.current.notes !== key) { show(`${cur?.no}라운드 롤링페이퍼가 모두 전달됐어요`); navigator.vibrate?.(200); }
+    if (choiceAll && !was.current.choice) { show('모두 최종 선택을 제출했어요'); navigator.vibrate?.(200); }
+    was.current = { notes: key || was.current.notes, choice: choiceAll };
+  }, [notesAll, choiceAll, cur?.no]);
+
   if (!v) return <main className="bd"><p className="ds">불러오는 중…</p></main>;
   const { ev, current } = v;
   const byId = new Map(v.people.map((p) => [p.id, p]));
   const label = (p: Person) => `${p.gender === 'f' ? '여' : '남'}${p.number ?? '-'}호`;
   const open = current && !current.closedAt;
+  const waitStart = !!open && notStarted(current!); // 자리 이동 중: 타이머가 멈춰 있다
   const seated = v.people.filter((p) => p.number != null && !p.excluded);
   const nf = seated.filter((p) => p.gender === 'f').length, nm = seated.filter((p) => p.gender === 'm').length;
 
@@ -67,14 +84,19 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           ))}
         </div>
 
+        {notesShow && <p className={`run-alert${notesAll ? ' ok' : ''}`} role="status">{notesAll ? `✓ ${cur!.no}라운드 롤링페이퍼 모두 전달됐어요` : `${cur!.no}라운드 롤링페이퍼 ${notesGot}/${notesNeed}장 도착`}</p>}
+        {choiceShow && <p className={`run-alert${choiceAll ? ' ok' : ''}`} role="status">{choiceAll ? '✓ 모두 최종 선택을 제출했어요' : `최종 선택 ${v.extras.done}/${v.extras.total}명 제출`}</p>}
+
         <section className="run-card">
           <div className="run-h"><b>{current ? `${current.no}라운드` : '라운드 전'}<em> / {ev.table_count}</em></b>
             {open && <button className="lnk" style={{ margin: 0 }} disabled={busy} onClick={() => send({ type: 'endRound' })}>이번 라운드 끝내기</button>}</div>
           {current && <RoundTimer round={current} offsetMs={offset} />}
-          <div className="btn2" style={{ marginTop: 14, gridTemplateColumns: open ? '1fr 1.6fr' : '1fr' }}>
-            {open && <button className="btn sub" disabled={busy} onClick={() => send({ type: current!.pausedAt ? 'resume' : 'pause' })}>{current!.pausedAt ? '다시 시작' : '일시정지'}</button>}
-            <button className="btn" disabled={busy || (current?.no ?? 0) >= ev.table_count} onClick={() => send({ type: 'nextRound' })}>
-              {!current ? '1라운드 시작' : current.no >= ev.table_count ? '마지막 라운드예요' : '다음 라운드 → 남자 이동'}</button>
+          <div className="btn2" style={{ marginTop: 14, gridTemplateColumns: open && !waitStart ? '1fr 1.6fr' : '1fr' }}>
+            {open && !waitStart && <button className="btn sub" disabled={busy} onClick={() => send({ type: current!.pausedAt ? 'resume' : 'pause' })}>{current!.pausedAt ? '다시 시작' : '일시정지'}</button>}
+            {waitStart
+              ? <button className="btn" disabled={busy} onClick={() => send({ type: 'resume' })}>자리 이동 끝 · 대화 시작</button>
+              : <button className="btn" disabled={busy || (current?.no ?? 0) >= ev.table_count} onClick={() => send({ type: 'nextRound' })}>
+              {!current ? '1라운드 자리 배정' : current.no >= ev.table_count ? '마지막 라운드예요' : '다음 라운드 → 남자 이동'}</button>}
           </div>
         </section>
 
@@ -148,7 +170,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </>}
 
         {v.extras.wine.length > 0 && <>
-          <p className="eb" style={{ marginTop: 26 }}>연말 와인모임 단톡방 신청 ({v.extras.wine.length})</p>
+          <p className="eb" style={{ marginTop: 26 }}>연말 와인모임 메일 안내 신청 ({v.extras.wine.length})</p>
           <div className="people">
             {v.extras.wine.map((w) => (
               <div key={w.email + w.phone} className="person-row"><div><b>{w.gender === 'f' ? '여' : '남'}{w.number}호 {w.name} · {w.age}세 · {w.job}</b><span>{w.phone} · {w.email}</span></div></div>))}

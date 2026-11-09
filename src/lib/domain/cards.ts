@@ -1,10 +1,11 @@
 // 인쇄물(밸런스게임 vol.1·2, 연애 토크 카드)의 카드 원문. "너는? 꼭 되물어주기" 안내는 넣지 않는다.
 export type CardKind = 'balance' | 'talk' | 'scenario';
-export type GameCard = { id: string; kind: CardKind; prompt: string; options: [string, string] | null; hint?: string };
+export type GameCard = { id: string; kind: CardKind; prompt: string; options: string[] };
 
-const b = (id: string, prompt: string, a: string, c: string): GameCard => ({ id, kind: 'balance', prompt, options: [a, c] });
-const t = (id: string, prompt: string, hint?: string): GameCard => ({ id, kind: 'talk', prompt, options: null, hint });
-const s = (id: string, prompt: string): GameCard => ({ id, kind: 'scenario', prompt, options: null });
+// 대화 중에는 타자 칠 여유가 없어서 모든 카드는 고르기만 한다.
+const b = (id: string, prompt: string, ...options: string[]): GameCard => ({ id, kind: 'balance', prompt, options });
+const t = (id: string, prompt: string, ...options: string[]): GameCard => ({ id, kind: 'talk', prompt, options });
+const s = (id: string, prompt: string, ...options: string[]): GameCard => ({ id, kind: 'scenario', prompt, options });
 
 export const KINDS: { kind: CardKind; label: string; sub: string }[] = [
   { kind: 'balance', label: '밸런스 게임', sub: '둘 중 하나만 고른다면?' },
@@ -26,25 +27,24 @@ export const CARDS: GameCard[] = [
   b('b11', '둘 중 하나만 고른다면?', '알아갈수록 좋아지는 스타일', '첫인상에 결정 나는 스타일'),
   b('b12', '사귄 지 3일, 이상형의 고백!', '지금 애인과 끝까지', '이상형에게 간다'),
   b('b13', '1주년을 까먹은 애인에게', '말 안 하고 기다린다', '바로 서운하다고 말한다'),
-  t('t1', '애인이 절대 하지 않았으면 하는 행동은?'),
-  t('t2', '무조건 2개를 포기해야 한다면?', 'MBTI · 키 · 얼굴 · 성격 · 능력 · 자산 · 끌림'),
-  t('t3', '애인의 이성친구, 어디까지 허용 가능?', '① 단체 모임 ② 단둘이 밥 ③ 단둘이 술 ④ 연락도 싫다'),
-  t('t4', '일주일에 데이트는 몇 번이 적당해?', '1번 · 2~3번 · 거의 매일'),
-  t('t5', '애인과 하루 종일 할 수 있는 스킨십은?'),
-  t('t6', '얼굴 포함, 가장 자신 있는 신체 부위는?'),
-  t('t7', '오늘 여기서 끝사랑을 찾았다면, 나는 ______ 하겠다.'),
-  t('t8', '연애·결혼 가치관에서 어렸을 때와 달라진 점이 있다면?'),
-  t('t9', '우리가 연애를 안 하고 있는 이유가 뭘까?'),
-  t('t10', '그나마 사귈 수 있는 사람은?', '모쏠 · 15년 연애한 사람 · 1년에 6번 연애한 사람'),
-  t('t11', '내 연애 스타일은?'),
-  s('s1', '약속에 30분 늦은 애인이 "방금 일어났어"라고 한다. 나는?'),
-  s('s2', '애인 폰에 이성의 "오늘 즐거웠어요" 메시지가 떴다. 나는?'),
-  s('s3', '헤어진 전 애인이 "잘 지내?"라고 연락해 왔다. 나는?'),
-  s('s4', '내 생일에 애인이 친구와의 약속을 먼저 잡았다. 나는?'),
+  t('t1', '애인이 절대 하지 않았으면 하는 행동은?', '거짓말', '연락 두절', '이성과 단둘이 술', '약속 어기기'),
+  t('t2', '하나만 포기해야 한다면?', 'MBTI', '키', '얼굴', '성격', '능력', '자산', '끌림'),
+  t('t3', '애인의 이성친구, 어디까지 괜찮아?', '단체 모임까지', '단둘이 밥까지', '단둘이 술까지', '연락도 싫다'),
+  t('t4', '일주일에 데이트는 몇 번이 적당해?', '1번', '2~3번', '거의 매일'),
+  t('t5', '애인과 하루 종일 할 수 있는 스킨십은?', '손잡기', '팔짱 끼기', '백허그', '어깨에 기대기'),
+  t('t6', '얼굴 포함, 가장 자신 있는 부위는?', '눈', '웃는 입', '손', '어깨', '다리'),
+  t('t7', '오늘 여기서 끝사랑을 찾았다면, 나는?', '바로 연애 시작', '천천히 알아가기', '오늘 고백하기', '친구들에게 자랑'),
+  t('t8', '어렸을 때와 달라진 연애관은?', '외모보다 성격', '조건도 보게 됐다', '결혼 생각이 생겼다', '혼자도 괜찮아졌다'),
+  t('t9', '우리가 연애를 안 하고 있는 이유는?', '만날 기회가 없어서', '눈이 높아서', '일이 바빠서', '혼자가 편해서'),
+  t('t10', '그나마 사귈 수 있는 사람은?', '모쏠', '15년 연애한 사람', '1년에 6번 연애한 사람'),
+  t('t11', '내 연애 스타일은?', '직진형', '밀당형', '친구 같은 연애', '다정한 집사형'),
+  s('s1', '약속에 30분 늦은 애인이 "방금 일어났어"라고 한다. 나는?', '괜찮아, 천천히 와', '오늘 밥은 네가 사', '솔직히 서운하다고 말한다', '그냥 집에 간다'),
+  s('s2', '애인 폰에 이성의 "오늘 즐거웠어요" 메시지가 떴다. 나는?', '바로 물어본다', '모른 척 넘어간다', '나중에 넌지시 묻는다'),
+  s('s3', '헤어진 전 애인이 "잘 지내?"라고 연락해 왔다. 나는?', '답장 안 한다', '짧게 답한다', '애인에게 바로 말한다'),
+  s('s4', '내 생일에 애인이 친구와의 약속을 먼저 잡았다. 나는?', '서운하다고 말한다', '쿨하게 넘어간다', '나도 다른 약속을 잡는다'),
 ];
 
 export const cardById = (id: string) => CARDS.find((c) => c.id === id) ?? null;
-export const ANSWER_MAX = 100;
 
 /** 현재 카드와 다른 카드를 종류 안에서 무작위로 */
 export function drawCard(kind: CardKind, currentId?: string | null, rnd = Math.random): GameCard {

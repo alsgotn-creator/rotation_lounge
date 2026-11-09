@@ -24,7 +24,7 @@ export function characterSrc(shape: Shape, color: number, frame: 'base' | 'smile
 }
 
 // shortcut: 진짜 3모양×16색 그림(계획서 Task 15)이 나오기 전까지는 한 장을 색만 돌리고 비율로 모양을 흉내 낸다.
-const SHAPE_FAKE: Record<Shape, string> = { cloud: 'none', mochi: 'scale(1.1,.9)', drop: 'scale(.9,1.08)' };
+const SHAPE_FAKE: Record<Shape, string> = { cloud: 'none', mochi: 'scale(1.24,.8)', drop: 'scale(.8,1.2)' };
 const PROP_ANCHOR: Record<Shape, { x: number; y: number; w: number }> = {
   cloud: { x: 62, y: 6, w: 30 }, mochi: { x: 60, y: 10, w: 30 }, drop: { x: 58, y: 2, w: 28 },
 };

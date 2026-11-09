@@ -408,13 +408,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .rp-foot{text-align:center;margin:16px 0 0;font-size:13px;font-weight:700;color:var(--mute)}
 
 /* ---------- 페어 게임 ---------- */
-.gm-ping{animation:gmping 1.6s ease-in-out infinite;color:var(--acc)}
-@keyframes gmping{50%{box-shadow:0 0 0 6px rgba(255,143,163,.18)}}
-.gm-scrim{position:fixed;inset:0;z-index:50;background:rgba(5,8,22,.6);display:flex;align-items:flex-end;justify-content:center}
-.gm-sheet{width:100%;max-width:480px;max-height:88vh;overflow:auto;background:var(--sheet);border-radius:28px 28px 0 0;padding:12px 20px 28px;animation:gmup .3s cubic-bezier(.2,.9,.3,1)}
-@keyframes gmup{from{transform:translateY(40px);opacity:0}}
-.gm-grab{display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 16px}
-.gm-kind{margin:0;text-align:center;font-size:13px;font-weight:800;color:var(--acc)}
 .gm-prompt{margin:8px 0 0;text-align:center;font-size:21px;line-height:1.4;font-weight:900;letter-spacing:-.03em;word-break:keep-all}
 .gm-hint{margin:8px 0 0;text-align:center;font-size:13px;color:var(--mute)}
 .gm-opts{margin-top:12px}.gm-opts .opt{justify-content:center;text-align:center;font-size:17px;font-weight:800;min-height:64px}
@@ -429,7 +422,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .cls-rv textarea{width:100%;margin:10px 0 12px;padding:12px;border-radius:14px;border:1px solid var(--line);background:transparent;color:inherit;font:inherit;font-size:15px;resize:none}
 .cls-rv .btn{position:static;width:100%}
 
-.pp-fab{position:fixed;top:12px;right:12px;z-index:30;border:0;border-radius:999px;padding:8px 14px;background:var(--accbg);color:var(--acc);font:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .cls-wine{margin:0 0 120px;padding:18px;border-radius:20px;background:var(--surf)}
 .cls-wine h3{margin:0 0 4px;font-size:16px;font-weight:800}
 .cls-wine .btn{position:static;width:100%;margin-top:12px}
@@ -462,3 +454,24 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .trk-me{position:absolute;bottom:8px;transform:translateX(-50%);transition:left .25s linear}
 .trk.paused .trk-me{opacity:.55}
 h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
+/* 라운드 화면에 펼쳐 둔 같이 해보기 */
+.gm-inline{margin:22px 16px 0;padding:16px;border-radius:24px;background:var(--surf)}
+.gm-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gm-kinds button{height:40px;border:1px solid var(--line);border-radius:999px;background:none;font-size:13px;font-weight:800;cursor:pointer;color:var(--mute)}
+.gm-kinds button.on{background:var(--accbg);color:var(--acc);border-color:transparent}
+.gm-inline .gm-prompt{font-size:18px;margin-top:14px}
+.gm-opts.many{display:grid;grid-template-columns:1fr 1fr;gap:8px}.gm-opts.many .opt{min-height:52px;font-size:15px;margin:0}
+.rnd-wait{margin:10px 16px 0;text-align:center;font-size:14px;font-weight:800;color:var(--acc)}
+/* 진행자 알림 */
+.run-alert{margin:14px 0 0;padding:12px 16px;border-radius:14px;background:var(--surf);font-size:14px;font-weight:800;color:var(--mute)}
+.run-alert.ok{background:var(--accbg);color:var(--acc)}
+/* 롤링페이퍼: 쓴 사람, 글꼴 고르기 */
+.rp-who{margin:0 0 10px;text-align:center;font-size:13px;font-weight:800;color:var(--acc)}
+.rp-fonts{display:flex;gap:6px;overflow-x:auto;margin:0 0 12px;padding-bottom:2px}
+.rp-fonts button{flex:none;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:none;font-size:17px;cursor:pointer;color:var(--mute)}
+.rp-fonts button.on{background:var(--accbg);color:var(--acc);border-color:transparent}
+/* 마무리: 와인모임 가격, 캐릭터 인사 */
+.cls-price{margin:6px 0 0;font-size:15px}.cls-price s{color:var(--mute)}.cls-price b{font-size:20px;color:var(--acc);margin:0 4px}.cls-price em{font-style:normal;font-size:12px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--accbg);color:var(--acc)}
+.cls-bye{display:grid;justify-items:center;gap:8px;margin:28px 0 20px}
+.cls-bubble{position:relative;margin:0;padding:14px 20px;border-radius:20px;background:var(--accbg);color:var(--text);font-weight:800;text-align:center;line-height:1.6}
+.cls-bubble::after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-8px;border:8px solid transparent;border-bottom:0;border-top-color:var(--accbg)}

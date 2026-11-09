@@ -9,7 +9,7 @@ import { Reveal } from './Round';
 const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}호`;
 
 /** 최종 선택: 이성 전원의 캐릭터를 3열로. 0명도 가능, 단계가 끝나기 전까지 고칠 수 있다. */
-export default function Choice({ slug, view, onSaved }: { slug: string; view: PlayView; onSaved: () => void }) {
+export default function Choice({ slug, view, onSaved, onPaper }: { slug: string; view: PlayView; onSaved: () => void; onPaper: () => void }) {
   const choice = view.choice!;
   const [sel, setSel] = useState<string[]>(choice.picks);
   const [busy, setBusy] = useState(false);
@@ -40,6 +40,7 @@ export default function Choice({ slug, view, onSaved }: { slug: string; view: Pl
       <header className="chc-head">
         <h1 className="q">마음이 간 분을<br />골라주세요</h1>
         <p className="ds">누른 순서가 1순위, 2순위, 3순위예요. 서로 고른 경우에만 연결돼요. 아무도 고르지 않아도 괜찮아요.</p>
+        <button className="lnk" style={{ margin: '6px 0 0' }} onClick={onPaper}>롤링페이퍼 다시 보기</button>
         <span className={`chc-count${shake ? ' shake' : ''}`} aria-live="polite">{sel.length} / {choice.max}</span>
       </header>
       <div className="chc-grid">

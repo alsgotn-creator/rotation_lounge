@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import GameSheet from './GameSheet';
 import { Character } from '../../../components/Character';
 import { useNow } from '../../../components/RoundTimer';
-import { elapsedMs, REVEAL_MS } from '../../../lib/domain/seating';
+import { elapsedMs, notStarted, REVEAL_MS } from '../../../lib/domain/seating';
 import { PALETTE } from '../../../lib/domain/loveType';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import type { PlayView, Profile } from '../../../lib/server/play';
@@ -39,8 +39,6 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
 
 export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: string; view: PlayView; offsetMs: number; onRefresh: () => void; me: PublicCard | null }) {
   const round = view.round!;
-  const [gameOpen, setGameOpen] = useState(false);
-  const g = view.game, waiting = !!g && !g.mine; // 상대가 카드를 뽑았고 아직 내가 답 전
   const now = useNow(offsetMs);
   const revealedLocally = elapsedMs(round.timer, now) >= REVEAL_MS;
   const hasProfile = round.partners.some((p) => view.met[p.id]);
@@ -80,6 +78,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
         {chip && <span className="rnd-chip">{chip}</span>}
       </header>
       <Track round={round} offsetMs={offsetMs} me={me} />
+      {notStarted(round.timer) && <p className="rnd-wait">자리를 옮겨 앉아주세요 · 진행자가 시작하면 시간이 흘러가요</p>}
 
       <section className={`pcs${many ? ' many' : ''}`}>
         {round.partners.map((p) => (
@@ -94,12 +93,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
         ))}
       </section>
 
-      {round.partners.length > 0 && (
-        <div className="ft">
-          <button className={`btn sub${waiting ? ' gm-ping' : ''}`} onClick={() => setGameOpen(true)}>{waiting ? '✦ 카드가 도착했어요' : '✦ 같이 해보기'}</button>
-        </div>
-      )}
-      {gameOpen && <GameSheet slug={slug} game={g} onClose={() => setGameOpen(false)} onChange={onRefresh} />}
+      {round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} />}
     </main>
   );
 }

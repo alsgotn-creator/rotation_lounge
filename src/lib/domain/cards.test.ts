@@ -4,12 +4,12 @@ import { CARDS, drawCard, KINDS } from './cards';
 describe('cards', () => {
   it('원문을 모두 옮겼고 되묻기 안내는 없다', () => {
     expect(CARDS.length).toBeGreaterThan(20);
-    expect(CARDS.some((c) => /되물어/.test(c.prompt + (c.hint ?? '')))).toBe(false);
+    expect(CARDS.some((c) => /되물어/.test(c.prompt + c.options.join('')))).toBe(false);
     expect(new Set(CARDS.map((c) => c.id)).size).toBe(CARDS.length);
   });
-  it('밸런스는 선택지 2개, 나머지는 자유 답변', () => {
+  it('모든 카드는 고르기만 한다: 밸런스는 2개, 나머지는 3~7개', () => {
     CARDS.filter((c) => c.kind === 'balance').forEach((c) => expect(c.options).toHaveLength(2));
-    CARDS.filter((c) => c.kind !== 'balance').forEach((c) => expect(c.options).toBeNull());
+    CARDS.filter((c) => c.kind !== 'balance').forEach((c) => { expect(c.options.length).toBeGreaterThanOrEqual(3); expect(c.options.length).toBeLessThanOrEqual(7); });
   });
   it('다시 뽑으면 같은 종류의 다른 카드', () => {
     for (const { kind } of KINDS) {

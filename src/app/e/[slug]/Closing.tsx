@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
-import { Icon } from '../../../components/Icon';
 import type { PublicCard } from '../../../lib/domain/lounge';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
@@ -10,13 +9,14 @@ const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}
 const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} prop={c.prop as Prop} size={size} delay={(c.number ?? 0) * 0.6} />;
 
 /** 마무리: 결과는 호스트가 열어줄 때까지 기다리고, 열리면 서로 고른 사람만 보여준다. 롤링페이퍼는 언제든 볼 수 있다. */
-function ReviewBox({ slug }: { slug: string }) {
+function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   const [text, setText] = useState('');
   const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
   const send = async () => {
     setSt('busy');
     const r = await fetch(`/api/e/${slug}/review`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ body: text }) }).catch(() => null);
     setSt(r?.ok ? 'done' : 'err');
+    if (r?.ok) onDone();
   };
   return (
     <section className="cls-rv">
@@ -29,18 +29,21 @@ function ReviewBox({ slug }: { slug: string }) {
   );
 }
 
-function WineBox({ slug }: { slug: string }) {
+function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
   const join = async () => {
     setSt('busy');
     const r = await fetch(`/api/e/${slug}/wine`, { method: 'POST' }).catch(() => null);
     setSt(r?.ok ? 'done' : 'err');
+    if (r?.ok) onDone();
   };
   return (
     <section className="cls-wine">
       <h3>연말 와인모임</h3>
-      <p className="ds">연말모임은 모임 때 자세히 안내할게요. 오늘 일정이 안 맞아도 기수제로 이어지니, 연말에 오실 분은 꼭 와주세요.</p>
-      <button className="btn" disabled={st === 'busy' || st === 'done'} onClick={join}>{st === 'done' ? '✓ 단톡방 참가를 신청했어요' : '연말와인모임 단톡방 참가하기'}</button>
+      <p className="cls-price"><s>50,000원</s> <b>35,000원</b> <em>30% 할인</em></p>
+      <p className="ds">여기서 참가 신청하면 30% 할인된 가격으로 결제할 수 있어요. 지인과 함께 오면 각각 50% 할인도 도와드려요.</p>
+      <p className="ds">연말 와인모임은 한 테이블당 3:3으로 진행돼요. 절대 많은 인원과 함께하지 않아요.</p>
+      <button className="btn" disabled={st === 'busy' || st === 'done'} onClick={join}>{st === 'done' ? '✓ 메일로 안내해드릴게요' : '연말 와인모임 메일로 안내받기'}</button>
       {st === 'done' && <p className="preview">호스트에게 이름·연락처·이메일이 전달됐어요.</p>}
       {st === 'err' && <p className="preview">신청하지 못했어요. 다시 시도해주세요.</p>}
     </section>
@@ -49,13 +52,15 @@ function WineBox({ slug }: { slug: string }) {
 
 export default function Closing({ view, me, slug }: { view: PlayView; me: PublicCard | null; slug: string }) {
   const matches = view.result?.matches ?? [];
+  const [thanks, setThanks] = useState(false); // 후기나 와인모임 신청을 하면 캐릭터가 인사하며 마무리
+  const bye = () => { setThanks(true); setTimeout(() => document.getElementById('cls-bye')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50); };
 
   return (
     <main className="cls" style={{ paddingTop: 40 }}>
       {!view.resultsOpen && <>
         <div className="cls-wait" aria-hidden="true">{me && <Face c={me} size={150} />}</div>
-        <h2 className="q" style={{ textAlign: 'center' }}>결과는 진행자가<br />곧 공개해요</h2>
-        <p className="ds" style={{ textAlign: 'center' }}>오늘 만나서 반가웠어요.</p>
+        <h2 className="q" style={{ textAlign: 'center' }}>오늘 만나서<br />반가웠어요</h2>
+        <p className="ds" style={{ textAlign: 'center' }}>결과는 호스트가 매칭된 분들에게만<br />1시간 이내에 메일로 보내드려요.</p>
       </>}
 
       {view.resultsOpen && matches.length > 0 && <>
@@ -75,9 +80,16 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
         <p className="ds" style={{ textAlign: 'center' }}>그래도 오늘 만나서 반가웠어요.</p>
       </>}
 
-      <ReviewBox slug={slug} />
+      <ReviewBox slug={slug} onDone={bye} />
 
-      <WineBox slug={slug} />
+      <WineBox slug={slug} onDone={bye} />
+
+      {thanks && (
+        <section id="cls-bye" className="cls-bye">
+          <p className="cls-bubble">오늘 정말 고생 많으셨어요!<br />조심히 들어가세요 ♡</p>
+          {me && <Face c={me} size={130} />}
+        </section>
+      )}
     </main>
   );
 }

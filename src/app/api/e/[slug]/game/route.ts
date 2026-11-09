@@ -3,7 +3,7 @@ import { db } from '../../../../../lib/server/supabase';
 import { getEvent } from '../../../../../lib/server/signup';
 import { invitedFromCookie, participantOf } from '../../../../../lib/server/invite';
 import { computePlay } from '../../../../../lib/server/play';
-import { ANSWER_MAX, drawCard, KINDS, type CardKind } from '../../../../../lib/domain/cards';
+import { drawCard, KINDS, type CardKind } from '../../../../../lib/domain/cards';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -32,8 +32,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   if (b.type === 'answer') {
     if (!view.game) return fail('먼저 카드를 뽑아주세요.', 409);
     const text = String(b.answer ?? '').trim();
-    if (text.length < 1 || text.length > ANSWER_MAX) return fail(`1~${ANSWER_MAX}자로 적어주세요.`);
-    if (view.game.options && !view.game.options.includes(text)) return fail('선택지에서 골라주세요.');
+    if (!view.game.options.includes(text)) return fail('선택지에서 골라주세요.');
     const ins = await db().from('game_answers').insert({ ...key, participant_id: p.id, answer: text });
     if (ins.error?.code === '23505') return fail('이미 답했어요.', 409);
     if (ins.error) return fail('저장하지 못했어요. 다시 시도해주세요.', 500);

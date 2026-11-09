@@ -7,7 +7,7 @@ import { containsContact, NOTE_MAX } from '../../../../../lib/domain/notes';
 
 const fail = (message: string, status = 400, code?: string) => NextResponse.json({ ok: false, message, code }, { status });
 
-// 롤링페이퍼 남기기/건너뛰기. 지금 써야 하는 것(pending)과 일치할 때만 저장한다.
+// 롤링페이퍼 남기기 (건너뛰기 없음). 지금 써야 하는 것(pending)과 일치할 때만 저장한다.
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const event = await getEvent({ slug: (await params).slug });
   if (!event) return fail('행사를 찾지 못했어요.', 404);
@@ -17,11 +17,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
   const b = await req.json().catch(() => ({}));
   const round = Number(b.round), toId = String(b.toId ?? '');
-  const raw = b.body === null || b.body === undefined ? null : String(b.body).trim();
-  if (raw !== null) {
-    if (raw.length < 1 || raw.length > NOTE_MAX) return fail(`1~${NOTE_MAX}자로 적어주세요.`);
-    if (containsContact(raw)) return fail('연락처로 보이는 내용이 있어요', 400, 'contact_info');
-  }
+  const raw = String(b.body ?? '').trim();
+  if (raw.length < 1 || raw.length > NOTE_MAX) return fail(`1~${NOTE_MAX}자로 적어주세요.`);
+  if (containsContact(raw)) return fail('연락처로 보이는 내용이 있어요', 400, 'contact_info');
   const { pendingAll } = await computePlay(event.id, p.id);
   if (!pendingAll.some((x) => x.round === round && x.toId === toId)) return fail('이미 남겼거나, 지금 쓸 수 없는 쪽지예요.', 409);
 

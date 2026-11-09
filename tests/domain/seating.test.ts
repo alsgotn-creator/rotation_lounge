@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { elapsedMs, ordinal, pairs, partnersOf, revealReached, tableOf, type Seated } from '../../src/lib/domain/seating';
+import { elapsedMs, notStarted, ordinal, pairs, partnersOf, revealReached, tableOf, type Seated } from '../../src/lib/domain/seating';
 
 const W = (n: number): Seated => ({ id: `f${n}`, gender: 'f', number: n });
 const M = (n: number): Seated => ({ id: `m${n}`, gender: 'm', number: n });
@@ -65,4 +65,16 @@ describe('timer', () => {
   test('paused at 5:00 never reaches reveal while paused', () => expect(revealReached({ ...r, pausedAt: 300_000 }, 999_999)).toBe(false));
   test('stays revealed after close', () => expect(revealReached({ ...r, closedAt: 430_000 }, 2_000_000)).toBe(true));
   test('closed before 7 min → never revealed', () => expect(revealReached({ ...r, closedAt: 400_000 }, 2_000_000)).toBe(false));
+});
+
+describe('round starts paused after the seat move', () => {
+  test('no time passes until the host starts it', () => {
+    const r = { no: 2, startedAt: 1000, pausedAt: 1000, pausedTotalMs: 0, durationSec: 720, closedAt: null };
+    expect(notStarted(r)).toBe(true);
+    expect(elapsedMs(r, 1000 + 5 * 60e3)).toBe(0);
+    const started = { ...r, pausedAt: null, pausedTotalMs: 5 * 60e3 };
+    expect(notStarted(started)).toBe(false);
+    expect(elapsedMs(started, 1000 + 6 * 60e3)).toBe(60e3);
+    expect(notStarted({ ...started, pausedAt: 1000 + 7 * 60e3 })).toBe(false); // 중간 일시정지는 시작 전이 아니다
+  });
 });

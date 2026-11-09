@@ -76,7 +76,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
     case 'nextRound': {
       if (current && current.no >= ev.table_count) return no(`마지막 라운드(${ev.table_count})예요. 최종 선택으로 넘어가 주세요.`);
       await closeOpen(eventId, open, now);
-      const { error } = await db().from('rounds').insert({ event_id: eventId, no: (current?.no ?? 0) + 1, started_at: iso, duration_sec: ev.round_duration_sec });
+      const { error } = await db().from('rounds').insert({ event_id: eventId, no: (current?.no ?? 0) + 1, started_at: iso, paused_at: iso, duration_sec: ev.round_duration_sec }); // 자리 이동 동안은 멈춰 두고, 진행자가 '대화 시작'(resume)을 누르면 흐른다
       if (error) return no('라운드를 시작하지 못했어요. 다시 눌러주세요.');
       if (ev.phase !== 'talk') await db().from('events').update({ phase: 'talk' }).eq('id', eventId);
       return { ok: true };
