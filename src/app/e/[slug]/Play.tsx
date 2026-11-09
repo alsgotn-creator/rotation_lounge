@@ -43,6 +43,6 @@ export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: s
     ? <button className="pp-fab" onClick={() => setPaperOpen(true)}>롤링페이퍼{v.paper.notes.length > 0 ? ` ${v.paper.notes.length}` : ''}</button> : null;
   if (v?.phase === 'closing') return <Closing slug={slug} view={v} me={lounge.cards.find((c) => c.me) ?? null} />;
   if (v?.phase === 'choice' && v.choice) return <Choice key="choice" slug={slug} view={v} onSaved={load} />;
-  if (v?.round) return <>{fab}<Round key={v.round.no} slug={slug} view={v} offsetMs={offset} onRefresh={load} /></>;
+  if (v?.round) return <>{fab}<Round key={v.round.no} slug={slug} view={v} offsetMs={offset} onRefresh={load} me={lounge.cards.find((c) => c.me) ?? null} /></>;
   return <>{fab}<Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} recommendation={v?.recommendation ?? null} /></>;
 }

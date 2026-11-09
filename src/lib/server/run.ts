@@ -16,7 +16,7 @@ export type Person = { id: string; gender: 'f' | 'm'; number: number | null; exc
 
 export async function loadRun(eventId: string) {
   const [{ data: ev }, { data: rr }, { data: ps }] = await Promise.all([
-    db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks,screen_key,recommendation_open,results_open').eq('id', eventId).single(),
+    db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks,recommendation_open,results_open').eq('id', eventId).single(),
     db().from('rounds').select('*').eq('event_id', eventId).order('no'),
     db().from('participants').select('id,gender,number,excluded,nickname,shape,prop,love_type,keywords,applications(name)').eq('event_id', eventId).order('number', { nullsFirst: false }),
   ]);
@@ -164,7 +164,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
   }
 }
 
-/** 호스트만 보는 최종 선택 현황·매칭 커플·쪽지 (참가자/큰 화면 응답에는 절대 넣지 않는다). 표가 아직 없으면 빈 값. */
+/** 호스트만 보는 최종 선택 현황·매칭 커플·쪽지 (참가자 응답에는 절대 넣지 않는다). 표가 아직 없으면 빈 값. */
 export async function loadHostExtras(eventId: string, people: Person[]) {
   const [ch0, nt, dn, ap, wn] = await Promise.all([
     db().from('choices').select('from_id,to_id,rank').eq('event_id', eventId).order('rank'),

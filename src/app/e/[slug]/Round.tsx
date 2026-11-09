@@ -7,22 +7,17 @@ import { elapsedMs, REVEAL_MS } from '../../../lib/domain/seating';
 import { PALETTE } from '../../../lib/domain/loveType';
 import type { Prop, Shape } from '../../../lib/domain/register';
 import type { PlayView, Profile } from '../../../lib/server/play';
+import type { PublicCard } from '../../../lib/domain/lounge';
 
 const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}호`;
-const mmss = (ms: number) => { const s = Math.ceil(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
-const R = 96, C = 2 * Math.PI * R;
-
-function Ring({ round, offsetMs }: { round: NonNullable<PlayView['round']>; offsetMs: number }) {
+/** 남은 시간은 숫자 없이 막대로만: 내 캐릭터가 왼쪽에서 출발해 시간이 끝나면 오른쪽 끝에 도착한다. */
+function Track({ round, offsetMs, me }: { round: NonNullable<PlayView['round']>; offsetMs: number; me: PublicCard | null }) {
   const now = useNow(offsetMs);
-  const total = round.timer.durationSec * 1000, el = elapsedMs(round.timer, now), left = total - el;
-  const label = left <= 0 ? '종료' : round.timer.pausedAt ? '일시정지' : '남은 시간';
+  const pct = Math.min(1, elapsedMs(round.timer, now) / (round.timer.durationSec * 1000)) * 100;
   return (
-    <div className={`ring${left <= 0 ? ' up' : ''}${round.timer.pausedAt ? ' paused' : ''}`} role="timer" aria-label={`남은 시간 ${mmss(Math.max(left, 0))}`}>
-      <svg viewBox="0 0 220 220" aria-hidden="true">
-        <circle cx="110" cy="110" r={R} className="ring-bg" />
-        <circle cx="110" cy="110" r={R} className="ring-fg" strokeDasharray={C} strokeDashoffset={C * Math.min(el / total, 1)} transform="rotate(-90 110 110)" />
-      </svg>
-      <div className="ring-in"><small>{label}</small><b>{left <= 0 ? '0:00' : mmss(left)}</b></div>
+    <div className={`trk${pct >= 100 ? ' up' : ''}${round.timer.pausedAt ? ' paused' : ''}`} role="progressbar" aria-label="대화 시간" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
+      <div className="trk-bar"><i style={{ width: `${pct}%` }} /></div>
+      {me && <span className="trk-me" style={{ left: `${pct}%` }}><Character shape={me.shape as Shape} color={me.color} prop={me.prop as Prop} size={48} /></span>}
     </div>
   );
 }
@@ -42,7 +37,7 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
   );
 }
 
-export default function Round({ slug, view, offsetMs, onRefresh }: { slug: string; view: PlayView; offsetMs: number; onRefresh: () => void }) {
+export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: string; view: PlayView; offsetMs: number; onRefresh: () => void; me: PublicCard | null }) {
   const round = view.round!;
   const [gameOpen, setGameOpen] = useState(false);
   const g = view.game, waiting = !!g && !g.mine; // 상대가 카드를 뽑았고 아직 내가 답 전
@@ -84,24 +79,20 @@ export default function Round({ slug, view, offsetMs, onRefresh }: { slug: strin
         <h1>Round {round.no}<em> / {round.total}</em></h1>
         {chip && <span className="rnd-chip">{chip}</span>}
       </header>
-      <Ring round={round} offsetMs={offsetMs} />
+      <Track round={round} offsetMs={offsetMs} me={me} />
 
-      {round.partners.length === 0 ? (
-        <div className="rest"><h2 className="q" style={{ textAlign: 'center' }}>이번 라운드는<br />쉬어가요</h2><p className="ds" style={{ textAlign: 'center' }}>잠깐 숨 돌리고, 다음 라운드를 기다려요.</p></div>
-      ) : (
-        <section className={`pcs${many ? ' many' : ''}`}>
-          {round.partners.map((p) => (
-            <article className="pc" key={p.id}>
-              <Character shape={p.shape as Shape} color={p.color} prop={p.prop as Prop} size={many ? 92 : 128} />
-              <b className="pc-ho">{ho(p.gender, p.number)}</b>
-              <div className="lg-kw">{p.keywords.map((k) => <span key={k}>{k}</span>)}</div>
-              {view.met[p.id]
-                ? <Reveal p={view.met[p.id]} fresh={fresh.has(p.id)} />
-                : <p className="pc-wait">나이 · 직업 · 사는 곳 · MBTI는 <b>7분째</b>에 공개돼요</p>}
-            </article>
-          ))}
-        </section>
-      )}
+      <section className={`pcs${many ? ' many' : ''}`}>
+        {round.partners.map((p) => (
+          <article className="pc" key={p.id}>
+            <Character shape={p.shape as Shape} color={p.color} prop={p.prop as Prop} size={many ? 92 : 128} />
+            <b className="pc-ho">{ho(p.gender, p.number)}</b>
+            <div className="lg-kw">{p.keywords.map((k) => <span key={k}>{k}</span>)}</div>
+            {view.met[p.id]
+              ? <Reveal p={view.met[p.id]} fresh={fresh.has(p.id)} />
+              : <p className="pc-wait">나이 · 직업 · 사는 곳 · MBTI는 <b>7분째</b>에 공개돼요</p>}
+          </article>
+        ))}
+      </section>
 
       {round.partners.length > 0 && (
         <div className="ft">

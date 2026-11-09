@@ -8,7 +8,7 @@ import type { Round } from '../../../../lib/domain/seating';
 import type { HostCmd, Moved, Person, Phase } from '../../../../lib/server/run';
 
 type View = {
-  ev: { slug: string; phase: Phase; table_count: number; per_table: number; recommendation_open: boolean; results_open: boolean; round_duration_sec: number; max_picks: number; screen_key: string };
+  ev: { slug: string; phase: Phase; table_count: number; per_table: number; recommendation_open: boolean; results_open: boolean; round_duration_sec: number; max_picks: number };
   current: Round | null; people: Person[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
   extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
@@ -51,7 +51,6 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const byId = new Map(v.people.map((p) => [p.id, p]));
   const label = (p: Person) => `${p.gender === 'f' ? '여' : '남'}${p.number ?? '-'}호`;
   const open = current && !current.closedAt;
-  const screenUrl = typeof window === 'undefined' ? '' : `${location.origin}/screen/${slug}?k=${encodeURIComponent(ev.screen_key)}`;
   const seated = v.people.filter((p) => p.number != null && !p.excluded);
   const nf = seated.filter((p) => p.gender === 'f').length, nm = seated.filter((p) => p.gender === 'm').length;
 
@@ -167,11 +166,6 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           </div>
         </>}
 
-        <p className="eb" style={{ marginTop: 26 }}>큰 화면</p>
-        <div className="btn2">
-          <button className="btn sub" onClick={async () => { try { await navigator.clipboard.writeText(screenUrl); show('큰 화면 링크를 복사했어요'); } catch { show(screenUrl); } }}>링크 복사</button>
-          <a className="btn" href={screenUrl} target="_blank" rel="noreferrer">큰 화면 열기</a>
-        </div>
       </div>
       {moved && <>
         <div className="dim" onClick={() => setMoved(null)} />

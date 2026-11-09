@@ -328,9 +328,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .rt-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--btn);transition:width .25s linear}
 .rt-bar em{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--warn)}
 .rt-bar em span{position:absolute;top:18px;left:50%;transform:translateX(-50%);white-space:nowrap;font-style:normal;font-size:11px;font-weight:800;color:var(--warn)}
-.rt.big{padding:20px 24px 34px;text-align:center}
-.rt.big .rt-l{font-size:20px}.rt.big .rt-n{font-size:120px}
-.rt.big .rt-bar{height:12px}.rt.big .rt-bar em span{font-size:16px;top:24px}
 .fp{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:10px}
 .fp-col{display:flex;flex-direction:column;gap:10px}
 .fp-col:first-child{justify-content:flex-end}
@@ -348,20 +345,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .person-row div{flex:1;min-width:0}.person-row b{display:block;font-size:14px}.person-row span{font-size:12px;color:var(--mute)}
 .mini-in{width:56px;height:36px;border-radius:18px;border:0;background:var(--surf2);text-align:center;font-weight:700;font-size:14px}
 /* 큰 화면 (세로 모니터) */
-.app:has(.scr-big){max-width:none}
-.scr-big{min-height:100svh;padding:3vh 4vw;background:radial-gradient(120% 70% at 50% 20%,rgba(255,143,163,.1),transparent 70%)}
-.sb-head{display:flex;justify-content:space-between;align-items:center;font-size:2.2vh}
-.sb-head .logo{font-size:2.6vh}.sb-head b{font-size:2.2vh;color:var(--acc)}
-.sb-round{margin:3vh 0 1vh;text-align:center;font-size:4vh;font-weight:900;font-variant-numeric:tabular-nums}
-.sb-round em{font-style:normal;color:var(--dim)}
-.scr-big .fp{gap:6vw;margin-top:5vh}
-.scr-big .fp-t{padding:3.4vh 1vh 1.4vh;border-radius:2vh}
-.scr-big .fp-no{font-size:2vh}.scr-big .fp-seat{font-size:1.9vh}
-.sb-rest{text-align:center;margin-top:3vh;font-size:2vh;color:var(--mute);font-weight:700}
-.sb-move{text-align:center;margin-top:3vh;font-size:2.2vh;color:var(--mute);font-weight:700}
-.sb-title{text-align:center;margin:8vh 0 0;font-size:6vh;font-weight:900;letter-spacing:-.04em}
-.sb-lounge{display:flex;flex-wrap:wrap;justify-content:center;gap:4vh 5vw;margin-top:6vh}
-.sb-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh}
 
 /* ---------- 대화 라운드 (참가자) ---------- */
 .rnd{padding-bottom:120px}
@@ -369,15 +352,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .rnd-head h1{margin:0;font-size:30px;font-weight:900;letter-spacing:-.04em}
 .rnd-head h1 em{font-style:normal;color:var(--dim);font-size:20px}
 .rnd-chip{display:inline-block;margin-top:8px;padding:6px 14px;border-radius:15px;background:var(--accbg);color:#ffd1d9;font-size:13px;font-weight:800}
-.ring{position:relative;width:220px;height:220px;margin:18px auto 0}
-.ring svg{width:100%;height:100%}
-.ring-bg{fill:none;stroke:var(--line);stroke-width:10}
-.ring-fg{fill:none;stroke:var(--acc);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
-.ring-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring-in small{font-size:13px;font-weight:800;color:var(--mute)}
-.ring-in b{font-size:54px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
-.ring.up .ring-in b,.ring.up .ring-in small{color:var(--acc)}
-.ring.paused .ring-in b{opacity:.5}
 .pcs{padding:14px 20px 0}
 .pc{display:flex;flex-direction:column;align-items:center;margin-top:10px;padding:16px 14px 18px;border-radius:24px;background:var(--surf);border:1px solid var(--line)}
 .pcs.many .pc{flex-direction:column}
@@ -392,7 +366,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .rv-grid b{font-size:16px;font-weight:800}
 .rv-love{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .rv-love p{margin:0;font-size:12px;font-weight:600;line-height:1.7;color:#e9e2ee}
-.rest{margin-top:34px;padding:0 24px}
 /* ---------- 롤링페이퍼 쓰기 ---------- */
 .nw{padding:34px 20px 170px}
 .nw-top{display:grid;place-items:center}
@@ -426,8 +399,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .cls-match p{margin:0;font-size:14px;color:var(--mute)}
 .lg-rec{margin:10px 0 0;font-size:13px;font-weight:700;color:var(--mute)}
 .lg-rec.on{color:#ffd1d9}.lg-rec b{color:var(--acc)}
-.sb-prog{margin-top:5vh;text-align:center;font-size:9vh;font-weight:900;font-variant-numeric:tabular-nums}
-.sb-prog em{font-style:normal;font-size:3vh;color:var(--mute)}
 /* 롤링페이퍼 편지지 */
 .rp{padding:8px 16px 40px}
 .rp-sheet{position:relative;min-height:560px;border-radius:12px;background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0 31px,rgba(122,38,56,.07) 31px 32px),#fbf3e3;box-shadow:0 24px 50px -24px rgba(0,0,0,.7);overflow:hidden;transform:rotate(-.4deg)}
@@ -484,3 +455,9 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .lg-home{display:inline-flex;align-items:center;gap:2px;color:var(--mute);font-size:14px;font-weight:700;text-decoration:none;padding:6px 0}
 .lg-home .ic{width:18px;height:18px}
 .enter>b{font-size:16px;font-weight:800}
+/* 라운드 시간: 캐릭터가 막대 위를 왼쪽→오른쪽으로 */
+.trk{position:relative;margin:26px 34px 0;height:60px}
+.trk-bar{position:absolute;left:0;right:0;bottom:6px;height:8px;border-radius:4px;background:var(--line)}
+.trk-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--btn);transition:width .25s linear}
+.trk-me{position:absolute;bottom:8px;transform:translateX(-50%);transition:left .25s linear}
+.trk.paused .trk-me{opacity:.55}
