@@ -48,7 +48,11 @@ export type HostCmd =
   | { type: 'compact' }
   | { type: 'openResults'; open: boolean }
   | { type: 'openRecommendation'; open: boolean }
-  | { type: 'hideNote'; noteId: string; hidden: boolean };
+  | { type: 'hideNote'; noteId: string; hidden: boolean }
+  | { type: 'reset'; what: ResetWhat };
+
+/** 리허설 뒤 처음으로 되돌리기. rounds는 쪽지·게임까지 지운다 (라운드 번호가 겹치면 쪽지를 다시 못 쓴다). */
+export type ResetWhat = 'rounds' | 'notes' | 'choices' | 'closing' | 'all';
 
 export type Moved = { name: string; gender: 'f' | 'm'; from: number | null; to: number | null };
 type Result = { ok: true; moved?: Moved[]; tableCount?: number } | { ok: false; message: string };
@@ -157,6 +161,21 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
     case 'hideNote':
       await db().from('notes').update({ hidden: !!cmd.hidden }).eq('id', cmd.noteId).eq('event_id', eventId);
       return { ok: true };
+    case 'reset': {
+      const w = cmd.what, all = w === 'all';
+      if (!['rounds', 'notes', 'choices', 'closing', 'all'].includes(w)) return no('알 수 없는 초기화예요.');
+      const del = (table: string) => db().from(table).delete().eq('event_id', eventId);
+      if (all || w === 'rounds') { await del('game_answers'); await del('game_plays'); await del('rounds'); }
+      if (all || w === 'rounds' || w === 'notes') await del('notes');
+      if (all || w === 'choices') { await del('choices'); await db().from('participants').update({ choice_done_at: null }).eq('event_id', eventId); }
+      if (all || w === 'closing') { await del('reviews'); await del('wine_signups'); }
+      const patch: Record<string, unknown> = {};
+      if (all || w === 'rounds') patch.phase = 'before';
+      if (all || w === 'choices') patch.results_open = false;
+      if (all) patch.recommendation_open = false;
+      if (Object.keys(patch).length) await db().from('events').update(patch).eq('id', eventId);
+      return { ok: true };
+    }
     case 'exclude': {
       await db().from('participants').update({ excluded: cmd.excluded }).eq('id', cmd.participantId).eq('event_id', eventId);
       return { ok: true };

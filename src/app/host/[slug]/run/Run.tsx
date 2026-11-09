@@ -5,7 +5,7 @@ import { Icon } from '../../../../components/Icon';
 import { FloorPlan } from '../../../../components/FloorPlan';
 import { RoundTimer } from '../../../../components/RoundTimer';
 import { notStarted, type Round } from '../../../../lib/domain/seating';
-import type { HostCmd, Moved, Person, Phase } from '../../../../lib/server/run';
+import type { HostCmd, Moved, Person, Phase, ResetWhat } from '../../../../lib/server/run';
 
 type View = {
   ev: { slug: string; phase: Phase; table_count: number; per_table: number; recommendation_open: boolean; results_open: boolean; round_duration_sec: number; max_picks: number };
@@ -42,6 +42,9 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
     await load();
     return j;
   };
+  const reset = async (what: ResetWhat, msg: string) => { if (window.confirm(`${msg}
+되돌릴 수 없어요. 초기화할까요?`)) { const j = await send({ type: 'reset', what }); if (j.ok) show('초기화했어요'); } };
+  const ResetBtn = ({ what, msg }: { what: ResetWhat; msg: string }) => <button className="lnk run-reset" disabled={busy} onClick={() => reset(what, msg)}>초기화</button>;
   const compact = async () => { const j = await send({ type: 'compact' }); if (j.ok) setMoved(j.moved); };
   const hoOf = (g: 'f' | 'm', n: number | null) => (n == null ? '번호 없음' : `${g === 'f' ? '여' : '남'}${n}호`);
   const movedText = (moved ?? []).filter((m) => m.to != null).map((m) => `[플러팅 라운지] ${m.name}님, 오늘 번호가 ${hoOf(m.gender, m.to)}로 바뀌었어요. 첫 대화는 ${m.to}번 테이블이에요.`).join('\n\n');
@@ -89,7 +92,10 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
 
         <section className="run-card">
           <div className="run-h"><b>{current ? `${current.no}라운드` : '라운드 전'}<em> / {ev.table_count}</em></b>
-            {open && <button className="lnk" style={{ margin: 0 }} disabled={busy} onClick={() => send({ type: 'endRound' })}>이번 라운드 끝내기</button>}</div>
+            <span style={{ display: 'flex', gap: 12 }}>
+              {open && <button className="lnk" style={{ margin: 0 }} disabled={busy} onClick={() => send({ type: 'endRound' })}>이번 라운드 끝내기</button>}
+              {current && <ResetBtn what="rounds" msg="라운드·같이해보기·롤링페이퍼를 모두 지우고 '시작 전'으로 돌아가요." />}
+            </span></div>
           {current && <RoundTimer round={current} offsetMs={offset} />}
           <div className="btn2" style={{ marginTop: 14, gridTemplateColumns: open && !waitStart ? '1fr 1.6fr' : '1fr' }}>
             {open && !waitStart && <button className="btn sub" disabled={busy} onClick={() => send({ type: current!.pausedAt ? 'resume' : 'pause' })}>{current!.pausedAt ? '다시 시작' : '일시정지'}</button>}
@@ -153,7 +159,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </div>
 
         {(ev.phase === 'choice' || ev.phase === 'closing') && <>
-          <p className="eb" style={{ marginTop: 26 }}>최종 선택 · {v.extras.done}/{v.extras.total}명 완료</p>
+          <p className="eb run-eb" style={{ marginTop: 26 }}>최종 선택 · {v.extras.done}/{v.extras.total}명 완료<ResetBtn what="choices" msg="모든 참가자의 최종 선택을 지우고 결과 공개를 꺼요." /></p>
           <div className="people">
             {v.extras.picks.map((x) => { const p = byId.get(x.id)!; return (
               <div key={x.id} className="person-row" style={{ alignItems: 'flex-start' }}>
@@ -170,7 +176,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </>}
 
         {v.extras.wine.length > 0 && <>
-          <p className="eb" style={{ marginTop: 26 }}>연말 와인모임 메일 안내 신청 ({v.extras.wine.length})</p>
+          <p className="eb run-eb" style={{ marginTop: 26 }}>연말 와인모임 메일 안내 신청 ({v.extras.wine.length})<ResetBtn what="closing" msg="와인모임 신청과 후기를 모두 지워요." /></p>
           <div className="people">
             {v.extras.wine.map((w) => (
               <div key={w.email + w.phone} className="person-row"><div><b>{w.gender === 'f' ? '여' : '남'}{w.number}호 {w.name} · {w.age}세 · {w.job}</b><span>{w.phone} · {w.email}</span></div></div>))}
@@ -178,7 +184,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </>}
 
         {v.extras.notes.length > 0 && <>
-          <p className="eb" style={{ marginTop: 26 }}>롤링페이퍼 검토 · {v.extras.notes.length}장</p>
+          <p className="eb run-eb" style={{ marginTop: 26 }}>롤링페이퍼 검토 · {v.extras.notes.length}장<ResetBtn what="notes" msg="모든 롤링페이퍼를 지워요. 끝난 라운드의 쪽지를 참가자가 다시 써야 해요." /></p>
           <div className="people">
             {v.extras.notes.map((n) => (
               <div key={n.id} className={`person-row${n.hidden ? ' off' : ''}`} style={{ alignItems: 'flex-start' }}>
@@ -188,6 +194,8 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           </div>
         </>}
 
+        <button className="btn sub" style={{ marginTop: 36, height: 46, fontSize: 15 }} disabled={busy}
+          onClick={() => reset('all', '라운드·같이해보기·롤링페이퍼·최종 선택·후기·와인 신청을 모두 지우고 공개 설정을 꺼요. 참가자 등록과 호 번호는 그대로예요.')}>전체 초기화 · 리허설 전으로</button>
       </div>
       {moved && <>
         <div className="dim" onClick={() => setMoved(null)} />
