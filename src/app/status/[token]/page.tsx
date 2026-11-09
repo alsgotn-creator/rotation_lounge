@@ -64,7 +64,7 @@ export default async function Status({ params }: { params: Promise<{ token: stri
         </div>}
 
         {(st === 'new' || st === 'held' || st === 'awaiting_payment') && <StatusActions token={token} cancelOnly />}
-        {st === 'confirmed' && <p className="preview">취소·환불은 {BUSINESS.email}로 문의해주세요 (3일 전까지 전액 · 2일 전~전날 50% · 당일 없음)</p>}
+        {st === 'confirmed' && <p className="preview">취소·환불은 {BUSINESS.email}로 문의해주세요 (모임 4일 전까지만 환불 가능)</p>}
       </div>
     </main>
   );

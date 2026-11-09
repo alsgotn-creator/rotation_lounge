@@ -90,9 +90,8 @@ export default async function Landing() {
         <p className="eb">참가비</p>
         <div className="price">
           <div className="amt">{won(PRICE)}<small>1인</small></div>
-          <div className="kv"><span>3일 전까지 취소</span><b>전액 환불</b></div>
-          <div className="kv"><span>2일 전~전날 취소</span><b>50% 환불</b></div>
-          <div className="kv"><span>당일 취소</span><b>환불 없음</b></div>
+          <div className="kv"><span>모임 4일 전까지 취소</span><b>환불 가능</b></div>
+          <div className="kv"><span>그 이후 취소</span><b>환불 불가</b></div>
         </div>
       </section>
 
