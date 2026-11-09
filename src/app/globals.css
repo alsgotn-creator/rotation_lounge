@@ -470,3 +470,4 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .idc-top{display:block;margin:8px 0;font-size:40px;font-weight:900;letter-spacing:-.04em;background:var(--btn);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lg-home{display:inline-flex;align-items:center;gap:2px;color:var(--mute);font-size:14px;font-weight:700;text-decoration:none;padding:6px 0}
 .lg-home .ic{width:18px;height:18px}
+.enter>b{font-size:16px;font-weight:800}

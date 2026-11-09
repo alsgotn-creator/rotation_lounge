@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Icon } from '../components/Icon';
+import EnterCard from './EnterCard';
 import { PRICE, won, yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
 import { listSessions } from '../lib/server/signup';
 import { db, hasDb } from '../lib/server/supabase';
@@ -48,6 +49,11 @@ export default async function Landing() {
       </section>
 
       <section className="lsec" style={{ paddingTop: 8 }}>
+        <p className="eb">라운지 입장</p>
+        <EnterCard />
+      </section>
+
+      <section className="lsec">
         <p className="eb">이런 자리예요</p>
         <h3>한 저녁에 일곱 명과<br />천천히 대화해요</h3>
         <div className="fact" style={{ marginTop: 10 }}><i><Icon name="clock" /></i><div><b>15분씩, 일곱 번</b><span>자리를 옮기며 한 명씩 깊게 이야기해요</span></div></div>
@@ -80,8 +86,8 @@ export default async function Landing() {
         <h3>신청은 1분,<br />호스트가 승인하면 입장해요</h3>
         <div className="stp">
           <div><b>신청하기</b><span>이름, 출생연도, 연락처만 받아요</span></div>
-          <div><b>호스트 승인</b><span>보통 하루 안에 나만의 입장 링크를 보내드려요</span></div>
-          <div><b>사전 등록하기</b><span>링크로 들어가 나를 소개하는 질문에 답해요</span></div>
+          <div><b>호스트 승인</b><span>보통 하루 안에 승인돼요. 그다음엔 신청한 이메일만 넣으면 입장해요</span></div>
+          <div><b>사전 등록하기</b><span>라운지에 들어가 나를 소개하는 질문에 답해요</span></div>
           <div><b>당일, 라운지에서 만나요</b><span>휴대폰 하나만 들고 오세요</span></div>
         </div>
       </section>
