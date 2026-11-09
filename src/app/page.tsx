@@ -42,7 +42,7 @@ export default async function Landing() {
         {next && <div className="bottom">
           <Link className="ticket" href={`/apply?s=${next.id}`}>
             <div className="dt">{next.mon}<b>{next.day}</b>{next.dow}</div>
-            <div className="tx"><strong>{next.time} · {next.place} 라운지</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · <em>{next.seatsF <= next.seatsM ? `여성 ${next.seatsF}` : `남성 ${next.seatsM}`}자리 남음</em></div>
+            <div className="tx"><strong>{next.time} · {next.place} 라운지</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · <em>여성 {next.seatsF} · 남성 {next.seatsM}자리 남음</em></div>
             <Icon name="next" />
           </Link>
         </div>}
