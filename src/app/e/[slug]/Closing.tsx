@@ -39,7 +39,7 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   };
   return (
     <section className="cls-wine">
-      <h3>연말 와인모임</h3>
+      <h3>연말 와인 무제한 모임</h3>
       <p className="cls-price"><s>70,000원</s> <b>60,000원</b> <em>14% 할인</em></p>
       <p className="ds">지인과 함께 오면 각각 30% 할인 (49,000원)</p>
       <ul className="cls-wine-list">
@@ -48,6 +48,7 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
         <li>관상게임 · 익명게임 · 올해 마무리 이야기</li>
         <li>인원이 모이지 않으면 진행되지 않아요</li>
       </ul>
+      <p className="ds" style={{ margin: '0 0 14px', textAlign: 'center', fontWeight: 800 }}>옷깃만 믿고 오세요 😊</p>
       <button className="btn cls-wine-btn" disabled={st === 'busy' || st === 'done'} onClick={join}>
         {st === 'done' ? '✓ 메일로 안내해드릴게요' : <>와인 모임 관심있어요!<small>메일로 안내받기</small></>}
       </button>
