@@ -461,3 +461,4 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .trk-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--btn);transition:width .25s linear}
 .trk-me{position:absolute;bottom:8px;transform:translateX(-50%);transition:left .25s linear}
 .trk.paused .trk-me{opacity:.55}
+h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}

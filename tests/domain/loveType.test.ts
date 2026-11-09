@@ -3,12 +3,22 @@ import { loveType, PALETTE, phrases, recommend, QUESTIONS } from '../../src/lib/
 import { registrationError } from '../../src/lib/domain/register';
 
 describe('love type', () => {
-  test('15 questions, reversed #3 #7 #10 #14', () => {
+  const poleA = QUESTIONS.map((q) => (q.reversed ? 1 : 5)), poleB = poleA.map((v) => 6 - v);
+  test('15 questions, reversed #2 #8 #9 #12', () => {
     expect(QUESTIONS).toHaveLength(15);
-    expect(QUESTIONS.flatMap((q, i) => (q.reversed ? [i + 1] : []))).toEqual([3, 7, 10, 14]);
+    expect(QUESTIONS.flatMap((q, i) => (q.reversed ? [i + 1] : []))).toEqual([2, 8, 9, 12]);
   });
-  test('all 5s → 0 (reversed items flipped)', () => expect(loveType(Array(15).fill(5))).toBe(0));
-  test('all 1s → 15', () => expect(loveType(Array(15).fill(1))).toBe(15));
+  test('every question fits one line (≤ 12 chars without spaces)', () => {
+    for (const q of QUESTIONS) expect(q.text.replace(/\s/g, '').length, q.text).toBeLessThanOrEqual(12);
+  });
+  test('pole A answers → 0, pole B → 15', () => {
+    expect(loveType(poleA)).toBe(0);
+    expect(loveType(poleB)).toBe(15);
+  });
+  test('questions without an axis never change the type', () => {
+    for (const a of [0, 1, 2, 3]) expect(QUESTIONS.some((q) => q.axis === a)).toBe(true);
+    expect(loveType(poleA.map((v, i) => (QUESTIONS[i].axis === null ? 6 - v : v)))).toBe(0);
+  });
   test('exact 3 goes to pole A', () => expect(loveType(Array(15).fill(3))).toBe(0));
   test('palette has 16 distinct colors', () => expect(new Set(PALETTE).size).toBe(16));
   test('phrases follow bits', () => expect(phrases(0b0101)).toEqual(['자주 연락하며 곁에 있고 싶어요', '천천히, 은근하게 다가가요', '둘만의 아늑한 데이트가 좋아요', '지금 이 순간에 집중해요']));

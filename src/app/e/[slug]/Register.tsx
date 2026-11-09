@@ -132,7 +132,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
 
         {isQ && <>
           <p className="qno">{qi + 1} / {QUESTIONS.length}</p>
-          <h2 className="q" style={{ marginTop: 8 }}>{QUESTIONS[qi].text}</h2>
+          <h2 className="q one" style={{ marginTop: 8 }}>{QUESTIONS[qi].text}</h2>
           <div className="scale" role="radiogroup" aria-label="얼마나 그런가요">
             {DOT.map((d, i) => (
               <button type="button" key={i} role="radio" aria-checked={answers[qi] === i + 1} aria-label={['전혀 아니에요', '아닌 편이에요', '보통이에요', '그런 편이에요', '완전 그래요'][i]}

@@ -1,22 +1,23 @@
 // 연애 컬러 16유형 (계획서 Task 2, 스펙 §5)
 export type Axis = 0 | 1 | 2 | 3; // 거리감 · 표현 · 데이트 · 미래
 
-export const QUESTIONS: { text: string; axis: Axis; reversed: boolean }[] = [
-  { text: '연인과는 하루에도 여러 번 연락하는 게 좋아요.', axis: 0, reversed: false },
-  { text: '주말은 대부분 연인과 함께 보내고 싶어요.', axis: 0, reversed: false },
-  { text: '연애 중에도 혼자만의 시간이 꼭 필요해요.', axis: 0, reversed: true },
-  { text: '연인의 친구들과도 자주 어울리고 싶어요.', axis: 0, reversed: false },
-  { text: '좋아하는 마음은 바로 표현하는 편이에요.', axis: 1, reversed: false },
-  { text: '서운한 일이 생기면 그날 바로 이야기해요.', axis: 1, reversed: false },
-  { text: '말보다 행동으로 마음을 보여주는 편이에요.', axis: 1, reversed: true },
-  { text: '먼저 연락하거나 고백하는 게 어렵지 않아요.', axis: 1, reversed: false },
-  { text: '집에서 영화 보며 쉬는 데이트가 제일 좋아요.', axis: 2, reversed: false },
-  { text: '새로운 맛집이나 장소를 찾아다니는 게 좋아요.', axis: 2, reversed: true },
-  { text: '계획 없이 동네를 산책하는 데이트가 좋아요.', axis: 2, reversed: false },
-  { text: '연애를 시작할 때 결혼 가능성도 생각해요.', axis: 3, reversed: false },
-  { text: '1~2년 뒤 함께할 계획을 이야기하는 게 좋아요.', axis: 3, reversed: false },
-  { text: '미래보다 지금 함께 즐거운 게 더 중요해요.', axis: 3, reversed: true },
-  { text: '돈 관리나 사는 곳 같은 현실 얘기도 일찍 나누고 싶어요.', axis: 3, reversed: false },
+/** 한 줄에 들어가게 짧게 (테스트가 길이를 지킨다). axis null = 연애 컬러에는 안 들어가고 '가장 비슷한 사람' 추천에만 쓰인다. */
+export const QUESTIONS: { text: string; axis: Axis | null; reversed: boolean }[] = [
+  { text: '연락은 자주 할수록 좋아요', axis: 0, reversed: false },
+  { text: '혼자만의 시간이 꼭 필요해요', axis: 0, reversed: true },
+  { text: '취미도 같이 하고 싶어요', axis: 0, reversed: false },
+  { text: '좋으면 먼저 다가가요', axis: 1, reversed: false },
+  { text: '서운하면 바로 말해요', axis: 1, reversed: false },
+  { text: '표현은 많을수록 좋아요', axis: 1, reversed: false },
+  { text: '집 데이트가 제일 편해요', axis: 2, reversed: false },
+  { text: '주말엔 새로운 곳에 가요', axis: 2, reversed: true },
+  { text: '여행은 계획 없이 떠나요', axis: 2, reversed: true },
+  { text: '결혼은 꼭 하고 싶어요', axis: 3, reversed: false },
+  { text: '연애할 때 결혼도 생각해요', axis: 3, reversed: false },
+  { text: '지금 즐거운 게 더 중요해요', axis: 3, reversed: true },
+  { text: '외모보다 대화가 먼저예요', axis: null, reversed: false },
+  { text: '술자리는 즐기는 편이에요', axis: null, reversed: false },
+  { text: '연인의 이성 친구, 괜찮아요', axis: null, reversed: false },
 ];
 
 export const normalize = (answers: number[]) => answers.map((a, i) => (QUESTIONS[i].reversed ? 6 - a : a));
