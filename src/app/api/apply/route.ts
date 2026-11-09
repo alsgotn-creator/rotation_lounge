@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db, hasDb, PHOTO_BUCKET } from '../../../lib/server/supabase';
+import { db, hasDb } from '../../../lib/server/supabase';
 import { hash, newToken } from '../../../lib/server/auth';
 import { eventSeats, getEvent } from '../../../lib/server/signup';
 import { isBirth, isEmail, isName, isPhone, formatPhone } from '../../../lib/signup/validate';
@@ -31,7 +31,6 @@ export async function POST(req: Request) {
     avoid = (JSON.parse(String(f.get('avoid') ?? '[]')) as { name: string; note: string }[]).slice(0, 5)
       .map((a) => ({ name: String(a.name ?? '').trim().slice(0, 20), note: String(a.note ?? '').trim().slice(0, 40) })).filter((a) => a.name);
   } catch { return fail('지인 정보를 다시 확인해주세요.'); }
-  const photos = f.getAll('photos').filter((p): p is File => p instanceof File && p.size > 0);
 
   const event = await getEvent({ id: eventId });
   if (!event) return fail('일정을 찾지 못했어요.');
@@ -44,28 +43,14 @@ export async function POST(req: Request) {
   if (!isPhone(phone)) return fail('휴대폰 번호를 확인해주세요.');
   if (!isEmail(email)) return fail('이메일을 확인해주세요.');
   if (job.length < 2) return fail('하는 일을 적어주세요.');
-  if (photos.length < 1 || photos.length > 3) return fail('사진을 1~3장 올려주세요.');
-  if (photos.some((p) => !p.type.startsWith('image/') || p.size > 3_000_000)) return fail('사진은 3MB 이하 이미지만 올릴 수 있어요.');
 
   const id = crypto.randomUUID();
-  const paths: string[] = [];
-  for (const [i, p] of photos.entries()) {
-    const path = `${event.id}/${id}/${i}.jpg`;
-    const { error } = await db().storage.from(PHOTO_BUCKET).upload(path, p, { contentType: p.type });
-    if (error) {
-      if (paths.length) await db().storage.from(PHOTO_BUCKET).remove(paths);
-      return fail('사진을 올리지 못했어요. 다시 시도해주세요.', 500);
-    }
-    paths.push(path);
-  }
-
   const statusToken = newToken();
   const { error } = await db().from('applications').insert({
     id, event_id: event.id, gender, name, birth_year: Number(birth), phone, email, job,
-    photo_paths: paths, avoid, status_token_hash: hash(statusToken),
+    avoid, status_token_hash: hash(statusToken),
   });
   if (error) {
-    await db().storage.from(PHOTO_BUCKET).remove(paths);
     return fail('신청을 저장하지 못했어요. 다시 시도해주세요.', 500);
   }
   return NextResponse.json({ ok: true, statusToken });

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../../components/Icon';
@@ -9,7 +9,7 @@ import { birthError, digits, formatPhone, isBirth, isEmail, isName, isPhone } fr
 
 type Gender = '' | 'f' | 'm';
 type Avoid = { name: string; note: string };
-const STEPS = 7;
+const STEPS = 6;
 const DOMAINS = ['@gmail.com', '@naver.com', '@kakao.com', '@daum.net'];
 const JOBS = ['개발자', '교사', '간호사', '마케터', '공무원'];
 
@@ -25,7 +25,6 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [job, setJob] = useState('');
-  const [photos, setPhotos] = useState<(Photo | null)[]>([null, null, null]);
   const [avoidMode, setAvoidMode] = useState<'' | 'no' | 'yes'>('');
   const [avoid, setAvoid] = useState<Avoid[]>([]);
   const [draft, setDraft] = useState<Avoid>({ name: '', note: '' });
@@ -34,30 +33,13 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const [done, setDone] = useState<string | null>(null); // 신청 내역 토큰
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
-  const slotRef = useRef(0);
 
   const s = sessions.find((x) => x.id === sessionId);
   const go = (n: number) => { setStep(n); window.scrollTo(0, 0); };
   // shortcut: 브라우저 뒤로가기는 단계가 아니라 페이지 단위로 동작함. 실제 오픈 전 history 연동 고려.
   const back = () => (step === 0 ? router.push('/') : go(step - 1));
 
-  useEffect(() => () => photos.forEach((p) => p && URL.revokeObjectURL(p.url)), []); // eslint-disable-line react-hooks/exhaustive-deps
-
   if (done) return <Done email={email} token={done} />;
-
-  const pickPhoto = (i: number) => { slotRef.current = i; fileRef.current?.click(); };
-  const onFile = async (f: File | undefined) => {
-    if (!f) return;
-    const blob = await shrink(f).catch(() => f);
-    setPhotos((ps) => {
-      const n = [...ps];
-      const i = n[slotRef.current] ? slotRef.current : n.findIndex((p) => !p);
-      if (n[i]) URL.revokeObjectURL(n[i]!.url);
-      n[i] = { url: URL.createObjectURL(blob), blob };
-      return n;
-    });
-  };
 
   const submit = async () => {
     if (!s || sending) return;
@@ -65,7 +47,6 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
     const fd = new FormData();
     Object.entries({ eventId: s.id, gender, name: name.trim(), birth, phone, email, job: job.trim(), avoid: JSON.stringify(avoidMode === 'yes' ? avoid : []) })
       .forEach(([k, v]) => fd.append(k, v));
-    photos.forEach((p) => p && fd.append('photos', p.blob, 'photo.jpg'));
     try {
       const r = await fetch('/api/apply', { method: 'POST', body: fd });
       const j = await r.json().catch(() => ({ ok: false, message: '잠시 뒤에 다시 시도해주세요.' }));
@@ -74,7 +55,6 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
     } catch { setErr('인터넷 연결을 확인하고 다시 시도해주세요.'); }
     finally { setSending(false); }
   };
-  const photoCount = photos.filter(Boolean).length;
 
   // 단계별 다음 버튼 가능 여부
   const bErr = s ? birthError(birth, s.birthFrom, s.birthTo) : null;
@@ -82,7 +62,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const canNext = [
     !!s, !!gender,
     basicOk[basic],
-    isEmail(email), job.trim().length >= 2, photoCount >= 1,
+    isEmail(email), job.trim().length >= 2,
     avoidMode === 'no' || (avoidMode === 'yes' && avoid.length > 0),
   ][step];
 
@@ -148,13 +128,14 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         </>}
 
         {step === 3 && <>
-          <h2 className="q">안내 메일을 받을<br />이메일을 알려주세요</h2>
+          <h2 className="q">매칭 결과를 받을<br />이메일을 알려주세요</h2>
+          <p className="ds">행사가 끝난 뒤, 매칭이 됐는지 안 됐는지 이 메일로 알려드리려고 받아요.</p>
           <label className="fld"><span>이메일</span>
             <input autoFocus type="email" inputMode="email" autoComplete="email" placeholder="example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value.trim())} /></label>
           {!email.includes('@') && <div className="chips">
             {DOMAINS.map((d) => <button type="button" key={d} onClick={() => setEmail((email || '') + d)}>{d}</button>)}
           </div>}
-          <p className="hint"><Icon name="lock" />신청 안내 말고는 메일을 보내지 않아요</p>
+          <p className="hint"><Icon name="lock" />매칭 결과 안내 말고는 메일을 보내지 않아요</p>
         </>}
 
         {step === 4 && <>
@@ -166,22 +147,6 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         </>}
 
         {step === 5 && <>
-          <h2 className="q">얼굴이 잘 보이는<br />사진을 올려주세요</h2>
-          <p className="ds">한 장은 꼭, 두 장 더는 원하면요.</p>
-          <input ref={fileRef} className="sr" type="file" accept="image/*" onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
-          <div className="ph">
-            {photos.map((p, i) => (
-              <button type="button" key={i} className={`slot${i === 0 ? ' big' : ''}${p ? ' filled' : ''}`} onClick={() => pickPhoto(i)}
-                aria-label={p ? `${i + 1}번째 사진 바꾸기` : `${i + 1}번째 사진 추가`}>
-                {p ? <><img src={p.url} alt="" /><span className="chg">바꾸기</span></> : <>{i === 0 && <span className="req">필수</span>}<Icon name="plus" />{i === 0 ? '사진 올리기' : '추가'}</>}
-              </button>
-            ))}
-          </div>
-          <div className="mini"><span><Icon name="check" />정면 얼굴</span><span><Icon name="check" />최근 6개월</span><span className="no"><Icon name="x" />선글라스·단체 사진</span></div>
-          <div className="safe"><Icon name="lock" /><div>사진은 <b>호스트만</b> 봐요. 다른 참가자에게 보여주지 않고, 행사 30일 뒤 지워요.</div></div>
-        </>}
-
-        {step === 6 && <>
           <h2 className="q">마주치고 싶지 않은<br />지인이 있나요?</h2>
           <p className="ds">적어주시면 같은 날 배정하지 않아요.</p>
           <div className="yn">
@@ -205,7 +170,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         </>}
 
         {/* 일정·성별은 고르면 바로 넘어가서 버튼이 필요 없음 */}
-        {step >= 2 && !(step === 6 && avoidMode === '') && (
+        {step >= 2 && !(step === 5 && avoidMode === '') && (
           <div className="ft"><button className="btn" type="submit" disabled={!canNext}>{step === 2 && basic < 2 ? '확인' : '다음'}</button></div>
         )}
       </form>
@@ -215,7 +180,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t">
           <div className="grab" />
           <h3 id="sheet-t">이대로 신청할까요?</h3>
-          <p className="ds">지금은 돈을 내지 않아요. 호스트가 확인한 뒤 입금 안내를 보내드려요.</p>
+          <p className="ds">호스트가 신청을 확인(승인)하면 라운지에 입장할 수 있게 해드려요.</p>
           <dl className="sum">
             {([
               ['일정', `${s.dateLabel} ${s.time}`, 0],
@@ -223,7 +188,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
               ['휴대폰', phone, 2],
               ['이메일', email, 3],
               ['하는 일', job.trim(), 4],
-              ['사진 · 지인', `${photoCount}장 · ${avoidMode === 'yes' ? `${avoid.length}명` : '없음'}`, 5],
+              ['피하고 싶은 지인', avoidMode === 'yes' ? `${avoid.length}명` : '없음', 5],
             ] as const).map(([k, v, to]) => (
               <button type="button" key={k} onClick={() => { setSheet(false); go(to); }} aria-label={`${k} 고치기`}><dt>{k}</dt><dd>{v}</dd></button>
             ))}
@@ -238,18 +203,6 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   );
 }
 
-type Photo = { url: string; blob: Blob };
-
-/** 긴 변 1280px JPEG로 줄여서 올린다 (업로드 용량·속도) */
-async function shrink(f: File): Promise<Blob> {
-  const img = await createImageBitmap(f);
-  const k = Math.min(1, 1280 / Math.max(img.width, img.height));
-  const c = document.createElement('canvas');
-  c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-  c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
-  return new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error('toBlob'))), 'image/jpeg', 0.82));
-}
-
 function Done({ email, token }: { email: string; token: string }) {
   const [copied, setCopied] = useState(false);
   const link = `${typeof window === 'undefined' ? '' : window.location.origin}/status/${token}`;
@@ -258,7 +211,7 @@ function Done({ email, token }: { email: string; token: string }) {
     <main className="fin">
       <div className="big"><Icon name="check" /></div>
       <h2 className="q">신청을 마쳤어요</h2>
-      <p className="ds">호스트가 확인하면 입금 안내를 보내드려요.<br />아래 <b>내 신청 내역 링크</b>를 꼭 저장해주세요.</p>
+      <p className="ds">호스트가 승인하면 라운지에 입장할 수 있어요.<br />아래 <b>내 신청 내역 링크</b>를 꼭 저장해주세요.</p>
       <div className="card" style={{ paddingBottom: 18 }}>
         <p className="ds" style={{ margin: 0, fontSize: 13 }}>내 신청 내역 링크</p>
         <p style={{ margin: '6px 0 12px', fontSize: 13, fontWeight: 700, wordBreak: 'break-all' }}>{link}</p>
@@ -267,7 +220,7 @@ function Done({ email, token }: { email: string; token: string }) {
       <div className="card"><div className="tl">
         <div className="done"><i /><span><b>신청 완료</b><small>{email}</small></span></div>
         <div className="now"><i /><span><b>호스트 확인 중</b><small>보통 하루 안에 끝나요</small></span></div>
-        <div><i /><span><b>입금하고 입장 링크 받기</b><small>입금이 확인되면 나만의 라운지 링크를 드려요</small></span></div>
+        <div><i /><span><b>승인 후 라운지 입장</b><small>호스트가 승인하면 나만의 라운지 링크를 드려요</small></span></div>
       </div></div>
       <div className="ft"><Link className="btn" href={`/status/${token}`}>신청 내역 보기</Link><Link className="lnk" href="/">처음으로</Link></div>
     </main>

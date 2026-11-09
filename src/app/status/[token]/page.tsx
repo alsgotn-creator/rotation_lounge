@@ -23,7 +23,7 @@ export default async function Status({ params }: { params: Promise<{ token: stri
   const st = app.status;
 
   const head = {
-    new: { badge: '확인 중', title: <>호스트가 신청을<br />확인하고 있어요</>, desc: <>보통 하루 안에 끝나요. 확인되면 입금 안내를 보내드려요.</> },
+    new: { badge: '확인 중', title: <>호스트가 신청을<br />확인하고 있어요</>, desc: <>보통 하루 안에 끝나요. 승인되면 라운지에 입장할 수 있어요.</> },
     held: { badge: '대기', title: <>잠시 대기 중이에요</>, desc: <>성비를 맞추는 중이에요. 자리가 나면 바로 알려드려요.</> },
     awaiting_payment: { badge: '입금 대기', title: <>{won(event.price)}을<br />입금해주세요</>, desc: <><b>{app.payment_due ? kDate(app.payment_due) : '안내받은 날'}까지</b> 입금하면 자리가 확정돼요.</> },
     confirmed: { badge: '확정', title: app.number != null ? <>당신은 {app.gender === 'f' ? '여자' : '남자'} {app.number}호예요</> : <>자리가 확정됐어요.<br />라운지에서 만나요</>, desc: <>첫 대화는 <b>{app.number}번 테이블</b>에서 시작해요. 호스트가 보내드린 <b>나만의 입장 링크</b>로 사전 등록을 해주세요.</> },
@@ -59,7 +59,7 @@ export default async function Status({ params }: { params: Promise<{ token: stri
 
         {st !== 'cancelled' && <div className="tl" style={{ marginTop: 22 }}>
           <div className={cls(0)}><i /><span><b>{st === 'held' ? '대기 중' : '호스트 확인'}</b><small>신청을 확인해요</small></span></div>
-          <div className={cls(1)}><i /><span><b>입금</b><small>입금이 확인되면 입장 링크를 드려요</small></span></div>
+          <div className={cls(1)}><i /><span><b>승인</b><small>호스트가 승인하면 입장 링크를 드려요</small></span></div>
           <div className={cls(2)}><i /><span><b>확정 · 사전 등록</b><small>나만의 링크로 라운지에 들어와요</small></span></div>
         </div>}
 

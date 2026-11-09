@@ -3,7 +3,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
-import { ACCOUNT, won } from '../../../lib/signup/data';
 import type { AppStatus, Session } from '../../../lib/signup/rules';
 
 export type Row = {
@@ -14,12 +13,12 @@ export type Row = {
 type Ev = { id: string; slug: string; applyOpen: boolean; capacity: number; tables: number; perTable: number; price: number };
 
 const TABS: [string, string, AppStatus[]][] = [
-  ['new', '새 신청', ['new']], ['wait', '입금 대기', ['awaiting_payment']], ['ok', '확정', ['confirmed']], ['etc', '대기·취소', ['held', 'cancelled']],
+  ['new', '새 신청', ['new']], ['ok', '확정', ['confirmed']], ['etc', '대기·취소', ['held', 'cancelled']],
 ];
 const STATUS_KO: Record<AppStatus, string> = { new: '새 신청', held: '대기', awaiting_payment: '입금 대기', confirmed: '확정', cancelled: '취소' };
 const ACTIONS: Record<AppStatus, [string, string][]> = {
-  new: [['hold', '대기로'], ['approve', '확정하고 입금 안내']],
-  held: [['cancel', '취소'], ['approve', '확정하고 입금 안내']],
+  new: [['hold', '대기로'], ['approve', '승인 · 입장 링크']],
+  held: [['cancel', '취소'], ['approve', '승인 · 입장 링크']],
   awaiting_payment: [['hold', '대기로'], ['paid', '입금 확인 · 입장 링크']],
   confirmed: [['cancel', '참가 취소'], ['relink', '입장 링크 다시 만들기']],
   cancelled: [['restore', '새 신청으로 되돌리기']],
@@ -47,13 +46,9 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
     const j = await res.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
     setBusy(false);
     if (!j.ok) return show(j.message);
-    if (action === 'approve') setMsg({
-      title: `${r.name}님께 보낼 입금 안내`,
-      text: `[플러팅 라운지] ${r.name}님, ${session.dateLabel} ${session.time} 자리를 잡아뒀어요!\n\n${kDue(j.paymentDue)}까지 참가비 ${won(event.price)}을 보내주세요.\n${ACCOUNT.number ? `${ACCOUNT.bank} ${ACCOUNT.number} (${ACCOUNT.holder})\n` : ''}보내는 분 이름: ${r.name}\n\n입금이 확인되면 나만의 라운지 입장 링크를 보내드려요.`,
-    });
-    else if (j.inviteToken) setMsg({
+    if (j.inviteToken) setMsg({
       title: `${r.name}님께 보낼 입장 링크`,
-      text: `[플러팅 라운지] ${r.name}님, 입금 확인됐어요. 자리가 확정됐어요!\n오늘 ${r.name}님은 ${r.gender === 'f' ? '여자' : '남자'} ${j.number}호예요.\n\n아래 링크로 사전 등록을 해주세요 (약 5분).\n${location.origin}/e/${event.slug}/join/${j.inviteToken}\n\n이 링크는 ${r.name}님 전용이에요. 다른 사람과 공유하지 말아주세요.`,
+      text: `[플러팅 라운지] ${r.name}님, 승인됐어요. 자리가 확정됐어요!\n오늘 ${r.name}님은 ${r.gender === 'f' ? '여자' : '남자'} ${j.number}호예요.\n\n아래 링크로 사전 등록을 해주세요 (약 5분).\n${location.origin}/e/${event.slug}/join/${j.inviteToken}\n\n이 링크는 ${r.name}님 전용이에요. 다른 사람과 공유하지 말아주세요.`,
     });
     else { show(`${r.name}님: ${STATUS_KO[j.status as AppStatus]}`); setOpenId(null); }
     router.refresh();
@@ -78,11 +73,11 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
     return (
       <main>
         <div className="nb"><button className="bk" aria-label="뒤로" onClick={() => setOpenId(null)}><Icon name="back" /></button><div className="tt">신청자</div></div>
-        <div className="pics">
+        {open.photos.length > 0 && <div className="pics">
           {[0, 1, 2].map((i) => open.photos[i]
             ? <a key={i} href={open.photos[i]} target="_blank" rel="noreferrer" style={{ display: 'block', borderRadius: 16, background: `center/cover url("${open.photos[i]}")` }} aria-label={`사진 ${i + 1} 크게 보기`} />
             : <div key={i} style={{ background: 'var(--surf)' }} />)}
-        </div>
+        </div>}
         <div className="bd" style={{ paddingTop: 16 }}>
           <span className="badge">{STATUS_KO[open.status]}{open.number != null && ` · ${open.gender === 'f' ? '여' : '남'}${open.number}호`}</span>
           <h2 className="q" style={{ fontSize: 22, marginTop: 10 }}>{open.name} <small className="ds" style={{ fontSize: 14 }}>{open.gender === 'f' ? '여' : '남'} · {open.birthYear}년생</small></h2>
@@ -128,7 +123,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
         <div className="seat">
           {(['f', 'm'] as const).map((g) => {
             const v = filled(g);
-            return <div key={g}><span>{g === 'f' ? '여성' : '남성'} (입금 대기+확정)</span><b>{v}<em> / {event.capacity}</em></b>
+            return <div key={g}><span>{g === 'f' ? '여성' : '남성'} (확정)</span><b>{v}<em> / {event.capacity}</em></b>
               <i style={{ background: `linear-gradient(90deg,var(--acc) ${(v / event.capacity) * 100}%,var(--line) 0)` }} /></div>;
           })}
         </div>

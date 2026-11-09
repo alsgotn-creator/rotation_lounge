@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import { db } from '../../../../../lib/server/supabase';
 import { hash, isHost, newToken } from '../../../../../lib/server/auth';
 import { getEvent } from '../../../../../lib/server/signup';
-import { paymentDue, pickNumber, seatsLeft, type AppStatus, type Gender } from '../../../../../lib/signup/rules';
+import { pickNumber, seatsLeft, type AppStatus, type Gender } from '../../../../../lib/signup/rules';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
 // 어떤 상태에서 어떤 버튼이 가능한지
 const FROM: Record<string, AppStatus[]> = {
-  approve: ['new', 'held'],          // → 입금 대기
+  approve: ['new', 'held'],          // → 바로 확정 + 입장 링크 + 호 번호 (입금 단계 없음)
   paid: ['awaiting_payment'],        // → 확정 + 입장 링크
   relink: ['confirmed'],             // 입장 링크 새로 만들기 (이전 링크는 못 씀)
   hold: ['new', 'awaiting_payment'], // → 대기
@@ -36,16 +36,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const { data: rows } = await db().from('applications').select('gender,status').eq('event_id', event.id);
     if (seatsLeft(event.capacity_per_gender, (rows ?? []) as { gender: Gender; status: AppStatus }[], app.gender) === 0)
       return fail('이 성별은 자리가 다 찼어요. 대기로 두세요.');
-    patch.status = 'awaiting_payment';
-    patch.payment_due = paymentDue(now, event.starts_at, event.payment_due_days);
   }
-  if (action === 'paid' || action === 'relink') {
+  if (action === 'approve' || action === 'paid' || action === 'relink') {
     inviteToken = newToken();
     patch.status = 'confirmed';
     patch.invite_token_hash = hash(inviteToken);
   }
   // 참가 확정 때 호 번호를 무작위로 (같은 성별의 빈 번호 중에서). 1라운드는 같은 번호끼리 같은 테이블.
-  if (action === 'paid' && app.number == null) {
+  if ((action === 'approve' || action === 'paid') && app.number == null) {
     const { data: rows } = await db().from('applications').select('number').eq('event_id', event.id).eq('gender', app.gender).not('number', 'is', null);
     const n = pickNumber((rows ?? []).map((r) => r.number as number), event.capacity_per_gender);
     if (n == null) return fail('이 성별의 호 번호가 다 찼어요.');
