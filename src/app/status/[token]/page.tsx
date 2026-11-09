@@ -7,6 +7,7 @@ import { hasDb } from '../../../lib/server/supabase';
 import { toSession } from '../../../lib/signup/rules';
 import { ACCOUNT, BUSINESS, won } from '../../../lib/signup/data';
 import StatusActions from './StatusActions';
+import AutoRefresh from './AutoRefresh';
 
 export const metadata: Metadata = { title: '신청 내역 · 플러팅 라운지', robots: { index: false } };
 export const dynamic = 'force-dynamic';
@@ -65,7 +66,7 @@ export default async function Status({ params }: { params: Promise<{ token: stri
           <div className={cls(2)}><i /><span><b>확정 · 사전 등록</b><small>라운지에 들어와 나를 소개해요</small></span></div>
         </div>}
 
-        {(st === 'new' || st === 'held' || st === 'awaiting_payment') && <StatusActions token={token} cancelOnly />}
+        {(st === 'new' || st === 'held' || st === 'awaiting_payment') && <><StatusActions token={token} cancelOnly /><AutoRefresh /></>}
         {st === 'confirmed' && <p className="preview">취소·환불은 {BUSINESS.email}로 문의해주세요 (모임 4일 전까지만 환불 가능)</p>}
       </div>
     </main>
