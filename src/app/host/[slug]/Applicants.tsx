@@ -49,7 +49,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
     if (!j.ok) return show(j.message);
     if (action === 'approve') setMsg({
       title: `${r.name}님께 보낼 입금 안내`,
-      text: `[플러팅 라운지] ${r.name}님, ${session.dateLabel} ${session.time} 자리를 잡아뒀어요!\n\n${kDue(j.paymentDue)}까지 아래 계좌로 참가비 ${won(event.price)}을 보내주세요.\n${ACCOUNT.bank} ${ACCOUNT.number} (${ACCOUNT.holder})\n보내는 분 이름: ${r.name}\n\n입금이 확인되면 나만의 라운지 입장 링크를 보내드려요.`,
+      text: `[플러팅 라운지] ${r.name}님, ${session.dateLabel} ${session.time} 자리를 잡아뒀어요!\n\n${kDue(j.paymentDue)}까지 참가비 ${won(event.price)}을 보내주세요.\n${ACCOUNT.number ? `${ACCOUNT.bank} ${ACCOUNT.number} (${ACCOUNT.holder})\n` : ''}보내는 분 이름: ${r.name}\n\n입금이 확인되면 나만의 라운지 입장 링크를 보내드려요.`,
     });
     else if (j.inviteToken) setMsg({
       title: `${r.name}님께 보낼 입장 링크`,

@@ -7,7 +7,8 @@ export const SAMPLE_EVENTS: EventRow[] = [
 ];
 
 export const PRICE = 30000;
-export const ACCOUNT = { bank: '토스뱅크', number: '1000-4168-0942', holder: '민시훈' };
+// 계좌는 잠시 비워둠(공개 안 함). 다시 보여주려면 토스뱅크 1000-4168-0942 민시훈을 채울 것
+export const ACCOUNT = { bank: '', number: '', holder: '' };
 export const HOST_NAME = '옷깃';
 export const BUSINESS = { owner: '민시훈', number: '697-67-00622', email: 'alsgotn@naver.com' };
 

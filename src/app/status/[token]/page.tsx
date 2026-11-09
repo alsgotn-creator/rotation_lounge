@@ -42,10 +42,12 @@ export default async function Status({ params }: { params: Promise<{ token: stri
 
         {st === 'awaiting_payment' && (
           <div className="acct">
-            <div className="kv"><span>받는 계좌</span><b>{ACCOUNT.bank} {ACCOUNT.number}</b></div>
-            <div className="kv"><span>받는 분</span><b>{ACCOUNT.holder}</b></div>
+            {ACCOUNT.number ? <>
+              <div className="kv"><span>받는 계좌</span><b>{ACCOUNT.bank} {ACCOUNT.number}</b></div>
+              <div className="kv"><span>받는 분</span><b>{ACCOUNT.holder}</b></div>
+            </> : <div className="kv"><span>입금 계좌</span><b>호스트가 따로 알려드려요</b></div>}
             <div className="kv"><span>보내는 분 이름</span><b>{app.name}</b></div>
-            <StatusActions token={token} copy={`${ACCOUNT.bank} ${ACCOUNT.number}`} />
+            {ACCOUNT.number && <StatusActions token={token} copy={`${ACCOUNT.bank} ${ACCOUNT.number}`} />}
           </div>
         )}
 
