@@ -70,6 +70,6 @@ describe('notes', () => {
     const a = layoutNotes(ns);
     expect(a).toEqual(layoutNotes(ns));
     expect(a.map((n) => n.half)).toEqual([false, true, true]);
-    for (const n of a) { expect(Math.abs(n.rotDeg)).toBeLessThanOrEqual(3); expect(n.sizePx).toBeGreaterThanOrEqual(24); }
+    for (const n of a) { expect(Math.abs(n.rotDeg)).toBeLessThanOrEqual(3); expect(n.sizePx).toBeGreaterThanOrEqual(30); }
   });
 });

@@ -40,7 +40,7 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   return (
     <section className="cls-wine">
       <h3>연말 와인 무제한 모임</h3>
-      <p className="cls-price"><s>70,000원</s> <b>60,000원</b> <em>14% 할인</em></p>
+      <p className="cls-price"><s>70,000원</s> <b>58,000원</b> <em>17% 할인</em></p>
       <p className="ds">지인과 함께 오면 각각 30% 할인 (49,000원)</p>
       <ul className="cls-wine-list">
         <li>12월 중순~말 진행 예정</li>

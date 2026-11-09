@@ -37,7 +37,7 @@ export function layoutNotes(notes: { id: string; body: string }[]) {
       half,
       rotDeg: Math.round((r() * 6 - 3) * 10) / 10,
       shiftPct: half ? 0 : Math.round(r() * 14), // 긴 쪽지는 왼쪽 여백을 조금씩 다르게
-      sizePx: Math.round(24 + r() * 4),
+      sizePx: Math.round(30 + r() * 4),
       ink: INKS[Math.floor(r() * INKS.length)],
     };
   });
