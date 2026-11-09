@@ -50,7 +50,7 @@ describe('pending rolling paper', () => {
   });
   test('only the last round in choice phase; none before/after', () => {
     const rounds = [rd(1, 0, { closedAt: 900_000 }), rd(2, 900_000, { closedAt: 1_800_000 })];
-    expect(pendingNotes(W(1), rounds, 3, 1, seated, none, 2_000_000, 'choice')).toEqual([{ round: 2, toId: 'm2' }]);
+    expect(pendingNotes(W(1), rounds, 3, 1, seated, none, 2_000_000, 'choice')).toEqual([{ round: 2, toId: 'm3' }]); // 2라운드엔 남3호가 1번 테이블로 온다
     expect(pendingNotes(W(1), rounds, 3, 1, seated, none, 2_000_000, 'before')).toEqual([]);
     expect(pendingNotes(W(1), rounds, 3, 1, seated, none, 2_000_000, 'closing')).toEqual([]);
   });
