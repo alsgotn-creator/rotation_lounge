@@ -105,7 +105,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
           <h2 className="q">어디에 사세요?</h2>
           <p className="ds">구나 동네 정도면 충분해요.</p>
           <label className="fld"><span>사는 곳</span><input autoFocus maxLength={20} placeholder="예: 성동구" value={area} onChange={(e) => setArea(e.target.value)} /></label>
-          <div className="safe"><Icon name="lock" /><div>나이·직업·사는 곳·MBTI는 <b>대화 7분째</b>, 맞은편 상대에게만 보여요.</div></div>
+          <div className="safe"><Icon name="lock" /><div>나이·직업·사는 곳·MBTI는 <b>대화 5분 뒤</b>, 맞은편 상대에게만 보여요.</div></div>
         </>}
 
         {step === 3 && <>

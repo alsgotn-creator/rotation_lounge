@@ -1,10 +1,10 @@
 // 누가 누구의 정보를 볼 수 있는지, 라운드 뒤에 어떤 롤링페이퍼가 밀려 있는지 (계획서 Task 3·6)
 import { isTimeUp, partnersOf, revealReached, type Round, type Seated } from './seating';
 
-/** 7분 이상 함께 앉았던 이성 전원. 한 번 공개되면 행사가 끝날 때까지 계속 볼 수 있다. */
-export function metIds(viewer: Seated, rounds: Round[], T: number, g: number, seated: Seated[], now: number) {
+/** 5분 이상 함께 앉았던 이성 전원. 한 번 공개되면 행사가 끝날 때까지 계속 볼 수 있다. anyTime: 최종선택 때는 시간과 상관없이 같이 앉았던 사람 모두. */
+export function metIds(viewer: Seated, rounds: Round[], T: number, g: number, seated: Seated[], now: number, anyTime = false) {
   const out = new Set<string>();
-  for (const r of rounds) if (revealReached(r, now)) for (const p of partnersOf(viewer, r.no, T, seated, g)) out.add(p.id);
+  for (const r of rounds) if (anyTime || revealReached(r, now)) for (const p of partnersOf(viewer, r.no, T, seated, g)) out.add(p.id);
   return [...out];
 }
 

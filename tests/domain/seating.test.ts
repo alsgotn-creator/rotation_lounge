@@ -61,10 +61,10 @@ describe('seating, 2:2 and 3:3 per table', () => {
 describe('timer', () => {
   const r = { no: 1, startedAt: 0, pausedAt: null, pausedTotalMs: 0, durationSec: 900, closedAt: null };
   test('clamped to duration', () => expect(elapsedMs(r, 1_000_000)).toBe(900_000));
-  test('reveal waits for 7 min of un-paused time', () => expect(revealReached({ ...r, pausedTotalMs: 60_000 }, 450_000)).toBe(false));
-  test('paused at 5:00 never reaches reveal while paused', () => expect(revealReached({ ...r, pausedAt: 300_000 }, 999_999)).toBe(false));
-  test('stays revealed after close', () => expect(revealReached({ ...r, closedAt: 430_000 }, 2_000_000)).toBe(true));
-  test('closed before 7 min → never revealed', () => expect(revealReached({ ...r, closedAt: 400_000 }, 2_000_000)).toBe(false));
+  test('reveal waits for 5 min of un-paused time', () => expect(revealReached({ ...r, pausedTotalMs: 60_000 }, 330_000)).toBe(false));
+  test('paused at 4:00 never reaches reveal while paused', () => expect(revealReached({ ...r, pausedAt: 240_000 }, 999_999)).toBe(false));
+  test('stays revealed after close', () => expect(revealReached({ ...r, closedAt: 310_000 }, 2_000_000)).toBe(true));
+  test('closed before 5 min → never revealed', () => expect(revealReached({ ...r, closedAt: 280_000 }, 2_000_000)).toBe(false));
 });
 
 describe('round starts paused after the seat move', () => {

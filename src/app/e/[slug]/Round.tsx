@@ -43,7 +43,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
   const revealedLocally = elapsedMs(round.timer, now) >= REVEAL_MS;
   const hasProfile = round.partners.some((p) => view.met[p.id]);
 
-  // 7분이 지나면 서버에서 상대 정보를 가져온다 (아직 안 왔으면 1.5초마다 다시)
+  // 5분이 지나면 서버에서 상대 정보를 가져온다 (아직 안 왔으면 1.5초마다 다시)
   useEffect(() => {
     if (!revealedLocally || hasProfile || round.partners.length === 0) return;
     onRefresh();
@@ -88,11 +88,14 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
             <div className="lg-kw">{p.keywords.map((k) => <span key={k}>{k}</span>)}</div>
             {view.met[p.id]
               ? <Reveal p={view.met[p.id]} fresh={fresh.has(p.id)} />
-              : <p className="pc-wait">나이 · 직업 · 사는 곳 · MBTI는 <b>7분째</b>에 공개돼요</p>}
+              : <p className="pc-wait">나이 · 직업 · 사는 곳 · MBTI는 <b>5분 뒤</b>에 공개돼요</p>}
           </article>
         ))}
       </section>
 
+      {round.partners.length > 0 && !hasProfile && (
+        <p className="rnd-why">왜 바로 안 보여줄까요? 조건과 정보를 모른 채, 그 사람 자체를 먼저 알아가보세요.<br />대화를 도와줄 아래 게임이나 테이블 위 종이를 보고 이야기해도 좋아요.</p>
+      )}
       {round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} />}
     </main>
   );

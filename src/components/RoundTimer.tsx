@@ -21,7 +21,7 @@ export function RoundTimer({ round, offsetMs }: { round: Round; offsetMs: number
     <div className={`rt${left <= 0 || round.closedAt ? ' up' : ''}${round.pausedAt ? ' paused' : ''}`}>
       <span className="rt-l">{state}</span>
       <b className="rt-n" aria-live="off">{left <= 0 ? '0:00' : mmss(left)}</b>
-      <div className="rt-bar"><i style={{ width: `${(el / total) * 100}%` }} /><em style={{ left: `${(REVEAL_MS / total) * 100}%` }}><span>7분 · 정보 공개</span></em></div>
+      <div className="rt-bar"><i style={{ width: `${(el / total) * 100}%` }} /><em style={{ left: `${(REVEAL_MS / total) * 100}%` }}><span>5분 · 정보 공개</span></em></div>
     </div>
   );
 }

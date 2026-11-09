@@ -40,7 +40,7 @@ export function elapsedMs(r: Round, now: number) {
   return Math.min(Math.max(end - r.startedAt - r.pausedTotalMs, 0), r.durationSec * 1000);
 }
 export const isTimeUp = (r: Round, now: number) => elapsedMs(r, now) >= r.durationSec * 1000;
-export const REVEAL_MS = 420_000;
+export const REVEAL_MS = 300_000; // 인적사항은 대화 5분 뒤 공개
 export const revealReached = (r: Round, now: number) => elapsedMs(r, now) >= REVEAL_MS;
 
 /** 자리 이동 직후: 라운드는 만들어졌지만 진행자가 아직 '대화 시작'을 누르지 않았다 (멈춘 채로 시작). */

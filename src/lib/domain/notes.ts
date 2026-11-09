@@ -1,5 +1,11 @@
 // 롤링페이퍼 규칙 (계획서 Task 4)
-export const NOTE_MAX = 200;
+export const NOTE_MAX = 100; // 7명의 쪽지가 한 장에 들어가도록
+
+/** 쓰는 사람이 고르는 손글씨 글꼴 [CSS 이름, 화면 이름]. 첫 번째가 기본. */
+export const PAPER_FONTS = [
+  ['Nanum Pen Script', '나눔펜'], ['Gaegu', '개구'], ['Gamja Flower', '감자꽃'], ['Hi Melody', '하이멜로디'], ['Poor Story', '푸어스토리'],
+] as const;
+export const paperFont = (f: unknown) => (PAPER_FONTS.some(([x]) => x === f) ? (f as string) : PAPER_FONTS[0][0]);
 
 /** 전화번호·SNS 아이디처럼 보이는 내용은 막는다 */
 export function containsContact(text: string) {
@@ -18,17 +24,21 @@ const rng = (a: number) => () => {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 
-/** 한 장의 편지지 위에 흩어 놓을 위치·각도·크기·잉크색. 같은 입력이면 항상 같은 결과. */
-export function layoutNotes(ids: string[]) {
-  const n = ids.length, cols = Math.max(1, Math.ceil(Math.sqrt(n))), rows = Math.max(1, Math.ceil(n / cols));
-  const r = rng(seed(ids.join('|')));
-  const cw = 74 / cols, ch = 74 / rows, clamp = (v: number) => Math.min(80, Math.max(6, v));
-  return ids.map((id, i) => ({
-    id,
-    xPct: clamp(6 + (i % cols + 0.5) * cw - cw * 0.35 + r() * cw * 0.7),
-    yPct: clamp(6 + (Math.floor(i / cols) + 0.5) * ch - ch * 0.35 + r() * ch * 0.7),
-    rotDeg: Math.round((r() * 18 - 9) * 10) / 10,
-    sizePx: Math.round(17 + r() * 7),
-    ink: INKS[Math.floor(r() * INKS.length)],
-  }));
+/**
+ * 한 장의 편지지 위에 쪽지를 흩어 놓되 서로 겹치지 않게: 쪽지는 차례로 흐르고(짧으면 두 개가 한 줄),
+ * 각자 살짝 기울고 좌우로 비켜 앉는다. 같은 입력이면 항상 같은 결과.
+ */
+export function layoutNotes(notes: { id: string; body: string }[]) {
+  const r = rng(seed(notes.map((n) => n.id).join('|')));
+  return notes.map((n) => {
+    const half = n.body.length <= 24; // 짧은 쪽지는 반 칸
+    return {
+      id: n.id,
+      half,
+      rotDeg: Math.round((r() * 6 - 3) * 10) / 10,
+      shiftPct: half ? 0 : Math.round(r() * 14), // 긴 쪽지는 왼쪽 여백을 조금씩 다르게
+      sizePx: Math.round(24 + r() * 4),
+      ink: INKS[Math.floor(r() * INKS.length)],
+    };
+  });
 }

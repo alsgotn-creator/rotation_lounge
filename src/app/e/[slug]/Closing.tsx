@@ -40,10 +40,17 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   return (
     <section className="cls-wine">
       <h3>연말 와인모임</h3>
-      <p className="cls-price"><s>50,000원</s> <b>35,000원</b> <em>30% 할인</em></p>
-      <p className="ds">여기서 참가 신청하면 30% 할인된 가격으로 결제할 수 있어요. 지인과 함께 오면 각각 50% 할인도 도와드려요.</p>
-      <p className="ds">연말 와인모임은 한 테이블당 3:3으로 진행돼요. 절대 많은 인원과 함께하지 않아요.</p>
-      <button className="btn" disabled={st === 'busy' || st === 'done'} onClick={join}>{st === 'done' ? '✓ 메일로 안내해드릴게요' : '연말 와인모임 메일로 안내받기'}</button>
+      <p className="cls-price"><s>70,000원</s> <b>60,000원</b> <em>14% 할인</em></p>
+      <p className="ds">지인과 함께 오면 각각 30% 할인 (49,000원)</p>
+      <ul className="cls-wine-list">
+        <li>12월 중순~말 진행 예정</li>
+        <li>한 테이블 3:3 · 총 4테이블</li>
+        <li>관상게임 · 익명게임 · 올해 마무리 이야기</li>
+        <li>인원이 모이지 않으면 진행되지 않아요</li>
+      </ul>
+      <button className="btn cls-wine-btn" disabled={st === 'busy' || st === 'done'} onClick={join}>
+        {st === 'done' ? '✓ 메일로 안내해드릴게요' : <>와인 모임 관심있어요!<small>메일로 안내받기</small></>}
+      </button>
       {st === 'done' && <p className="preview">호스트에게 이름·연락처·이메일이 전달됐어요.</p>}
       {st === 'err' && <p className="preview">신청하지 못했어요. 다시 시도해주세요.</p>}
     </section>
@@ -60,7 +67,7 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
       {!view.resultsOpen && <>
         <div className="cls-wait" aria-hidden="true">{me && <Face c={me} size={150} />}</div>
         <h2 className="q" style={{ textAlign: 'center' }}>오늘 만나서<br />반가웠어요</h2>
-        <p className="ds" style={{ textAlign: 'center' }}>결과는 호스트가 매칭된 분들에게만<br />1시간 이내에 메일로 보내드려요.</p>
+        <p className="ds" style={{ textAlign: 'center' }}>매칭된 분들께는 1시간 이내로<br />메일 보내드려요.</p>
       </>}
 
       {view.resultsOpen && matches.length > 0 && <>

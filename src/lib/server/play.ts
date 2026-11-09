@@ -6,6 +6,7 @@ import { cardById } from '../domain/cards';
 import { metIds, pendingNotes, type Pending } from '../domain/turns';
 import { phrases, recommend } from '../domain/loveType';
 import { mutualMatches } from '../domain/matching';
+import { paperFont } from '../domain/notes';
 import type { PublicCard } from '../domain/lounge';
 
 export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[] };
@@ -14,11 +15,11 @@ export type PlayView = {
   phase: 'before' | 'talk' | 'choice' | 'closing';
   noNumber: boolean;                       // 아직 호 번호가 없다 (호스트에게 문의)
   round: null | { no: number; total: number; timer: Round; perTable: number; partners: PublicCard[]; ordinal: number; oppositeCount: number };
-  met: Record<string, Profile>;            // 7분 이상 함께 앉았던 사람만. 한 번 공개되면 계속 보인다.
+  met: Record<string, Profile>;            // 5분 이상 함께 앉았던 사람만 (최종선택 때는 같이 앉았던 사람 모두). 한 번 공개되면 계속 보인다.
   pending: null | { round: number; to: PublicCard };
   recommendation: null | 'pending' | PublicCard;   // 호스트가 '추천 공개'를 누르면 가장 비슷한 이성
   choice: null | { max: number; picks: string[]; done: boolean; candidates: PublicCard[] };
-  paper: null | { notes: { id: string; body: string; from: { gender: 'f' | 'm'; number: number | null } }[] };   // 최종선택 단계에만. 보낸 사람은 '여3호'처럼 호가 보인다
+  paper: null | { notes: { id: string; body: string; font: string; from: { gender: 'f' | 'm'; number: number | null } }[] };   // 최종선택 단계에만. 보낸 사람은 '여3호'처럼 호가 보인다
   resultsOpen: boolean;
   game: null | { cardId: string; kind: string; prompt: string; options: string[]; mine: string | null; answered: number; total: number; answers: null | { gender: 'f' | 'm'; number: number; me: boolean; text: string }[] };
   result: null | { matches: PublicCard[] };                  // 서로 고른 사람만. 나를 고른 사람 수·이름은 어디에도 없다.
@@ -26,7 +27,7 @@ export type PlayView = {
 
 const card = (p: Person): PublicCard => ({ id: p.id, gender: p.gender, number: p.number, shape: p.shape, prop: p.prop, color: p.color, keywords: p.keywords, me: false });
 
-/** 참가자 한 명 기준의 상태. 다른 사람의 비공개 정보는 7분 규칙(metIds)을 통과한 사람만 담는다. */
+/** 참가자 한 명 기준의 상태. 다른 사람의 비공개 정보는 5분 규칙(metIds)을 통과한 사람만 담는다. */
 export async function computePlay(eventId: string, meId: string, now = Date.now()) {
   const run = await loadRun(eventId);
   const { ev, rounds, current, people, seated } = run;
@@ -64,7 +65,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   }
 
   const met: PlayView['met'] = {};
-  const ids = me ? metIds(me, rounds, T, g, seated, now) : [];
+  const ids = me ? metIds(me, rounds, T, g, seated, now, ev.phase === 'choice') : [];
   if (ids.length) {
     const { data } = await db().from('participants').select('id,age,job,area,mbti,love_type').in('id', ids);
     for (const r of data ?? []) met[r.id as string] = { age: r.age, job: r.job, area: r.area, mbti: r.mbti, color: r.love_type, phrases: phrases(r.love_type) };
@@ -103,8 +104,11 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   // 받은 쪽지는 최종선택 단계에서 (고르기 전에) 읽는다. 마무리에서는 (호스트가 열면) 매칭 결과만.
   let paper: PlayView['paper'] = null, result: PlayView['result'] = null;
   if (me && ev.phase === 'choice') {
-    const { data } = await db().from('notes').select('id,body,from_id').eq('event_id', eventId).eq('to_id', meId).eq('hidden', false).not('body', 'is', null).order('created_at');
-    paper = { notes: (data ?? []).map((n) => { const f = byId.get(n.from_id as string); return { id: n.id as string, body: n.body as string, from: { gender: (f?.gender ?? 'f') as 'f' | 'm', number: f?.number ?? null } }; }) };
+    const q = (cols: string) => db().from('notes').select(cols).eq('event_id', eventId).eq('to_id', meId).eq('hidden', false).not('body', 'is', null).order('created_at');
+    let res = await q('id,body,from_id,font');
+    if (res.error) res = await q('id,body,from_id'); // font 칸이 아직 없을 때
+    const data = (res.data ?? []) as unknown as { id: string; body: string; from_id: string; font?: string | null }[];
+    paper = { notes: data.map((n) => { const f = byId.get(n.from_id); return { id: n.id, body: n.body, font: paperFont(n.font), from: { gender: (f?.gender ?? 'f') as 'f' | 'm', number: f?.number ?? null } }; }) };
   }
   if (me && ev.phase === 'closing') {
     if (ev.results_open) {

@@ -3,7 +3,7 @@ import { db } from '../../../../../lib/server/supabase';
 import { getEvent } from '../../../../../lib/server/signup';
 import { invitedFromCookie, participantOf } from '../../../../../lib/server/invite';
 import { computePlay } from '../../../../../lib/server/play';
-import { containsContact, NOTE_MAX } from '../../../../../lib/domain/notes';
+import { containsContact, NOTE_MAX, paperFont } from '../../../../../lib/domain/notes';
 
 const fail = (message: string, status = 400, code?: string) => NextResponse.json({ ok: false, message, code }, { status });
 
@@ -23,7 +23,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const { pendingAll } = await computePlay(event.id, p.id);
   if (!pendingAll.some((x) => x.round === round && x.toId === toId)) return fail('이미 남겼거나, 지금 쓸 수 없는 쪽지예요.', 409);
 
-  const { error } = await db().from('notes').insert({ event_id: event.id, round, from_id: p.id, to_id: toId, body: raw });
+  const row = { event_id: event.id, round, from_id: p.id, to_id: toId, body: raw };
+  let { error } = await db().from('notes').insert({ ...row, font: paperFont(b.font) });
+  if (error?.code === 'PGRST204' || error?.code === '42703') ({ error } = await db().from('notes').insert(row)); // font 칸이 아직 없을 때 (0011 마이그레이션 전)
   if (error?.code === '23505') return NextResponse.json({ ok: true });
   if (error) return fail('저장하지 못했어요. 다시 시도해주세요.', 500);
   return NextResponse.json({ ok: true });

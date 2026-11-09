@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const capacity = tables * perTable; // 성별당 최대 인원
   const { error } = await db().from('events').insert({
     slug, starts_at: startsAt.toISOString(), venue, birth_from: birthFrom, birth_to: birthTo,
-    capacity_per_gender: capacity, table_count: tables, price: PRICE, round_duration_sec: 720,
+    capacity_per_gender: capacity, table_count: tables, price: PRICE, round_duration_sec: 720, max_picks: 3,
     ...(perTable > 1 ? { per_table: perTable } : {}),
   });
   if (error) return fail(perTable > 1 || capacity > 12 ? 'Supabase에서 0005_per_table.sql을 먼저 실행해주세요.' : '저장하지 못했어요. 다시 시도해주세요.', 500);

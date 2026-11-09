@@ -140,7 +140,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
 
         {step === 4 && <>
           <h2 className="q">어떤 일을 하세요?</h2>
-          <p className="ds">직군 정도면 충분해요. 대화 7분째에 맞은편 한 사람에게만 보여요.</p>
+          <p className="ds">직군 정도면 충분해요. 대화 5분 뒤에 맞은편 한 사람에게만 보여요.</p>
           <label className="fld"><span>하는 일</span>
             <input autoFocus placeholder="예: UX 디자이너" value={job} onChange={(e) => setJob(e.target.value)} /></label>
           <div className="chips">{JOBS.map((j) => <button type="button" key={j} onClick={() => setJob(j)}>{j}</button>)}</div>

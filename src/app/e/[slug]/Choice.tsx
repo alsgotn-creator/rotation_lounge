@@ -39,7 +39,8 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
       <div className="lg-top"><span className="logo">플러팅<i>.</i>라운지</span></div>
       <header className="chc-head">
         <h1 className="q">마음이 간 분을<br />골라주세요</h1>
-        <p className="ds">누른 순서가 1순위, 2순위, 3순위예요. 서로 고른 경우에만 연결돼요. 아무도 고르지 않아도 괜찮아요.</p>
+        <p className="ds">최대 {choice.max}순위까지, 누른 순서대로 순위가 정해져요. 서로의 1·2순위가 겹치지 않아도 3순위끼리 서로 골랐다면 매칭해드려요. 아무도 고르지 않아도 괜찮아요.</p>
+        <p className="ds" style={{ marginTop: 6 }}>캐릭터 왼쪽 위 <b>ⓘ</b>를 누르면 그분의 정보를 볼 수 있어요.</p>
         <button className="lnk" style={{ margin: '6px 0 0' }} onClick={onPaper}>롤링페이퍼 다시 보기</button>
         <span className={`chc-count${shake ? ' shake' : ''}`} aria-live="polite">{sel.length} / {choice.max}</span>
       </header>
