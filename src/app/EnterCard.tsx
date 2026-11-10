@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../lib/api';
 import { after010 } from '../lib/signup/validate';
 
@@ -8,6 +8,13 @@ export default function EnterCard() {
   const [phone, setPhone] = useState('');
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const ref = useRef<HTMLFormElement>(null);
+  // 이 카드가 화면에 보이는 동안엔 아래 고정 '신청하기' 버튼을 숨겨서 두 버튼이 겹치지 않게
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => document.body.classList.toggle('enter-on', e.isIntersecting));
+    if (ref.current) io.observe(ref.current);
+    return () => { io.disconnect(); document.body.classList.remove('enter-on'); };
+  }, []);
   async function go(ev: React.FormEvent) {
     ev.preventDefault();
     setBusy(true); setMsg('');
@@ -16,7 +23,7 @@ export default function EnterCard() {
     setMsg(j.message ?? '다시 시도해주세요.'); setBusy(false);
   }
   return (
-    <form className="price enter" onSubmit={go}>
+    <form ref={ref} className="price enter" onSubmit={go}>
       <b>승인 받으셨나요?</b>
       <label className={`fld${msg ? ' err' : ''}`} style={{ marginTop: 14 }}>
         <span>신청할 때 쓴 휴대폰 번호</span>

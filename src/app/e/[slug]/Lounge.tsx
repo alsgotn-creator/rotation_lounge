@@ -72,6 +72,19 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
   const [v, setV] = useState(initial);
   const me = v.cards.find((c) => c.me)!;
   const others = v.cards.filter((c) => !c.me);
+  // 둘러앉을 자리: 내 양옆 2명 → 위 4명 → 남는 사람은 왼쪽·오른쪽 번갈아
+  const rest = others.slice(2), sides = rest.slice(4);
+  const ring = { b: others.slice(0, 2), t: rest.slice(0, 4), l: sides.filter((_, i) => i % 2 === 0), r: sides.filter((_, i) => i % 2 === 1) };
+  // 오른쪽에 앉은 사람은 좌우를 뒤집어 가운데를 바라보게
+  const person = (c: LoungeView['cards'][number], flip = false) => {
+    const i = others.indexOf(c);
+    return (
+      <Drag key={c.id} className="lg-p" style={{ animationDelay: `${-(i * 0.7) % 4}s` }}>
+        <Poke><Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={60} delay={i * 0.9} flip={flip} /></Poke>
+        <div className="lg-kw">{c.keywords.slice(0, 2).map((k) => <span key={k}>{k}</span>)}</div>
+      </Drag>
+    );
+  };
 
   const refresh = useCallback(async () => {
     const j = await api<{ view: LoungeView }>(`/api/e/${slug}/lounge`);
@@ -105,30 +118,28 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
         <span>{when} · 여 {v.counts.f} · 남 {v.counts.m}</span>
       </header>
 
-      <section className="lg-me">
-        <small>나</small>
-        <Drag><Poke><Character shape={me.shape as Shape} color={me.color} acc={me.prop} size={128} /></Poke></Drag>
-        <div className="lg-kw">{me.keywords.map((k) => <span key={k} className="on">{k}</span>)}</div>
-        {me.number != null && <b className="lg-ho">{ho(me.gender, me.number)}</b>}
+      {/* 이상형 박스를 가운데 두고 사람들이 빙 둘러앉는다. 나는 아래 가운데. */}
+      <section className="lg-ring">
+        <div className="lg-side t">{ring.t.map((c, i) => person(c, i >= ring.t.length / 2))}</div>
+        <div className="lg-side l">{ring.l.map((c) => person(c))}</div>
+        <div className="lg-mid">
+          {before ? <IdealCloud lists={IDEAL} /> : null}
+          {others.length === 0 && <p className="empty" style={{ padding: '16px 0' }}>다른 분들이 들어오는 중이에요</p>}
+        </div>
+        <div className="lg-side r">{ring.r.map((c) => person(c, true))}</div>
+        <div className="lg-side b">
+          {ring.b.slice(0, 1).map((c) => person(c))}
+          <div className="lg-me">
+            <small>나</small>
+            <Drag><Poke><Character shape={me.shape as Shape} color={me.color} acc={me.prop} size={92} /></Poke></Drag>
+            <div className="lg-kw">{me.keywords.map((k) => <span key={k} className="on">{k}</span>)}</div>
+            {me.number != null && <b className="lg-ho">{ho(me.gender, me.number)}</b>}
+          </div>
+          {ring.b.slice(1).map((c) => person(c, true))}
+        </div>
       </section>
 
-      {others.length === 0
-        ? <p className="empty">다른 분들이 들어오는 중이에요</p>
-        : <section className="lg-crowd">
-            {others.map((c, i) => (
-              <Drag key={c.id} className="lg-p" style={{ animationDelay: `${-(i * 0.7) % 4}s` }}>
-                <Poke><Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={74} delay={i * 0.9} /></Poke>
-                <div className="lg-kw">{c.keywords.slice(0, 2).map((k) => <span key={k}>{k}</span>)}</div>
-              </Drag>
-            ))}
-          </section>}
-
       <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
-
-      {before && <>
-        <IdealCloud tone="f" title="여자분들이 적은 이상형" lists={IDEAL.f} />
-        <IdealCloud tone="m" title="남자분들이 적은 이상형" lists={IDEAL.m} />
-      </>}
 
       <div className="ft">
         <div className="lg-mine">
