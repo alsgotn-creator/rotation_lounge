@@ -7,7 +7,6 @@ a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .app{position:relative;max-width:480px;min-height:100svh;margin:0 auto;overflow-x:hidden}
 .ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* ---------- 첫 화면 ---------- */
 .hero{position:relative;height:100svh;min-height:660px;max-height:900px;overflow:hidden}
@@ -35,8 +34,8 @@ a{color:inherit;text-decoration:none}
 .ticket .dt b{display:block;font-size:26px;letter-spacing:-.03em;color:var(--text)}
 .ticket .tx{flex:1;font-size:13px;line-height:1.55;color:var(--mute);font-weight:600}
 .ticket .tx strong{display:block;font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em}
-.ticket .tx em,.live{font-style:normal;font-weight:800;color:var(--acc);display:inline-flex;align-items:center;gap:5px}
-.ticket .tx em:before,.live:before{content:"";width:6px;height:6px;border-radius:3px;background:var(--acc);animation:ping 1.6s ease-out infinite}
+.ticket .tx em{font-style:normal;font-weight:800;color:var(--acc);display:inline-flex;align-items:center;gap:5px}
+.ticket .tx em:before{content:"";width:6px;height:6px;border-radius:3px;background:var(--acc);animation:ping 1.6s ease-out infinite}
 .ticket>.ic{color:var(--mute);width:18px}
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(17,17,17,0.35)}100%{box-shadow:0 0 0 8px rgba(17,17,17,0.0)}}
 
@@ -77,7 +76,6 @@ a{color:inherit;text-decoration:none}
 .rvs::-webkit-scrollbar{display:none}
 .rv{flex:none;width:250px;scroll-snap-align:start;border-radius:20px;background:var(--surf);padding:16px;font-size:14px;line-height:1.6;font-weight:500}
 .rv small{display:block;margin-top:10px;font-size:12px;color:var(--mute);font-weight:600}
-.tag{display:inline-block;font-size:11px;font-weight:800;color:var(--mute);border:1px solid var(--line);border-radius:7px;padding:2px 6px;margin-left:6px;vertical-align:2px}
 .qa{margin-top:6px}
 .qa details{border-bottom:1px solid var(--line)}
 .qa summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 0;font-size:15px;font-weight:700;cursor:pointer}
@@ -137,18 +135,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .chips button{height:36px;padding:0 14px;border-radius:18px;background:var(--surf2);border:0;font-size:14px;font-weight:700;cursor:pointer}
 .chips button:active{background:var(--accbg);color:var(--acc)}
-.ph{display:grid;grid-template-columns:1.25fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:260px;margin-top:26px}
-.slot{position:relative;border-radius:18px;border:1.5px dashed var(--line);background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;color:var(--mute);cursor:pointer;overflow:hidden;padding:0}
-.slot.big{grid-row:1/3}
-.slot>.ic{color:var(--acc)}
-.slot .req{position:absolute;left:10px;top:10px;font-size:11px;font-weight:800;color:var(--btntx);background:var(--acc);padding:3px 8px;border-radius:8px}
-.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.slot.filled{border:0}
-.slot .chg{position:absolute;right:8px;bottom:8px;font-size:12px;font-weight:700;color:#3a2a33;background:rgba(255,255,255,.9);border-radius:10px;padding:5px 9px}
-.mini{display:flex;gap:16px;margin-top:16px;font-size:13px;font-weight:600;color:var(--mute);flex-wrap:wrap}
-.mini span{display:flex;align-items:center;gap:5px}
-.mini .ic{width:16px;height:16px;color:var(--ok);stroke-width:2.6}
-.mini .no .ic{color:var(--err)}
 .safe{display:flex;gap:10px;margin-top:18px;padding:14px 16px;border-radius:16px;background:var(--accbg);font-size:13px;line-height:1.6;font-weight:500}
 .safe .ic{width:18px;height:18px;color:var(--acc);margin-top:2px}
 .yn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:26px}
@@ -330,7 +316,6 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .person-row select{height:38px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:800;padding:0 6px;font-family:inherit;color:var(--text)}
 .person-row div{flex:1;min-width:0}.person-row b{display:block;font-size:14px}.person-row span{font-size:12px;color:var(--mute)}
 .mini-in{width:56px;height:36px;border-radius:18px;border:0;background:var(--surf2);text-align:center;font-weight:700;font-size:14px}
-/* 큰 화면 (세로 모니터) */
 
 /* ---------- 대화 라운드 (참가자) ---------- */
 .rnd{padding-bottom:120px}
