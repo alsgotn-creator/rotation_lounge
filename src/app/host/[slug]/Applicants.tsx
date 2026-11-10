@@ -62,6 +62,14 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
     show(j.ok ? '바꿨어요' : j.message ?? '다시 시도해주세요.');
     router.refresh();
   };
+  // 확인 없이 바로 지운다 (호스트 요청). 신청·참가·쪽지 등 딸린 데이터도 함께 지워진다.
+  const removeEvent = async () => {
+    setBusy(true);
+    const j = await api('/api/host/events', { id: event.id }, 'DELETE');
+    if (j.ok) return router.push('/host');
+    setBusy(false);
+    show(j.message ?? '다시 시도해주세요.');
+  };
   const toggleApply = async () => {
     const j = await api('/api/host/events', { id: event.id, applyOpen: !event.applyOpen }, 'PATCH');
     if (!j.ok) show(j.message ?? '다시 시도해주세요.');
@@ -141,6 +149,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
             <Icon name="next" />
           </button>
         ))}
+        <button className="lnk" style={{ color: 'var(--err)', marginTop: 32 }} disabled={busy} onClick={removeEvent}>일정 삭제하기</button>
       </div>
       {toast && <div className="toast" role="status" style={{ bottom: 30 }}><Icon name="check" />{toast}</div>}
     </main>

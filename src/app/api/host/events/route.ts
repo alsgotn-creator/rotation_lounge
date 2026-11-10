@@ -65,3 +65,14 @@ export async function PATCH(req: Request) {
   }
   return NextResponse.json({ ok: true });
 }
+
+// 일정 삭제: 신청·참가·라운드·쪽지·선택 등은 events 외래키 on delete cascade 로 함께 지워진다.
+export async function DELETE(req: Request) {
+  if (!(await isHost())) return fail('다시 로그인해주세요.', 401);
+  const b = await req.json().catch(() => ({}));
+  const id = String(b.id ?? '');
+  if (!id) return fail('일정을 찾지 못했어요.');
+  const { error } = await db().from('events').delete().eq('id', id);
+  if (error) return fail('지우지 못했어요.', 500);
+  return NextResponse.json({ ok: true });
+}

@@ -27,7 +27,6 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const [avoid, setAvoid] = useState<Avoid[]>([]);
   const [draft, setDraft] = useState<Avoid>({ name: '', note: '' });
   const [sheet, setSheet] = useState(false);
-  const [agree, setAgree] = useState(false);
   const [share, setShare] = useState(false); // 매칭되면 상대에게 이름·번호 전달 동의
   const [done, setDone] = useState<string | null>(null); // 신청 내역 토큰
   const [sending, setSending] = useState(false);
@@ -180,12 +179,10 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
               <button type="button" key={k} onClick={() => { setSheet(false); go(to); }} aria-label={`${k} 고치기`}><dt>{k}</dt><dd>{v}</dd></button>
             ))}
           </dl>
-          <button type="button" className={`agree${agree ? ' on' : ''}`} onClick={() => setAgree(!agree)} aria-pressed={agree}>
-            <span className="chk" />필수 약관에 모두 동의해요</button>
-          <button type="button" className={`agree${share ? ' on' : ''}`} onClick={() => setShare(!share)} aria-pressed={share} style={{ marginTop: 8 }}>
+          <button type="button" className={`agree${share ? ' on' : ''}`} onClick={() => setShare(!share)} aria-pressed={share}>
             <span className="chk" /><span style={{ textAlign: 'left' }}>(필수) 서로 고른 상대가 있으면, 그 상대에게 제 <b>이름과 휴대폰 번호</b>가 문자로 전달되는 데 동의해요</span></button>
           {err && <p className="msg e" role="alert" style={{ margin: '0 0 10px', fontSize: 14, textAlign: 'center' }}>{err}</p>}
-          <button className="btn" disabled={!agree || !share || sending} onClick={submit}>{sending ? '보내는 중…' : '신청하기'}</button>
+          <button className="btn" disabled={!share || sending} onClick={submit}>{sending ? '보내는 중…' : '신청하기'}</button>
         </div>
       </>}
     </main>
