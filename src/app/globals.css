@@ -1,4 +1,5 @@
-:root{--bg:#f4f4f5;--sheet:#ffffff;--surf:#ffffff;--surf2:#ebebed;--line:#e3e3e6;--text:#111111;--mute:#6b6b72;--dim:#a3a3aa;--acc:#111111;--accbg:#ececee;--btn:#111111;--btntx:#ffffff;--ok:#2f9e6e;--err:#e5484d;--warn:#c27a00}
+/* --mute 5.6:1 · --dim 3.4:1 (큰 글자·장식용만) on --bg. --shadow: 흰 카드가 회색 배경에서 떠 보이게 */
+:root{--bg:#f4f4f5;--sheet:#ffffff;--surf:#ffffff;--surf2:#ebebed;--line:#e3e3e6;--text:#111111;--mute:#5f5f66;--dim:#85858d;--acc:#111111;--accbg:#ececee;--btn:#111111;--btntx:#ffffff;--ok:#2f9e6e;--err:#e5484d;--warn:#c27a00;--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 20px -12px rgba(0,0,0,.12)}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text)}
 body{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
@@ -457,3 +458,34 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 .cls-wine-btn{height:auto;min-height:56px;padding:10px 0;flex-direction:column;line-height:1.3}.cls-wine-btn small{display:block;font-size:12px;font-weight:700;opacity:.8}
 
 .tel010{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line)}.enter .tel010 b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--mute)}.fld .tel010 input{flex:1;min-width:0;border-bottom:0}
+
+/* ---------- 정리 (2026-11-10): 깊이 · 위계 · 터치 영역 · 안전 영역. 같은 특이도는 뒤에 온 규칙이 이긴다 ---------- */
+/* 흰 카드: 얇은 선 + 아주 옅은 그림자 */
+.price,.card,.run-card,.given,.acct,.people,.addf,.evs,.rv,.idc-card,.gm-inline,.cls-rv,.cls-wine,.seat div,.pc,.rnd-why,.lg-mine,.sheet{border:1px solid var(--line);box-shadow:var(--shadow)}
+.sheet{border-bottom:0;box-shadow:0 -12px 40px -20px rgba(0,0,0,.25)}
+/* 고르는 카드: 기본 상태도 테두리가 있어 '누를 수 있는 것'으로 읽힌다 (.on 은 검정 테두리로 구분) */
+.opt,.tile,.yn button,.mbti button,.shapes button,.chc-pick{border-color:var(--line)}
+/* 보조 글: 정보가 있는 글은 --mute (4.5:1 이상), 장식 숫자만 --dim */
+.preview,.empty,.biz,.run-h em{color:var(--mute)}
+.preview{font-size:13px;line-height:1.6}
+/* 제목 크기: 화면 제목 26~28 · 섹션 16~22 · 본문 15 · 설명 13 */
+.rnd-head h1{font-size:28px}
+.run-h{flex-wrap:wrap;gap:6px 12px}
+/* 터치 영역 44px 이상 */
+.lnk{display:flex;align-items:center;width:max-content;min-height:44px;padding:6px 8px;margin:8px auto 0}
+.chips button{height:44px;padding:0 16px;border-radius:22px}
+.mini-in{height:44px;border-radius:22px}
+.tabs button{height:40px;padding:0 14px;border-radius:20px}
+.phases button,.gm-kinds button,.nw-fonts button{height:44px}
+.person-row select{height:44px}
+.chc-info{width:36px;height:36px;border-radius:18px}
+.kw span{height:40px;padding:0 6px 0 14px}.kw span button{width:32px;height:32px}
+.nav a,.lg-home{padding:12px 0}
+.cancel,.pp button{padding:12px}
+.sum button{padding:12px 0}
+.scale button{position:relative}.scale button:before{content:"";position:absolute;inset:-10px;border-radius:50%} /* 작은 점도 44px 이상 눌린다 */
+/* 검정 버튼 위 포커스 링이 보이게 */
+.btn:focus-visible,.lg-seat:focus-visible{outline:0;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--acc)}
+/* 안전 영역 (iOS 홈 화면 앱: 상단 상태바 아래로) */
+.nb{height:auto;min-height:56px;padding-top:env(safe-area-inset-top)}
+.nav,.lg-top,.ah{padding-top:calc(16px + env(safe-area-inset-top))}
