@@ -23,7 +23,8 @@ async function seatRows(eventIds: string[]) {
 export async function listSessions(): Promise<Session[]> {
   // 키가 없으면 로컬에서만 예시 일정을 보여주고, 배포 사이트에서는 빈 목록 (가짜 일정에 신청하지 않게)
   if (!hasDb()) return process.env.NODE_ENV === 'production' ? [] : SAMPLE_EVENTS.map((e) => toSession(e, []));
-  const { data, error } = await db().from('events').select(EVENT_COLS).gt('starts_at', new Date().toISOString()).order('starts_at');
+  // 'demo-'로 시작하는 모임은 시연용이라 공개 목록에서 뺀다 (입장 링크·호스트 화면은 그대로)
+  const { data, error } = await db().from('events').select(EVENT_COLS).gt('starts_at', new Date().toISOString()).not('slug', 'like', 'demo-%').order('starts_at');
   if (error) throw error;
   const events = data as EventRow[];
   const apps = await seatRows(events.map((e) => e.id));
