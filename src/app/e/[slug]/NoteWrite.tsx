@@ -27,7 +27,7 @@ export default function NoteWrite({ slug, pending, onDone }: { slug: string; pen
 
   return (
     <main className="nw">
-      <div className="nw-top"><Character shape={to.shape as Shape} color={to.color} size={96} /></div>
+      <div className="nw-top"><Character shape={to.shape as Shape} color={to.color} acc={to.prop} size={96} /></div>
       <h2 className="q" style={{ textAlign: 'center' }}>{label}에게 한마디</h2>
       <p className="ds" style={{ textAlign: 'center' }}>{round}번째 라운지에서 만난 분께 남기는 쪽지예요.</p>
       <div className="nw-fonts" role="radiogroup" aria-label="글씨체">

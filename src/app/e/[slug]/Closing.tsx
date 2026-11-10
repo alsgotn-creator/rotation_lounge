@@ -6,7 +6,7 @@ import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
 
 const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}호`;
-const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} size={size} delay={(c.number ?? 0) * 0.6} />;
+const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={size} delay={(c.number ?? 0) * 0.6} />;
 
 /** 마무리: 결과는 호스트가 열어줄 때까지 기다리고, 열리면 서로 고른 사람만 보여준다. 롤링페이퍼는 언제든 볼 수 있다. */
 function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {
@@ -43,7 +43,7 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
       <p className="cls-price"><s>70,000원</s> <b>58,000원</b> <em>17% 할인</em></p>
       <p className="ds">지인과 함께 오면 각각 30% 할인 (49,000원)</p>
       <ul className="cls-wine-list">
-        <li>12월 중순~말 진행 예정</li>
+        <li>12월 18일 진행 예정</li>
         <li>한 테이블 3:3 · 총 4테이블</li>
         <li>관상게임 · 익명게임 · 올해 마무리 이야기</li>
         <li>인원이 모이지 않으면 진행되지 않아요</li>

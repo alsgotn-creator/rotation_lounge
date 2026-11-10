@@ -16,7 +16,7 @@ function Track({ round, offsetMs, me }: { round: NonNullable<PlayView['round']>;
   return (
     <div className={`trk${pct >= 100 ? ' up' : ''}${round.timer.pausedAt ? ' paused' : ''}`} role="progressbar" aria-label="대화 시간" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
       <div className="trk-bar"><i style={{ width: `${pct}%` }} /></div>
-      {me && <span className="trk-me" style={{ left: `${pct}%` }}><Character shape={me.shape} color={me.color} size={48} /></span>}
+      {me && <span className="trk-me" style={{ left: `${pct}%` }}><Character shape={me.shape} color={me.color} acc={me.prop} size={48} /></span>}
     </div>
   );
 }
@@ -27,9 +27,9 @@ function Scene({ me, partners }: { me: PublicCard | null; partners: PublicCard[]
   const small = partners.length > 1;
   return (
     <div className="scene" aria-hidden="true">
-      <div className="scene-l">{me && <Character shape={me.shape} color={me.color} size={150} />}</div>
+      <div className="scene-l">{me && <Character shape={me.shape} color={me.color} acc={me.prop} size={150} />}</div>
       <div className={`scene-r${small ? ' many' : ''}`}>
-        {partners.map((p, i) => <Character key={p.id} shape={p.shape} color={p.color} size={small ? 112 : 150} delay={i + 1} flip />)}
+        {partners.map((p, i) => <Character key={p.id} shape={p.shape} color={p.color} acc={p.prop} size={small ? 112 : 150} delay={i + 1} flip />)}
       </div>
       <svg className="scene-tbl" viewBox="0 -24 360 144" fill="#fff" stroke="#111" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M128 6h14v8a7 7 0 0 1-14 0zM142 8h3a3 3 0 0 1 0 6h-3M218 6h14v8a7 7 0 0 1-14 0zM218 8h-3a3 3 0 0 0 0 6h3" />

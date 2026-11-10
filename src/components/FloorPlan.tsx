@@ -11,7 +11,7 @@ function Side({ list, label, faces }: { list: P[]; label: string; faces: boolean
     <div className="fp-side">
       {list.map((p) => (
         <div className="fp-seat" key={`${p.gender}${p.number}`}>
-          {faces && <Character shape={p.shape as Shape} color={p.color} size={list.length > 2 ? 30 : 40} delay={(p.number ?? 0) * 0.7} />}
+          {faces && <Character shape={p.shape as Shape} color={p.color} acc={p.prop} size={list.length > 2 ? 30 : 40} delay={(p.number ?? 0) * 0.7} />}
           <span>{p.gender === 'f' ? '여' : '남'}{p.number}호{p.nickname ? <small>{p.nickname}</small> : null}</span>
         </div>
       ))}

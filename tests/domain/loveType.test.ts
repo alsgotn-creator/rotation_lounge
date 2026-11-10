@@ -42,5 +42,9 @@ describe('registration validation', () => {
     expect(registrationError({ ...ok, answers: [...Array(14).fill(3), 6] })).toMatch('질문');
     expect(registrationError({ ...ok, shape: 'star' })).toMatch('캐릭터');
     expect(registrationError({ ...ok, consent: false })).toMatch('동의');
+    expect(registrationError({ ...ok, prop: 'glasses,blush' })).toBeNull();
+    expect(registrationError({ ...ok, prop: 'glasses,sunglasses' })).toMatch('꾸미기');
+    expect(registrationError({ ...ok, prop: 'crown' })).toMatch('꾸미기');
+    expect(registrationError({ ...ok, prop: 'blush,blush' })).toMatch('꾸미기');
   });
 });

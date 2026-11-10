@@ -43,7 +43,7 @@ export default async function Landing() {
 
       <section className="lsec">
         <p className="eb">이런 자리예요</p>
-        <h3>한 저녁에 일곱 명과<br />천천히 대화해요</h3>
+        <h3>2시간 동안 일곱 명과<br />천천히 대화해요</h3>
         <div className="fact" style={{ marginTop: 10 }}><i><Icon name="clock" /></i><div><b>15분씩, 일곱 번</b><span>자리를 옮기며 한 명씩 깊게 이야기해요</span></div></div>
         <div className="fact"><i><Icon name="heart" /></i><div><b>서로 고른 사람만 연결돼요</b><span>한쪽만 고르면 아무 일도 일어나지 않아요</span></div></div>
         <div className="fact"><i><Icon name="eyeOff" /></i><div><b>몇 명이 나를 골랐는지 몰라요</b><span>결과는 ‘매칭되었어요’ 한 줄만 보여요</span></div></div>

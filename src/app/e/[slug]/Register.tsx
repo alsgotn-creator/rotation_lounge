@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
 import { Character } from '../../../components/Character';
 import { QUESTIONS, PALETTE, loveType, phrases } from '../../../lib/domain/loveType';
-import { CHARS, registrationError, type Shape } from '../../../lib/domain/register';
+import { ACCS, ACC_KO, CHARS, EYEWEAR, GLASSED, parseAccs, registrationError, type Acc, type Shape } from '../../../lib/domain/register';
 
-export type Initial = { nickname: string; area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape } | null;
+export type Initial = { nickname: string; area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: string } | null;
 type Given = { gender: 'f' | 'm'; age: number; job: string };
 
 const MBTI_PAIRS: [string, string, string, string][] = [['E', '외향', 'I', '내향'], ['N', '직관', 'S', '감각'], ['F', '감정', 'T', '사고'], ['J', '계획', 'P', '즉흥']];
@@ -26,6 +26,11 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
   const [kw, setKw] = useState('');
   const [answers, setAnswers] = useState<number[]>(initial?.answers ?? Array(QUESTIONS.length).fill(devStep && devStep > 5 ? 4 : 0));
   const [shape, setShape] = useState<Shape>(initial?.shape ?? CHARS[given.gender][0]);
+  const [accs, setAccs] = useState<Acc[]>(parseAccs(initial?.prop));
+  const glassed = GLASSED.includes(shape);
+  const myAccs = accs.filter((a) => !(glassed && EYEWEAR.includes(a)));
+  // 안경류는 하나만: 새로 고르면 다른 안경은 빠진다
+  const toggleAcc = (a: Acc) => setAccs(accs.includes(a) ? accs.filter((x) => x !== a) : [...accs.filter((x) => !(EYEWEAR.includes(a) && EYEWEAR.includes(x))), a]);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -46,7 +51,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
   })();
 
   const submit = async () => {
-    const body = { nickname, area, mbti: mbti.join(''), keywords, answers, shape, consent };
+    const body = { nickname, area, mbti: mbti.join(''), keywords, answers, shape, prop: myAccs.join(','), consent };
     const e = registrationError(body);
     if (e) return setErr(e);
     setBusy(true); setErr('');
@@ -151,9 +156,15 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
 
         {step === CHAR && <>
           <h2 className="q">나를 닮은 캐릭터를<br />골라주세요</h2>
-          <div className="preview-chr"><Character shape={shape} color={type} size={180} /></div>
+          <div className="preview-chr"><Character shape={shape} color={type} acc={myAccs.join(',')} size={180} /></div>
           <div className="shapes">
-            {CHARS[given.gender].map((s, i) => <button type="button" key={s} className={shape === s ? 'on' : ''} aria-pressed={shape === s} aria-label={`캐릭터 ${i + 1}`} onClick={() => setShape(s)}><Character shape={s} color={type} size={84} delay={i} /></button>)}
+            {CHARS[given.gender].map((s, i) => <button type="button" key={s} className={shape === s ? 'on' : ''} aria-pressed={shape === s} aria-label={`캐릭터 ${i + 1}`} onClick={() => setShape(s)}><Character shape={s} color={type} acc={myAccs.join(',')} size={84} delay={i} /></button>)}
+          </div>
+          <p className="eb" style={{ marginTop: 22 }}>꾸미기 <span style={{ color: 'var(--mute)', fontWeight: 600 }}>· 여러 개 골라도 돼요</span></p>
+          <div className="chips" style={{ marginTop: 0 }}>
+            {ACCS.filter((a) => !(glassed && EYEWEAR.includes(a))).map((a) => (
+              <button type="button" key={a} onClick={() => toggleAcc(a)} aria-pressed={accs.includes(a)} style={accs.includes(a) ? { background: 'var(--acc)', color: 'var(--btntx)' } : undefined}>{ACC_KO[a]}</button>
+            ))}
           </div>
           <p className="hint">대기실에서는 이 캐릭터와 키워드만 보여요</p>
         </>}
