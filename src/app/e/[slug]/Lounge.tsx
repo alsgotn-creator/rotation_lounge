@@ -49,18 +49,20 @@ const PREP: [string, string?][] = [
   ['화장실은 한 곳이에요.', '쉬는 시간에 붐비고 수압이 약해서, 미리 해결하고 오시는 걸 추천합니다.'],
 ];
 
-/** 등록을 마치고 라운지에 처음 들어오면 한 번 뜨는 준비사항. 닫으면 이 폰에서는 다시 안 뜬다 (아래 링크로 다시 볼 수 있다). */
+/** 등록을 마치고 라운지에 처음 들어오면 한 번 뜨는 준비사항. '확인했어요'를 체크해야 닫히고, 그 뒤로 이 폰에서는 다시 안 뜬다 (아래 링크로 다시 볼 수 있다). */
 function Prep({ onClose }: { onClose: () => void }) {
+  const [ok, setOk] = useState(false);
   return (
     <>
-      <div className="dim" onClick={onClose} />
+      <div className="dim" />
       <div className="sheet prep" role="dialog" aria-modal="true" aria-labelledby="prep-t">
         <div className="grab" />
         <p className="prep-eb">BEFORE YOU COME</p>
         <h3 id="prep-t">준비 사항</h3>
         <p className="ds">오셔서 이렇게 준비해 주세요</p>
         <ol>{PREP.map(([t, sub], i) => <li key={t}><em>{String(i + 1).padStart(2, '0')}</em><b>{t}</b>{sub && <small>{sub}</small>}</li>)}</ol>
-        <button className="btn" onClick={onClose}>확인했어요</button>
+        <button type="button" className={`agree${ok ? ' on' : ''}`} onClick={() => setOk(!ok)} aria-pressed={ok}><span className="chk" />위 내용을 모두 확인했어요</button>
+        <button className="btn" disabled={!ok} onClick={onClose}>라운지로 가기</button>
       </div>
     </>
   );
