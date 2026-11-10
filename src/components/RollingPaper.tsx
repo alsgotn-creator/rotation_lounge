@@ -1,4 +1,4 @@
-import { layoutNotes } from '../lib/domain/notes';
+import { layoutNotes, PAPER_FONTS_CSS } from '../lib/domain/notes';
 
 const HEARTS = [[14, 12], [78, 9], [46, 30], [10, 52], [86, 46], [30, 78], [66, 70], [90, 86]];
 type Note = { id: string; body: string; font: string; from?: { gender: 'f' | 'm'; number: number | null } };
@@ -11,6 +11,7 @@ export function RollingPaper({ notes }: { notes: Note[] }) {
 
   return (
     <div className="rp">
+      <link rel="stylesheet" href={PAPER_FONTS_CSS} precedence="fonts" />
       {who.length > 0 && <p className="rp-who">{who.map((x) => `${x.g === 'f' ? '여자' : '남자'} ${x.ns.map((n) => `${n}호`).join(' · ')}`).join('  /  ')}가 적어줬어요</p>}
       <div className="rp-sheet">
         {HEARTS.map(([x, y], i) => <span key={i} className="rp-heart" style={{ left: `${x}%`, top: `${y}%`, opacity: 0.35 + (i % 3) * 0.12 }} aria-hidden="true">♡</span>)}

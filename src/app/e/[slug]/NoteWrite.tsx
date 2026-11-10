@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Character } from '../../../components/Character';
 import { api } from '../../../lib/api';
 import { ho } from '../../../lib/domain/lounge';
-import { containsContact, NOTE_MAX, PAPER_FONTS } from '../../../lib/domain/notes';
+import { containsContact, NOTE_MAX, PAPER_FONTS, PAPER_FONTS_CSS } from '../../../lib/domain/notes';
 import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
 
@@ -28,6 +28,7 @@ export default function NoteWrite({ slug, pending, onDone }: { slug: string; pen
 
   return (
     <main className="nw">
+      <link rel="stylesheet" href={PAPER_FONTS_CSS} precedence="fonts" />
       <div className="nw-top"><Character shape={to.shape as Shape} color={to.color} acc={to.prop} size={96} /></div>
       <h2 className="q" style={{ textAlign: 'center' }}>{label}에게 한마디</h2>
       <p className="ds" style={{ textAlign: 'center' }}>{round}번째 라운지에서 만난 분께 남기는 쪽지예요.</p>

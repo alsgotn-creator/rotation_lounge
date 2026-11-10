@@ -42,3 +42,6 @@ export function layoutNotes(notes: { id: string; body: string }[]) {
     };
   });
 }
+
+/** 손글씨 글꼴 CSS (폰 기준 약 340KB): 롤링페이퍼를 쓰거나 볼 때만 불러온다 */
+export const PAPER_FONTS_CSS = 'https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Hi+Melody&family=Poor+Story&display=swap';

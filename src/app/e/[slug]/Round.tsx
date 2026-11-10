@@ -1,4 +1,6 @@
 'use client';
+import { preload } from 'react-dom';
+import { PAPER_FONTS_CSS } from '../../../lib/domain/notes';
 import { useEffect, useRef, useState } from 'react';
 import GameSheet from './GameSheet';
 import { Character } from '../../../components/Character';
@@ -62,6 +64,7 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
 
 export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: string; view: PlayView; offsetMs: number; onRefresh: () => void; me: PublicCard | null }) {
   const round = view.round!;
+  preload(PAPER_FONTS_CSS, { as: 'style' }); // 대화하는 동안 미리 받아 두면 라운드 끝 쪽지 화면이 바로 뜬다
   const now = useNow(offsetMs);
   const revealedLocally = elapsedMs(round.timer, now) >= REVEAL_MS;
   const hasProfile = round.partners.some((p) => view.met[p.id]);
