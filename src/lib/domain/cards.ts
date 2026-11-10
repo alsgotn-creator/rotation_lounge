@@ -9,8 +9,8 @@ const s = (id: string, prompt: string, ...options: string[]): GameCard => ({ id,
 
 export const KINDS: { kind: CardKind; label: string; sub: string }[] = [
   { kind: 'balance', label: '밸런스 게임', sub: '둘 중 하나만 고른다면?' },
-  { kind: 'talk', label: '연애 토크', sub: '정답 없는 가치관 이야기' },
-  { kind: 'scenario', label: '시나리오', sub: '이 상황, 나라면?' },
+  { kind: 'talk', label: '연애토크', sub: '정답 없는 가치관 이야기' },
+  { kind: 'scenario', label: '상황극', sub: '이 상황, 나라면?' },
 ];
 
 export const CARDS: GameCard[] = [

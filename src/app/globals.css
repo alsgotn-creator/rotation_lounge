@@ -489,3 +489,29 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 /* 안전 영역 (iOS 홈 화면 앱: 상단 상태바 아래로) */
 .nb{height:auto;min-height:56px;padding-top:env(safe-area-inset-top)}
 .nav,.lg-top,.ah{padding-top:calc(16px + env(safe-area-inset-top))}
+
+/* 마무리 · 연말 와인 모임: 크리스마스 초대장처럼, 카드가 천천히 궤도를 그리며 기울어진다 */
+.wine-orbit{perspective:900px;margin:28px 0 0}
+.cls-wine{position:relative;overflow:hidden;margin:0;padding:26px 20px 20px;border-radius:22px;text-align:center;color:#fff7ea;
+  background:radial-gradient(120% 70% at 50% -10%,#c42e44 0%,#8a1430 42%,#4a0c22 78%,#2a0614 100%);
+  border:1px solid rgba(232,196,120,.6);box-shadow:0 26px 40px -20px rgba(90,10,30,.6),inset 0 0 0 6px rgba(232,196,120,.12);
+  transform-style:preserve-3d;animation:wine-orbit 10s ease-in-out infinite}
+.cls-wine::after{content:'';position:absolute;inset:-40%;pointer-events:none;background:linear-gradient(115deg,transparent 40%,rgba(255,236,190,.22) 50%,transparent 60%);animation:wine-sheen 6s ease-in-out infinite}
+@keyframes wine-orbit{0%,100%{transform:rotateX(7deg) rotateY(0)}25%{transform:rotateX(0) rotateY(9deg)}50%{transform:rotateX(-7deg) rotateY(0)}75%{transform:rotateX(0) rotateY(-9deg)}}
+@keyframes wine-sheen{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
+.wine-snow{position:absolute;inset:0;pointer-events:none;opacity:.7;
+  background-image:radial-gradient(2px 2px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 78% 12%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 40% 64%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 88% 52%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 24% 84%,#fff 50%,transparent 51%),radial-gradient(2px 2px at 62% 36%,#fff 50%,transparent 51%);
+  background-size:100% 50%;animation:wine-snow 8s linear infinite}
+@keyframes wine-snow{to{background-position:0 100%}}
+.wine-eyebrow{position:relative;margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#f3d58a}
+.cls-wine h3{position:relative;margin:0 0 6px;font-size:22px;font-weight:900;letter-spacing:-.02em;color:#fff}
+.cls-wine .cls-price{position:relative}.cls-wine .cls-price s{color:rgba(255,247,234,.55)}.cls-wine .cls-price b{color:#f3d58a}.cls-wine .cls-price em{background:rgba(243,213,138,.18);color:#f3d58a}
+.cls-wine .ds,.cls-wine .preview{position:relative;color:rgba(255,247,234,.85)}
+.cls-wine-list{position:relative;list-style:none;padding:12px 0;margin:12px 0 14px;border-top:1px dashed rgba(243,213,138,.4);border-bottom:1px dashed rgba(243,213,138,.4);color:rgba(255,247,234,.85)}
+.cls-wine .btn{position:relative;background:linear-gradient(180deg,#f6dc98,#d9a94e);color:#3b0a1c}
+@media (prefers-reduced-motion:reduce){.cls-wine,.cls-wine::after,.wine-snow{animation:none}}
+
+/* 라운지: 캐릭터를 끌어서 옮길 수 있다 (내 화면에서만) */
+.drag{touch-action:none;cursor:grab;position:relative;z-index:1}
+.drag.on{cursor:grabbing;z-index:5}
+.drag.on .lg-p,.drag.on.lg-p{animation-play-state:paused}

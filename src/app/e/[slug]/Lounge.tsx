@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Character } from '../../../components/Character';
 import { Icon } from '../../../components/Icon';
 import { IdealCloud } from '../../../components/IdealCloud';
@@ -18,6 +18,27 @@ function Poke({ children }: { children: React.ReactNode }) {
       <span key={n} className={`poke-in${n ? ` a${(n - 1) % 3}` : ''}`}>{children}</span>
       {n > 0 && <i key={`h${n}`} className="poke-heart" aria-hidden="true">♥</i>}
     </button>
+  );
+}
+
+/** 손가락으로 끌어서 옮기기. 조금만 움직였으면 그냥 톡 건드린 것으로 둔다. 위치는 이 폰에서만 바뀐다. */
+function Drag({ className, style, children }: { className?: string; style?: React.CSSProperties; children: React.ReactNode }) {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [on, setOn] = useState(false);
+  const start = useRef<{ px: number; py: number; x: number; y: number; moved: boolean } | null>(null);
+  return (
+    <div className={`drag${on ? ' on' : ''}${className ? ` ${className}` : ''}`} style={{ ...style, translate: `${pos.x}px ${pos.y}px` }}
+      onPointerDown={(e) => { start.current = { px: e.clientX, py: e.clientY, x: pos.x, y: pos.y, moved: false }; e.currentTarget.setPointerCapture(e.pointerId); setOn(true); }}
+      onPointerMove={(e) => {
+        const s = start.current; if (!s) return;
+        const dx = e.clientX - s.px, dy = e.clientY - s.py;
+        if (!s.moved && Math.hypot(dx, dy) < 6) return;
+        s.moved = true; setPos({ x: s.x + dx, y: s.y + dy });
+      }}
+      onPointerUp={() => setOn(false)} onPointerCancel={() => setOn(false)}
+      onClickCapture={(e) => { if (start.current?.moved) { e.stopPropagation(); e.preventDefault(); } start.current = null; }}>
+      {children}
+    </div>
   );
 }
 
@@ -56,7 +77,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
 
       <section className="lg-me">
         <small>나</small>
-        <Poke><Character shape={me.shape as Shape} color={me.color} acc={me.prop} size={128} /></Poke>
+        <Drag><Poke><Character shape={me.shape as Shape} color={me.color} acc={me.prop} size={128} /></Poke></Drag>
         <div className="lg-kw">{me.keywords.map((k) => <span key={k} className="on">{k}</span>)}</div>
         {me.number != null && <b className="lg-ho">{ho(me.gender, me.number)}</b>}
       </section>
@@ -65,10 +86,10 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
         ? <p className="empty">다른 분들이 들어오는 중이에요</p>
         : <section className="lg-crowd">
             {others.map((c, i) => (
-              <div key={c.id} className="lg-p" style={{ animationDelay: `${-(i * 0.7) % 4}s` }}>
+              <Drag key={c.id} className="lg-p" style={{ animationDelay: `${-(i * 0.7) % 4}s` }}>
                 <Poke><Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={74} delay={i * 0.9} /></Poke>
                 <div className="lg-kw">{c.keywords.slice(0, 2).map((k) => <span key={k}>{k}</span>)}</div>
-              </div>
+              </Drag>
             ))}
           </section>}
 

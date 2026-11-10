@@ -115,13 +115,13 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
         ))}
       </section>
 
+      {round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} />}
       {round.partners.length > 0 && !hasProfile && (
         <div className="rnd-why">
           <p><span>신상정보를 바로 안 보여주는 이유는요, 조건과 정보를 모른 채,</span><span>그 사람 자체를 먼저 알아가길 바라는 컨셉이기 때문이에요.</span></p>
-          <small>대화를 도와줄 아래 게임이나 테이블 위 종이를 보고 이야기해도 좋아요.</small>
+          <small>대화를 도와줄 위의 게임이나 테이블 위 종이를 보고 이야기해도 좋아요.</small>
         </div>
       )}
-      {round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} />}
     </main>
   );
 }

@@ -38,10 +38,12 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
     if (r.ok) onDone();
   };
   return (
-    <section className="cls-wine">
+    <div className="wine-orbit"><section className="cls-wine">
+      <i className="wine-snow" aria-hidden="true" />
+      <p className="wine-eyebrow">Christmas Invitation</p>
       <h3>연말 와인 무제한 모임</h3>
       <p className="cls-price"><s>70,000원</s> <b>58,000원</b> <em>17% 할인</em></p>
-      <p className="ds">지인과 함께 오면 각각 30% 할인 (49,000원)</p>
+      <p className="ds">지인과 함께 오면 각각 30% 할인 (49,000원)<br />문토 리뷰를 남겨주시면 40% 할인 (42,000원)</p>
       <ul className="cls-wine-list">
         <li>12월 18일 진행 예정</li>
         <li>한 테이블 3:3 · 총 4테이블</li>
@@ -54,7 +56,7 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
       </button>
       {st === 'done' && <p className="preview">호스트에게 이름과 연락처가 전달됐어요.</p>}
       {st === 'err' && <p className="preview">신청하지 못했어요. 다시 시도해주세요.</p>}
-    </section>
+    </section></div>
   );
 }
 
@@ -68,9 +70,9 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
       <h2 className="q" style={{ textAlign: 'center' }}>오늘 만나서<br />반가웠어요</h2>
       <p className="ds" style={{ textAlign: 'center' }}>서로 마음이 닿은 분들께는<br />1시간 이내로 따로 연락드릴게요.</p>
 
-      <ReviewBox slug={slug} onDone={bye} />
-
       <WineBox slug={slug} onDone={bye} />
+
+      <ReviewBox slug={slug} onDone={bye} />
 
       {thanks && (
         <section id="cls-bye" className="cls-bye">
