@@ -87,7 +87,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
   }, [refresh]);
 
   const before = v.phase === 'before';
-  const prepKey = `fl_prep_${slug}`;
+  const prepKey = `fl_prep2_${slug}`; // 체크 방식으로 바뀌어서 이미 닫은 폰에도 한 번 더 뜬다
   const [prep, setPrep] = useState(false);
   useEffect(() => { try { if (!localStorage.getItem(prepKey)) setPrep(true); } catch { setPrep(true); } }, [prepKey]);
   const closePrep = () => { setPrep(false); try { localStorage.setItem(prepKey, '1'); } catch {} };
