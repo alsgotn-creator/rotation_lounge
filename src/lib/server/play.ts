@@ -12,6 +12,7 @@ import type { PublicCard } from '../domain/lounge';
 export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[] };
 export type PlayView = {
   serverNow: number;
+  me: PublicCard | null;                   // 나 (라운드 장면 왼쪽). 상대와 같은 응답에서 와야 섞이지 않는다
   phase: 'before' | 'talk' | 'choice' | 'closing';
   noNumber: boolean;                       // 아직 호 번호가 없다 (호스트에게 문의)
   round: null | { no: number; total: number; timer: Round; perTable: number; partners: PublicCard[]; ordinal: number; oppositeCount: number };
@@ -119,7 +120,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   }
 
   const view: PlayView = {
-    serverNow: now, phase: ev.phase, noNumber: !me, round, met, recommendation, choice, paper, result, resultsOpen: !!ev.results_open, game,
+    serverNow: now, me: byId.get(meId) ? { ...card(byId.get(meId)!), me: true } : null, phase: ev.phase, noNumber: !me, round, met, recommendation, choice, paper, result, resultsOpen: !!ev.results_open, game,
     pending: first && byId.get(first.toId) ? { round: first.round, to: card(byId.get(first.toId)!) } : null,
   };
   return { view, pendingAll, opposite, table };
