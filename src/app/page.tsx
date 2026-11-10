@@ -74,7 +74,7 @@ export default async function Landing() {
         <h3>신청은 1분,<br />호스트가 승인하면 입장해요</h3>
         <div className="stp">
           <div><b>신청하기</b><span>이름, 출생연도, 연락처만 받아요</span></div>
-          <div><b>호스트 승인</b><span>보통 하루 안에 승인돼요. 그다음엔 신청한 이메일만 넣으면 입장해요</span></div>
+          <div><b>호스트 승인</b><span>보통 하루 안에 승인돼요. 그다음엔 신청한 휴대폰 번호만 넣으면 입장해요</span></div>
           <div><b>사전 등록하기</b><span>라운지에 들어가 나를 소개하는 질문에 답해요</span></div>
           <div><b>당일, 라운지에서 만나요</b><span>휴대폰 하나만 들고 오세요</span></div>
         </div>

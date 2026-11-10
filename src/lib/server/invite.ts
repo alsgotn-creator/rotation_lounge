@@ -8,9 +8,15 @@ export const inviteCookie = (eventId: string) => `fl_inv_${eventId}`;
 
 export type Invited = { id: string; name: string; gender: 'f' | 'm'; birth_year: number; job: string; number: number | null };
 
+/** 호스트가 모임을 닫았는지 (locked 칸이 아직 없으면 열린 것으로) */
+export async function isLocked(eventId: string) {
+  const { data, error } = await db().from('events').select('locked').eq('id', eventId).maybeSingle();
+  return !error && !!data?.locked;
+}
+
 /** 확정된 신청자의 입장 링크(또는 신청 내역 링크)인지 확인 */
 export async function findInvited(eventId: string, token: string | undefined) {
-  if (!token) return null;
+  if (!token || (await isLocked(eventId))) return null;
   const appId = appFromSigned(token);
   if (appId) {
     const { data } = await db().from('applications').select('id,name,gender,birth_year,job,number').eq('id', appId).eq('event_id', eventId).eq('status', 'confirmed').maybeSingle();

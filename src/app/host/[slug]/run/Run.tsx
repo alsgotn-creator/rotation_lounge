@@ -8,7 +8,7 @@ import { notStarted, type Round } from '../../../../lib/domain/seating';
 import type { HostCmd, Moved, Person, Phase, ResetWhat } from '../../../../lib/server/run';
 
 type View = {
-  ev: { slug: string; phase: Phase; table_count: number; per_table: number; recommendation_open: boolean; results_open: boolean; round_duration_sec: number; max_picks: number };
+  ev: { slug: string; phase: Phase; table_count: number; per_table: number; locked: boolean; round_duration_sec: number; max_picks: number };
   current: Round | null; people: Person[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
   extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
@@ -146,20 +146,17 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           </div>
         ))}
 
-        <p className="eb" style={{ marginTop: 26 }}>공개 설정</p>
+        <p className="eb" style={{ marginTop: 26 }}>모임 닫기</p>
         <div className="addf" style={{ paddingTop: 12 }}>
-          <div className="kv" style={{ borderTop: 0 }}><span>가장 비슷한 사람 추천</span>
+          <div className="kv" style={{ borderTop: 0 }}><span>참가자 입장 {ev.locked ? '(닫힘)' : '(열림)'}</span>
             <div className="chips" style={{ margin: 0 }}>
-              {[[true, '공개'], [false, '숨김']].map(([o, l]) => <button key={String(o)} aria-pressed={ev.recommendation_open === o} style={ev.recommendation_open === o ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => ev.recommendation_open !== o && send({ type: 'openRecommendation', open: o as boolean })}>{l as string}</button>)}
+              {[[false, '열기'], [true, '닫기']].map(([o, l]) => <button key={String(o)} aria-pressed={ev.locked === o} style={ev.locked === o ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => ev.locked !== o && send({ type: 'lock', locked: o as boolean })}>{l as string}</button>)}
             </div></div>
-          <div className="kv"><span>최종 선택 결과 (참가자에게)</span>
-            <div className="chips" style={{ margin: 0 }}>
-              {[[true, '공개'], [false, '숨김']].map(([o, l]) => <button key={String(o)} aria-pressed={ev.results_open === o} style={ev.results_open === o ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => ev.results_open !== o && send({ type: 'openResults', open: o as boolean })}>{l as string}</button>)}
-            </div></div>
+          <p className="ds" style={{ margin: '8px 0 0', fontSize: 12 }}>모임이 끝나면 닫아주세요. 입장 링크·전화번호로 아무도 못 들어오고, 데이터는 그대로 남아요.</p>
         </div>
 
         {(ev.phase === 'choice' || ev.phase === 'closing') && <>
-          <p className="eb run-eb" style={{ marginTop: 26 }}>최종 선택 · {v.extras.done}/{v.extras.total}명 완료<ResetBtn what="choices" msg="모든 참가자의 최종 선택을 지우고 결과 공개를 꺼요." /></p>
+          <p className="eb run-eb" style={{ marginTop: 26 }}>최종 선택 · {v.extras.done}/{v.extras.total}명 완료<ResetBtn what="choices" msg="모든 참가자의 최종 선택을 지워요." /></p>
           <div className="people">
             {v.extras.picks.map((x) => { const p = byId.get(x.id)!; return (
               <div key={x.id} className="person-row" style={{ alignItems: 'flex-start' }}>

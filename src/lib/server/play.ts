@@ -4,12 +4,11 @@ import { loadRun, type Person } from './run';
 import { partnersOf, ordinal, tableOf, type Round } from '../domain/seating';
 import { cardById } from '../domain/cards';
 import { metIds, pendingNotes, type Pending } from '../domain/turns';
-import { phrases, recommend } from '../domain/loveType';
-import { mutualMatches } from '../domain/matching';
+import { phrases, recommend, similarity } from '../domain/loveType';
 import { paperFont } from '../domain/notes';
 import type { PublicCard } from '../domain/lounge';
 
-export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[] };
+export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[]; similar: number; best: boolean }; // similar: 나와 비슷한 정도 %, best: 오늘 이성 중 가장 비슷한 사람
 export type PlayView = {
   serverNow: number;
   me: PublicCard | null;                   // 나 (라운드 장면 왼쪽). 상대와 같은 응답에서 와야 섞이지 않는다
@@ -18,12 +17,9 @@ export type PlayView = {
   round: null | { no: number; total: number; timer: Round; perTable: number; partners: PublicCard[]; ordinal: number; oppositeCount: number };
   met: Record<string, Profile>;            // 5분 이상 함께 앉았던 사람만 (최종선택 때는 같이 앉았던 사람 모두). 한 번 공개되면 계속 보인다.
   pending: null | { round: number; to: PublicCard };
-  recommendation: null | 'pending' | PublicCard;   // 호스트가 '추천 공개'를 누르면 가장 비슷한 이성
   choice: null | { max: number; picks: string[]; done: boolean; candidates: PublicCard[] };
   paper: null | { notes: { id: string; body: string; font: string; from: { gender: 'f' | 'm'; number: number | null } }[] };   // 최종선택 단계에만. 보낸 사람은 '여3호'처럼 호가 보인다
-  resultsOpen: boolean;
   game: null | { cardId: string; kind: string; prompt: string; options: string[]; mine: string | null; answered: number; total: number; answers: null | { gender: 'f' | 'm'; number: number; me: boolean; text: string }[] };
-  result: null | { matches: PublicCard[] };                  // 서로 고른 사람만. 나를 고른 사람 수·이름은 어디에도 없다.
 };
 
 const card = (p: Person): PublicCard => ({ id: p.id, gender: p.gender, number: p.number, shape: p.shape, prop: p.prop, color: p.color, keywords: p.keywords, me: false });
@@ -68,8 +64,18 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   const met: PlayView['met'] = {};
   const ids = me ? metIds(me, rounds, T, g, seated, now, ev.phase === 'choice') : [];
   if (ids.length) {
-    const { data } = await db().from('participants').select('id,age,job,area,mbti,love_type').in('id', ids);
-    for (const r of data ?? []) met[r.id as string] = { age: r.age, job: r.job, area: r.area, mbti: r.mbti, color: r.love_type, phrases: phrases(r.love_type) };
+    // 비슷한 정도는 신상 공개와 함께. 가장 비슷한 이성(추천)도 그 사람이 공개될 때 같이 알려준다.
+    const [{ data }, { data: ans }] = await Promise.all([
+      db().from('participants').select('id,age,job,area,mbti,love_type').in('id', ids),
+      db().from('participants').select('id,number,answers').in('id', [meId, ...opposite.map((p) => p.id)]),
+    ]);
+    const mine = (ans ?? []).find((r) => r.id === meId)?.answers as number[] | undefined;
+    const others = (ans ?? []).filter((r) => r.id !== meId).map((r) => ({ id: r.id as string, number: (r.number as number | null) ?? 99, answers: r.answers as number[] }));
+    const best = mine ? recommend({ id: meId, answers: mine }, others) : null;
+    for (const r of data ?? []) {
+      const theirs = others.find((o) => o.id === r.id)?.answers;
+      met[r.id as string] = { age: r.age, job: r.job, area: r.area, mbti: r.mbti, color: r.love_type, phrases: phrases(r.love_type), similar: mine && theirs ? similarity(mine, theirs) : 0, best: r.id === best };
+    }
   }
 
   // 롤링페이퍼 밀린 것. notes 표가 아직 없으면(마이그레이션 전) 건너뛴다.
@@ -79,18 +85,6 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     if (!error) pendingAll = pendingNotes(me, rounds, T, g, seated, new Set((data ?? []).map((n) => `${n.round}:${n.to_id}`)), now, ev.phase);
   }
   const first = pendingAll[0];
-
-  // 가장 비슷한 이성 (호스트가 열었을 때만)
-  let recommendation: PlayView['recommendation'] = null;
-  if (me) {
-    recommendation = 'pending';
-    if (ev.recommendation_open) {
-      const { data } = await db().from('participants').select('id,number,answers').in('id', [meId, ...opposite.map((p) => p.id)]);
-      const mine = (data ?? []).find((r) => r.id === meId);
-      const best = mine && recommend({ id: meId, answers: mine.answers }, (data ?? []).filter((r) => r.id !== meId).map((r) => ({ id: r.id, number: r.number ?? 99, answers: r.answers })));
-      recommendation = best && byId.get(best) ? card(byId.get(best)!) : 'pending';
-    }
-  }
 
   // 최종 선택
   let choice: PlayView['choice'] = null;
@@ -102,8 +96,8 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     choice = { max: ev.max_picks, picks, done: !d.error ? !!d.data?.choice_done_at : picks.length > 0, candidates: opposite.sort((a, b) => a.number! - b.number!).map(card) };
   }
 
-  // 받은 쪽지는 최종선택 단계에서 (고르기 전에) 읽는다. 마무리에서는 (호스트가 열면) 매칭 결과만.
-  let paper: PlayView['paper'] = null, result: PlayView['result'] = null;
+  // 받은 쪽지는 최종선택 단계에서 (고르기 전에) 읽는다. 매칭 결과는 앱에 보여주지 않고 진행자가 따로 연락한다.
+  let paper: PlayView['paper'] = null;
   if (me && ev.phase === 'choice') {
     const q = (cols: string) => db().from('notes').select(cols).eq('event_id', eventId).eq('to_id', meId).eq('hidden', false).not('body', 'is', null).order('created_at');
     let res = await q('id,body,from_id,font');
@@ -111,16 +105,8 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     const data = (res.data ?? []) as unknown as { id: string; body: string; from_id: string; font?: string | null }[];
     paper = { notes: data.map((n) => { const f = byId.get(n.from_id); return { id: n.id, body: n.body, font: paperFont(n.font), from: { gender: (f?.gender ?? 'f') as 'f' | 'm', number: f?.number ?? null } }; }) };
   }
-  if (me && ev.phase === 'closing') {
-    if (ev.results_open) {
-      const { data: all } = await db().from('choices').select('from_id,to_id').eq('event_id', eventId);
-      const ms = mutualMatches((all ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string })), meId);
-      result = { matches: ms.map((id) => byId.get(id)).filter((p): p is Person => !!p).map(card) };
-    }
-  }
-
   const view: PlayView = {
-    serverNow: now, me: byId.get(meId) ? { ...card(byId.get(meId)!), me: true } : null, phase: ev.phase, noNumber: !me, round, met, recommendation, choice, paper, result, resultsOpen: !!ev.results_open, game,
+    serverNow: now, me: byId.get(meId) ? { ...card(byId.get(meId)!), me: true } : null, phase: ev.phase, noNumber: !me, round, met, choice, paper, game,
     pending: first && byId.get(first.toId) ? { round: first.round, to: card(byId.get(first.toId)!) } : null,
   };
   return { view, pendingAll, opposite, table };

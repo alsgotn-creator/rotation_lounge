@@ -16,7 +16,7 @@ export type Person = { id: string; gender: 'f' | 'm'; number: number | null; exc
 
 export async function loadRun(eventId: string) {
   const [{ data: ev }, { data: rr }, { data: ps }] = await Promise.all([
-    db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks,recommendation_open,results_open').eq('id', eventId).single(),
+    db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks').eq('id', eventId).single(),
     db().from('rounds').select('*').eq('event_id', eventId).order('no'),
     db().from('participants').select('id,gender,number,excluded,nickname,shape,prop,love_type,keywords,applications(name)').eq('event_id', eventId).order('number', { nullsFirst: false }),
   ]);
@@ -29,7 +29,9 @@ export async function loadRun(eventId: string) {
   const seated: Seated[] = people.filter((p) => p.number != null && !p.excluded).map((p) => ({ id: p.id, gender: p.gender, number: p.number! }));
   const current = rounds.at(-1) ?? null;
   const { perTable } = await eventLayout(eventId);
-  return { ev: { ...ev!, per_table: perTable }, rounds, current, people, seated };
+  // locked 칸은 마이그레이션 0012 전에는 없을 수 있다 → 그때는 열린 것으로
+  const lk = await db().from('events').select('locked').eq('id', eventId).single();
+  return { ev: { ...ev!, per_table: perTable, locked: !lk.error && !!lk.data?.locked }, rounds, current, people, seated };
 }
 
 /** 이번(또는 곧 시작할 1라운드) 테이블별 앉는 사람들 */
@@ -46,8 +48,7 @@ export type HostCmd =
   | { type: 'setNumber'; participantId: string; number: number | null }
   | { type: 'exclude'; participantId: string; excluded: boolean }
   | { type: 'compact' }
-  | { type: 'openResults'; open: boolean }
-  | { type: 'openRecommendation'; open: boolean }
+  | { type: 'lock'; locked: boolean }
   | { type: 'hideNote'; noteId: string; hidden: boolean }
   | { type: 'reset'; what: ResetWhat };
 
@@ -152,12 +153,11 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       await db().from('events').update({ table_count: tableCount }).eq('id', eventId);
       return { ok: true, moved, tableCount };
     }
-    case 'openResults':
-      await db().from('events').update({ results_open: !!cmd.open }).eq('id', eventId);
-      return { ok: true };
-    case 'openRecommendation':
-      await db().from('events').update({ recommendation_open: !!cmd.open }).eq('id', eventId);
-      return { ok: true };
+    case 'lock': {
+      // 모임이 끝나면 닫는다: 참가자 입장(링크·전화번호)만 막고 데이터는 그대로 둔다
+      const { error } = await db().from('events').update({ locked: !!cmd.locked }).eq('id', eventId);
+      return error ? no('잠금 칸이 아직 없어요. 마이그레이션 0012를 먼저 적용해주세요.') : { ok: true };
+    }
     case 'hideNote':
       await db().from('notes').update({ hidden: !!cmd.hidden }).eq('id', cmd.noteId).eq('event_id', eventId);
       return { ok: true };
@@ -171,8 +171,6 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       if (all || w === 'closing') { await del('reviews'); await del('wine_signups'); }
       const patch: Record<string, unknown> = {};
       if (all || w === 'rounds') patch.phase = 'before';
-      if (all || w === 'choices') patch.results_open = false;
-      if (all) patch.recommendation_open = false;
       if (Object.keys(patch).length) await db().from('events').update(patch).eq('id', eventId);
       return { ok: true };
     }

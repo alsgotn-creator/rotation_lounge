@@ -47,6 +47,13 @@ const PHRASES: [string, string][] = [
 ];
 export const phrases = (type: number) => PHRASES.map((p, axis) => p[(type >> (3 - axis)) & 1]) as [string, string, string, string];
 
+/** 두 사람 응답이 얼마나 비슷한지 0~100%. 추천과 같은 거리(역문항 뒤집은 15문항의 유클리드 거리)를 최대 거리로 나눈다. */
+export function similarity(a: number[], b: number[]) {
+  const x = normalize(a), y = normalize(b);
+  const d = Math.sqrt(x.reduce((s, v, i) => s + (v - y[i]) ** 2, 0));
+  return Math.round(100 * (1 - d / Math.sqrt(16 * x.length)));
+}
+
 /** 응답이 가장 비슷한 사람 (유클리드 거리, 같으면 번호가 작은 사람) */
 export function recommend(me: { id: string; answers: number[] }, others: { id: string; number: number; answers: number[] }[]) {
   const m = normalize(me.answers);

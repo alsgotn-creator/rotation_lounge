@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { loveType, PALETTE, phrases, recommend, QUESTIONS } from '../../src/lib/domain/loveType';
+import { loveType, PALETTE, phrases, recommend, similarity, QUESTIONS } from '../../src/lib/domain/loveType';
 import { registrationError } from '../../src/lib/domain/register';
 
 describe('love type', () => {
@@ -25,6 +25,11 @@ describe('love type', () => {
   test('recommend: smallest distance, tie → lower number', () => {
     const me = { id: 'm', answers: Array(15).fill(4) };
     expect(recommend(me, [{ id: 'a', number: 2, answers: Array(15).fill(1) }, { id: 'b', number: 5, answers: Array(15).fill(4) }, { id: 'c', number: 1, answers: Array(15).fill(4) }])).toBe('c');
+  });
+  test('similarity: same 100, opposite ends 0', () => {
+    const a = Array(15).fill(1), b = QUESTIONS.map((q) => (q.reversed ? 1 : 5));
+    expect(similarity(a, a)).toBe(100);
+    expect(similarity(QUESTIONS.map((q) => (q.reversed ? 5 : 1)), b)).toBe(0);
   });
   test('recommend with no others → null', () => expect(recommend({ id: 'm', answers: Array(15).fill(3) }, [])).toBeNull());
 });

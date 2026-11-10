@@ -5,7 +5,6 @@ import type { PublicCard } from '../../../lib/domain/lounge';
 import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
 
-const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}호`;
 const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={size} delay={(c.number ?? 0) * 0.6} />;
 
 /** 마무리: 결과는 호스트가 열어줄 때까지 기다리고, 열리면 서로 고른 사람만 보여준다. 롤링페이퍼는 언제든 볼 수 있다. */
@@ -59,34 +58,14 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
 }
 
 export default function Closing({ view, me, slug }: { view: PlayView; me: PublicCard | null; slug: string }) {
-  const matches = view.result?.matches ?? [];
   const [thanks, setThanks] = useState(false); // 후기나 와인모임 신청을 하면 캐릭터가 인사하며 마무리
   const bye = () => { setThanks(true); setTimeout(() => document.getElementById('cls-bye')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50); };
 
   return (
     <main className="cls" style={{ paddingTop: 40 }}>
-      {!view.resultsOpen && <>
-        <div className="cls-wait" aria-hidden="true">{me && <Face c={me} size={150} />}</div>
-        <h2 className="q" style={{ textAlign: 'center' }}>오늘 만나서<br />반가웠어요</h2>
-        <p className="ds" style={{ textAlign: 'center' }}>매칭된 분들께는 1시간 이내로<br />메일 보내드려요.</p>
-      </>}
-
-      {view.resultsOpen && matches.length > 0 && <>
-        <h2 className="q" style={{ textAlign: 'center' }}>서로 마음이 닿았어요</h2>
-        {matches.map((m) => (
-          <article className="cls-match" key={m.id}>
-            <div className="cls-pair">{me && <Face c={me} size={96} />}<span className="cls-heart" aria-hidden="true">♥</span><Face c={m} size={96} /></div>
-            <h3>{ho(m.gender, m.number)}님과 매칭되었어요</h3>
-            <p>진행자가 연락처를 직접 전해드릴 거예요.</p>
-          </article>
-        ))}
-      </>}
-
-      {view.resultsOpen && matches.length === 0 && <>
-        <div className="cls-wait" aria-hidden="true">{me && <Face c={me} size={130} />}</div>
-        <h2 className="q" style={{ textAlign: 'center' }}>이번엔 인연이<br />닿지 않았어요</h2>
-        <p className="ds" style={{ textAlign: 'center' }}>그래도 오늘 만나서 반가웠어요.</p>
-      </>}
+      <div className="cls-wait" aria-hidden="true">{me && <Face c={me} size={150} />}</div>
+      <h2 className="q" style={{ textAlign: 'center' }}>오늘 만나서<br />반가웠어요</h2>
+      <p className="ds" style={{ textAlign: 'center' }}>서로 마음이 닿은 분들께는<br />1시간 이내로 따로 연락드릴게요.</p>
 
       <ReviewBox slug={slug} onDone={bye} />
 

@@ -50,6 +50,10 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
       <div className="rv-grid">
         {[['나이', `${p.age}세`], ['직업', p.job], ['사는 곳', p.area], ['MBTI', p.mbti]].map(([k, v]) => <div key={k}><small>{k}</small><b>{v}</b></div>)}
       </div>
+      <p className={`rv-sim${p.best ? ' best' : ''}`}>
+        {p.best && <b>✦ 오늘 이성 중 나와 가장 비슷한 분이에요</b>}
+        <span>연애 성향 질문 15개 답이 <em>{p.similar}%</em> 비슷해요</span>
+      </p>
       <div className="rv-love">
         <span className="orb" style={{ ['--c' as string]: PALETTE[p.color], width: 30, height: 30, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
         <div>{p.phrases.map((t) => <p key={t}>{t}</p>)}</div>

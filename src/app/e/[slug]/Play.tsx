@@ -43,5 +43,5 @@ export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: s
   if (v?.phase === 'closing') return <Closing slug={slug} view={v} me={v.me} />;
   if (v?.phase === 'choice' && v.choice) return <Choice key="choice" slug={slug} view={v} onSaved={load} onPaper={() => setPaperOpen(true)} />;
   if (v?.round) return <Round key={v.round.no} slug={slug} view={v} offsetMs={offset} onRefresh={load} me={v.me} />;
-  return <Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} recommendation={v?.recommendation ?? null} />;
+  return <Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} />;
 }
