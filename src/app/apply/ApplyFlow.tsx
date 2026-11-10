@@ -128,8 +128,8 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         </>}
 
         {step === 3 && <>
-          <h2 className="q">매칭 결과를 받을<br />이메일을 알려주세요</h2>
-          <p className="ds">행사가 끝난 뒤, 매칭이 됐는지 안 됐는지 이 메일로 알려드리려고 받아요.</p>
+          <h2 className="q">이메일을<br />알려주세요</h2>
+          <p className="ds">매칭 결과는 문자로 알려드려요. 이메일은 다음 모임 소식을 보낼 때만 써요.</p>
           <label className="fld"><span>이메일</span>
             <input autoFocus type="email" inputMode="email" autoComplete="email" placeholder="example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value.trim())} /></label>
           {!email.includes('@') && <div className="chips">

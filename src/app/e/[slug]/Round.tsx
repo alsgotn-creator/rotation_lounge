@@ -52,7 +52,7 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
       </div>
       <p className={`rv-sim${p.best ? ' best' : ''}`}>
         {p.best && <b>✦ 오늘 이성 중 나와 가장 비슷한 분이에요</b>}
-        <span>연애 성향 질문 15개 답이 <em>{p.similar}%</em> 비슷해요</span>
+        <span>연애 성향이 <em>{p.similar}%</em> 비슷해요</span>
       </p>
       <div className="rv-love">
         <span className="orb" style={{ ['--c' as string]: PALETTE[p.color], width: 30, height: 30, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />

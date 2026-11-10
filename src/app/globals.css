@@ -470,3 +470,5 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 .rnd-why small{display:block;margin-top:6px;font-size:12px;line-height:1.5;word-break:keep-all}
 .cls-wine-list{margin:10px 0 14px;padding-left:18px;font-size:14px;line-height:1.75;color:var(--mute)}
 .cls-wine-btn{height:auto;min-height:56px;padding:10px 0;flex-direction:column;line-height:1.3}.cls-wine-btn small{display:block;font-size:12px;font-weight:700;opacity:.8}
+
+.tel010{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line)}.enter .tel010 b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--mute)}.fld .tel010 input{flex:1;min-width:0;border-bottom:0}

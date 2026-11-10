@@ -1,4 +1,5 @@
 'use client';
+import { matchSms, noMatchSms } from '../../../../lib/domain/sms';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '../../../../components/Icon';
@@ -68,6 +69,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   if (!v) return <main className="bd"><p className="ds">불러오는 중…</p></main>;
   const { ev, current } = v;
   const byId = new Map(v.people.map((p) => [p.id, p]));
+  const copy = async (t: string, ok: string) => { try { await navigator.clipboard.writeText(t); show(ok); } catch { show('복사하지 못했어요'); } };
   const label = (p: Person) => `${p.gender === 'f' ? '여' : '남'}${p.number ?? '-'}호`;
   const open = current && !current.closedAt;
   const waitStart = !!open && notStarted(current!); // 자리 이동 중: 타이머가 멈춰 있다
@@ -169,6 +171,19 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
             {v.extras.matches.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>아직 서로 고른 커플이 없어요</p>}
             {v.extras.matches.map(([a, b]) => { const pa = byId.get(a)!, pb = byId.get(b)!; return (
               <div key={a + b} className="person-row"><div><b>{label(pa)} ♥ {label(pb)}</b><span>{pa.nickname}({pa.name}) · {v.extras.contacts[a]?.email} · {v.extras.contacts[a]?.phone}</span><span>{pb.nickname}({pb.name}) · {v.extras.contacts[b]?.email} · {v.extras.contacts[b]?.phone}</span></div></div>); })}
+          </div>
+          <p className="eb" style={{ marginTop: 22 }}>결과 문자 · 업무용 폰으로 보내기</p>
+          <div className="people">
+            {v.extras.picks.map((x) => {
+              const p = byId.get(x.id)!, phone = v.extras.contacts[x.id]?.phone ?? '';
+              const mine = v.extras.matches.filter((m) => m.includes(x.id)).map((m) => byId.get(m[0] === x.id ? m[1] : m[0])!);
+              const text = mine.length ? matchSms(p.name, mine.map((o) => ({ label: label(o), name: o.name, phone: v.extras.contacts[o.id]?.phone ?? '' }))) : noMatchSms(p.name);
+              return (
+                <div key={x.id} className="person-row">
+                  <div><b>{label(p)} {p.name} {mine.length ? '♥ 매칭' : ''}</b><span>{phone}</span></div>
+                  <button className="lnk" style={{ margin: 0 }} onClick={() => copy(phone, '번호를 복사했어요')}>번호</button>
+                  <button className="lnk" style={{ margin: 0, fontWeight: 800, color: 'var(--text)' }} onClick={() => copy(text, '문자를 복사했어요. 문자 앱에 붙여넣어 주세요')}>문자 복사</button>
+                </div>); })}
           </div>
         </>}
 
