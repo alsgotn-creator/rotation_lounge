@@ -49,9 +49,9 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
       </ul>
       <p className="ds" style={{ margin: '0 0 14px', textAlign: 'center', fontWeight: 800 }}>옷깃만 믿고 오세요 😊</p>
       <button className="btn cls-wine-btn" disabled={st === 'busy' || st === 'done'} onClick={join}>
-        {st === 'done' ? '✓ 메일로 안내해드릴게요' : <>와인 모임 관심있어요!<small>메일로 안내받기</small></>}
+        {st === 'done' ? '✓ 문자로 안내해드릴게요' : <>와인 모임 관심있어요!<small>문자로 안내받기</small></>}
       </button>
-      {st === 'done' && <p className="preview">호스트에게 이름·연락처·이메일이 전달됐어요.</p>}
+      {st === 'done' && <p className="preview">호스트에게 이름과 연락처가 전달됐어요.</p>}
       {st === 'err' && <p className="preview">신청하지 못했어요. 다시 시도해주세요.</p>}
     </section>
   );

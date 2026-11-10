@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db, hasDb } from '../../../lib/server/supabase';
 import { hash, newToken } from '../../../lib/server/auth';
 import { eventSeats, getEvent } from '../../../lib/server/signup';
-import { isBirth, isEmail, isName, isPhone, formatPhone } from '../../../lib/signup/validate';
+import { isBirth, isName, isPhone, formatPhone } from '../../../lib/signup/validate';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   const s = (k: string, max: number) => String(f.get(k) ?? '').trim().slice(0, max);
   const eventId = s('eventId', 64), gender = s('gender', 1), name = s('name', 20), birth = s('birth', 4);
-  const phone = formatPhone(s('phone', 20)), email = s('email', 100).toLowerCase(), job = s('job', 30);
+  const phone = formatPhone(s('phone', 20)), job = s('job', 30);
   let avoid: { name: string; note: string }[] = [];
   try {
     avoid = (JSON.parse(String(f.get('avoid') ?? '[]')) as { name: string; note: string }[]).slice(0, 5)
@@ -41,13 +41,15 @@ export async function POST(req: Request) {
   if (!isName(name)) return fail('이름을 확인해주세요.');
   if (!isBirth(birth, event.birth_from, event.birth_to)) return fail('출생연도를 확인해주세요.');
   if (!isPhone(phone)) return fail('휴대폰 번호를 확인해주세요.');
-  if (!isEmail(email)) return fail('이메일을 확인해주세요.');
+  // 매칭 결과는 문자로 상대 번호를 전한다 → 신청 때 꼭 동의를 받는다
+  if (s('contactConsent', 5) !== 'yes') return fail('연락처 전달에 동의해주세요.');
   if (job.length < 2) return fail('하는 일을 적어주세요.');
 
   const id = crypto.randomUUID();
   const statusToken = newToken();
   const { error } = await db().from('applications').insert({
-    id, event_id: event.id, gender, name, birth_year: Number(birth), phone, email, job,
+    id, event_id: event.id, gender, name, birth_year: Number(birth), phone, email: '', job, // 이메일은 더 받지 않는다 (칸은 비워둠)
+   
     avoid, status_token_hash: hash(statusToken),
   });
   if (error) {

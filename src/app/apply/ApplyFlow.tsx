@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '../../components/Icon';
 import { yy } from '../../lib/signup/data';
 import type { Session } from '../../lib/signup/rules';
-import { birthError, digits, formatPhone, isBirth, isEmail, isName, isPhone } from '../../lib/signup/validate';
+import { birthError, digits, formatPhone, isBirth, isName, isPhone } from '../../lib/signup/validate';
 
 type Gender = '' | 'f' | 'm';
 type Avoid = { name: string; note: string };
-const STEPS = 6;
-const DOMAINS = ['@gmail.com', '@naver.com', '@kakao.com', '@daum.net'];
+const STEPS = 5;
 const JOBS = ['개발자', '교사', '간호사', '마케터', '공무원'];
 
 export default function ApplyFlow({ sessions, initialSession }: { sessions: Session[]; initialSession: string | null }) {
@@ -23,13 +22,13 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const [name, setName] = useState('');
   const [birth, setBirth] = useState('');
   const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
   const [job, setJob] = useState('');
   const [avoidMode, setAvoidMode] = useState<'' | 'no' | 'yes'>('');
   const [avoid, setAvoid] = useState<Avoid[]>([]);
   const [draft, setDraft] = useState<Avoid>({ name: '', note: '' });
   const [sheet, setSheet] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [share, setShare] = useState(false); // 매칭되면 상대에게 이름·번호 전달 동의
   const [done, setDone] = useState<string | null>(null); // 신청 내역 토큰
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState('');
@@ -39,13 +38,13 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   // shortcut: 브라우저 뒤로가기는 단계가 아니라 페이지 단위로 동작함. 실제 오픈 전 history 연동 고려.
   const back = () => (step === 0 ? router.push('/') : go(step - 1));
 
-  if (done) return <Done email={email} token={done} />;
+  if (done) return <Done phone={phone} token={done} />;
 
   const submit = async () => {
     if (!s || sending) return;
     setSending(true); setErr('');
     const fd = new FormData();
-    Object.entries({ eventId: s.id, gender, name: name.trim(), birth, phone, email, job: job.trim(), avoid: JSON.stringify(avoidMode === 'yes' ? avoid : []) })
+    Object.entries({ eventId: s.id, gender, name: name.trim(), birth, phone, job: job.trim(), contactConsent: share ? 'yes' : '', avoid: JSON.stringify(avoidMode === 'yes' ? avoid : []) })
       .forEach(([k, v]) => fd.append(k, v));
     try {
       const r = await fetch('/api/apply', { method: 'POST', body: fd });
@@ -62,7 +61,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const canNext = [
     !!s, !!gender,
     basicOk[basic],
-    isEmail(email), job.trim().length >= 2,
+    job.trim().length >= 2,
     avoidMode === 'no' || (avoidMode === 'yes' && avoid.length > 0),
   ][step];
 
@@ -128,17 +127,6 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         </>}
 
         {step === 3 && <>
-          <h2 className="q">이메일을<br />알려주세요</h2>
-          <p className="ds">매칭 결과는 문자로 알려드려요. 이메일은 다음 모임 소식을 보낼 때만 써요.</p>
-          <label className="fld"><span>이메일</span>
-            <input autoFocus type="email" inputMode="email" autoComplete="email" placeholder="example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value.trim())} /></label>
-          {!email.includes('@') && <div className="chips">
-            {DOMAINS.map((d) => <button type="button" key={d} onClick={() => setEmail((email || '') + d)}>{d}</button>)}
-          </div>}
-          <p className="hint"><Icon name="lock" />매칭 결과 안내 말고는 메일을 보내지 않아요</p>
-        </>}
-
-        {step === 4 && <>
           <h2 className="q">어떤 일을 하세요?</h2>
           <p className="ds">직군 정도면 충분해요. 대화 5분 뒤에 맞은편 한 사람에게만 보여요.</p>
           <label className="fld"><span>하는 일</span>
@@ -146,7 +134,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
           <div className="chips">{JOBS.map((j) => <button type="button" key={j} onClick={() => setJob(j)}>{j}</button>)}</div>
         </>}
 
-        {step === 5 && <>
+        {step === 4 && <>
           <h2 className="q">마주치고 싶지 않은<br />지인이 있나요?</h2>
           <p className="ds">적어주시면 같은 날 배정하지 않아요.</p>
           <div className="yn">
@@ -170,7 +158,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         </>}
 
         {/* 일정·성별은 고르면 바로 넘어가서 버튼이 필요 없음 */}
-        {step >= 2 && !(step === 5 && avoidMode === '') && (
+        {step >= 2 && !(step === 4 && avoidMode === '') && (
           <div className="ft"><button className="btn" type="submit" disabled={!canNext}>{step === 2 && basic < 2 ? '확인' : '다음'}</button></div>
         )}
       </form>
@@ -186,24 +174,25 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
               ['일정', `${s.dateLabel} ${s.time}`, 0],
               ['이름', `${name.trim()} · ${gender === 'f' ? '여성' : '남성'} · ${birth}`, 2],
               ['휴대폰', phone, 2],
-              ['이메일', email, 3],
-              ['하는 일', job.trim(), 4],
-              ['피하고 싶은 지인', avoidMode === 'yes' ? `${avoid.length}명` : '없음', 5],
+              ['하는 일', job.trim(), 3],
+              ['피하고 싶은 지인', avoidMode === 'yes' ? `${avoid.length}명` : '없음', 4],
             ] as const).map(([k, v, to]) => (
               <button type="button" key={k} onClick={() => { setSheet(false); go(to); }} aria-label={`${k} 고치기`}><dt>{k}</dt><dd>{v}</dd></button>
             ))}
           </dl>
           <button type="button" className={`agree${agree ? ' on' : ''}`} onClick={() => setAgree(!agree)} aria-pressed={agree}>
             <span className="chk" />필수 약관에 모두 동의해요</button>
+          <button type="button" className={`agree${share ? ' on' : ''}`} onClick={() => setShare(!share)} aria-pressed={share} style={{ marginTop: 8 }}>
+            <span className="chk" /><span style={{ textAlign: 'left' }}>(필수) 서로 고른 상대가 있으면, 그 상대에게 제 <b>이름과 휴대폰 번호</b>가 문자로 전달되는 데 동의해요</span></button>
           {err && <p className="msg e" role="alert" style={{ margin: '0 0 10px', fontSize: 14, textAlign: 'center' }}>{err}</p>}
-          <button className="btn" disabled={!agree || sending} onClick={submit}>{sending ? '보내는 중…' : '신청하기'}</button>
+          <button className="btn" disabled={!agree || !share || sending} onClick={submit}>{sending ? '보내는 중…' : '신청하기'}</button>
         </div>
       </>}
     </main>
   );
 }
 
-function Done({ email, token }: { email: string; token: string }) {
+function Done({ phone, token }: { phone: string; token: string }) {
   const [copied, setCopied] = useState(false);
   const link = `${typeof window === 'undefined' ? '' : window.location.origin}/status/${token}`;
   const copy = async () => { try { await navigator.clipboard.writeText(link); setCopied(true); } catch { /* 길게 눌러 복사 */ } };
@@ -218,7 +207,7 @@ function Done({ email, token }: { email: string; token: string }) {
         <button className="btn sub" style={{ height: 44, fontSize: 15 }} onClick={copy}>{copied ? '복사했어요' : '링크 복사하기'}</button>
       </div>
       <div className="card"><div className="tl">
-        <div className="done"><i /><span><b>신청 완료</b><small>{email}</small></span></div>
+        <div className="done"><i /><span><b>신청 완료</b><small>{phone}</small></span></div>
         <div className="now"><i /><span><b>호스트 확인 중</b><small>보통 하루 안에 끝나요</small></span></div>
         <div><i /><span><b>승인 후 라운지 입장</b><small>호스트가 승인하면 나만의 라운지 링크를 드려요</small></span></div>
       </div></div>

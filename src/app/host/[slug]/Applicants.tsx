@@ -82,7 +82,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
           <span className="badge">{STATUS_KO[open.status]}{open.number != null && ` · ${open.gender === 'f' ? '여' : '남'}${open.number}호`}</span>
           <h2 className="q" style={{ fontSize: 22, marginTop: 10 }}>{open.name} <small className="ds" style={{ fontSize: 14 }}>{open.gender === 'f' ? '여' : '남'} · {open.birthYear}년생</small></h2>
           <dl className="sum" style={{ marginTop: 12 }}>
-            {[['하는 일', open.job], ['연락처', open.phone], ['이메일', open.email], ['신청', ago(open.createdAt)], ...(open.paymentDue ? [['입금 기한', kDue(open.paymentDue)]] : [])]
+            {[['하는 일', open.job], ['연락처', open.phone], ...(open.email ? [['이메일', open.email]] : []), ['신청', ago(open.createdAt)], ...(open.paymentDue ? [['입금 기한', kDue(open.paymentDue)]] : [])]
               .map(([k, v]) => <div className="kv" key={k} style={{ borderTop: 0 }}><span>{k}</span><b>{k === '연락처' ? <a href={`tel:${v}`}>{v}</a> : v}</b></div>)}
           </dl>
           {open.avoid.length > 0 && <div className="alert"><Icon name="info" /><div>

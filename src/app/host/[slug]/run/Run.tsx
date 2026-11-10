@@ -170,7 +170,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           <div className="people">
             {v.extras.matches.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>아직 서로 고른 커플이 없어요</p>}
             {v.extras.matches.map(([a, b]) => { const pa = byId.get(a)!, pb = byId.get(b)!; return (
-              <div key={a + b} className="person-row"><div><b>{label(pa)} ♥ {label(pb)}</b><span>{pa.nickname}({pa.name}) · {v.extras.contacts[a]?.email} · {v.extras.contacts[a]?.phone}</span><span>{pb.nickname}({pb.name}) · {v.extras.contacts[b]?.email} · {v.extras.contacts[b]?.phone}</span></div></div>); })}
+              <div key={a + b} className="person-row"><div><b>{label(pa)} ♥ {label(pb)}</b><span>{pa.nickname}({pa.name}) · {v.extras.contacts[a]?.phone}</span><span>{pb.nickname}({pb.name}) · {v.extras.contacts[b]?.phone}</span></div></div>); })}
           </div>
           <p className="eb" style={{ marginTop: 22 }}>결과 문자 · 업무용 폰으로 보내기</p>
           <div className="people">
@@ -188,10 +188,10 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </>}
 
         {v.extras.wine.length > 0 && <>
-          <p className="eb run-eb" style={{ marginTop: 26 }}>연말 와인모임 메일 안내 신청 ({v.extras.wine.length})<ResetBtn what="closing" msg="와인모임 신청과 후기를 모두 지워요." /></p>
+          <p className="eb run-eb" style={{ marginTop: 26 }}>연말 와인모임 문자 안내 신청 ({v.extras.wine.length})<ResetBtn what="closing" msg="와인모임 신청과 후기를 모두 지워요." /></p>
           <div className="people">
             {v.extras.wine.map((w) => (
-              <div key={w.email + w.phone} className="person-row"><div><b>{w.gender === 'f' ? '여' : '남'}{w.number}호 {w.name} · {w.age}세 · {w.job}</b><span>{w.phone} · {w.email}</span></div></div>))}
+              <div key={w.email + w.phone} className="person-row"><div><b>{w.gender === 'f' ? '여' : '남'}{w.number}호 {w.name} · {w.age}세 · {w.job}</b><span>{w.phone}</span></div></div>))}
           </div>
         </>}
 
