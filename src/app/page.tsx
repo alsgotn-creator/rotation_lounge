@@ -15,15 +15,14 @@ const FAQ = [
 ];
 
 export default async function Landing() {
-  const sessions = await listSessions();
-  const { data: rv } = hasDb() ? await db().from('reviews').select('body,gender,age').order('created_at', { ascending: false }).limit(12) : { data: null };
+  const [sessions, { data: rv }] = await Promise.all([listSessions(), hasDb() ? db().from('reviews').select('body,gender,age').order('created_at', { ascending: false }).limit(12) : { data: null }]);
   const reviews = (rv ?? []) as { body: string; gender: 'f' | 'm'; age: number }[]; // 테이블이 아직 없으면 빈 목록
   const next = sessions.find((s) => !s.closed);
   return (
     <main>
       <section className="hero">
         <div className="art">
-          <img src="/lounge-line.webp" width={880} height={1168} alt="작은 와인 라운지에서 마주 앉아 이야기하는 사람들" />
+          <img src="/lounge-line.webp" width={880} height={1168} fetchPriority="high" alt="작은 와인 라운지에서 마주 앉아 이야기하는 사람들" />
         </div>
         <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><Link href="/status">신청 내역</Link><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
         <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>

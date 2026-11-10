@@ -16,17 +16,17 @@ export async function isLocked(eventId: string) {
 
 /** 확정된 신청자의 입장 링크(또는 신청 내역 링크)인지 확인 */
 export async function findInvited(eventId: string, token: string | undefined) {
-  if (!token || (await isLocked(eventId))) return null;
+  if (!token) return null;
   const appId = appFromSigned(token);
-  if (appId) {
-    const { data } = await db().from('applications').select('id,name,gender,birth_year,job,number').eq('id', appId).eq('event_id', eventId).eq('status', 'confirmed').maybeSingle();
-    return data as Invited | null;
-  }
   const h = hash(token); // hex라 or() 필터에 그대로 넣어도 안전
-  const { data } = await db().from('applications').select('id,name,gender,birth_year,job,number')
-    // 호스트가 보낸 입장 링크든, 신청 내역 링크(상태 토큰)든 확정된 본인이면 들어온다
-    .eq('event_id', eventId).eq('status', 'confirmed').or(`invite_token_hash.eq.${h},status_token_hash.eq.${h}`).maybeSingle();
-  return data as Invited | null;
+  const q = db().from('applications').select('id,name,gender,birth_year,job,number').eq('event_id', eventId).eq('status', 'confirmed');
+  // 잠금 확인과 본인 조회는 서로 독립 → 같이 보낸다 (모든 참가자 API가 지나는 길)
+  const [locked, { data }] = await Promise.all([
+    isLocked(eventId),
+    // 전화번호 입장 쿠키(서명된 신청 id)든, 호스트가 보낸 입장 링크든, 신청 내역 링크(상태 토큰)든 확정된 본인이면 들어온다
+    appId ? q.eq('id', appId).maybeSingle() : q.or(`invite_token_hash.eq.${h},status_token_hash.eq.${h}`).maybeSingle(),
+  ]);
+  return locked ? null : (data as Invited | null);
 }
 
 /** 쿠키로 지금 들어온 참가자(신청자) 찾기 */

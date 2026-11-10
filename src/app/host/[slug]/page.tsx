@@ -13,8 +13,7 @@ export default async function HostEvent({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const event = await getEvent({ slug });
   if (!event) notFound();
-  const apps = await listApplications(event.id);
-  const layout = await eventLayout(event.id);
+  const [apps, layout] = await Promise.all([listApplications(event.id), eventLayout(event.id)]);
   const urls = await photoUrls(apps.flatMap((a) => a.photo_paths));
   let k = 0;
   const rows: Row[] = apps.map((a) => ({

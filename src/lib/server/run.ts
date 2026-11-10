@@ -15,10 +15,13 @@ const toRound = (r: RoundRow): Round => ({ no: r.no, startedAt: t(r.started_at)!
 export type Person = { id: string; gender: 'f' | 'm'; number: number | null; excluded: boolean; nickname: string; shape: string; prop: string; color: number; keywords: string[]; name: string };
 
 export async function loadRun(eventId: string) {
-  const [{ data: ev }, { data: rr }, { data: ps }] = await Promise.all([
+  // 참가자 폰이 3초마다 부르는 길: 서로 독립인 조회는 한 번에 보낸다 (왕복 수가 곧 속도)
+  const [{ data: ev }, { data: rr }, { data: ps }, { perTable }, lk] = await Promise.all([
     db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks').eq('id', eventId).single(),
-    db().from('rounds').select('*').eq('event_id', eventId).order('no'),
+    db().from('rounds').select('no,started_at,paused_at,paused_total_ms,duration_sec,closed_at').eq('event_id', eventId).order('no'),
     db().from('participants').select('id,gender,number,excluded,nickname,shape,prop,love_type,keywords,applications(name)').eq('event_id', eventId).order('number', { nullsFirst: false }),
+    eventLayout(eventId),
+    db().from('events').select('locked').eq('id', eventId).single(), // locked 칸은 마이그레이션 0012 전에는 없을 수 있다 → 그때는 열린 것으로
   ]);
   const rounds = ((rr ?? []) as RoundRow[]).map(toRound);
   const people: Person[] = (ps ?? []).map((p: Record<string, unknown>) => ({
@@ -28,9 +31,6 @@ export async function loadRun(eventId: string) {
   }));
   const seated: Seated[] = people.filter((p) => p.number != null && !p.excluded).map((p) => ({ id: p.id, gender: p.gender, number: p.number! }));
   const current = rounds.at(-1) ?? null;
-  const { perTable } = await eventLayout(eventId);
-  // locked 칸은 마이그레이션 0012 전에는 없을 수 있다 → 그때는 열린 것으로
-  const lk = await db().from('events').select('locked').eq('id', eventId).single();
   return { ev: { ...ev!, per_table: perTable, locked: !lk.error && !!lk.data?.locked }, rounds, current, people, seated };
 }
 
