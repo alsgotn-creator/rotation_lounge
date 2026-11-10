@@ -19,3 +19,6 @@ export function birthError(y: string, from: number, to: number): string | null {
   return null;
 }
 export const isBirth = (y: string, from: number, to: number) => /^\d{4}$/.test(y) && !birthError(y, from, to);
+
+/** 입장 칸(010 뒤 8자리): 010을 또 치거나 자동완성으로 전체 번호가 들어와도 뒤 8자리만 남긴다 */
+export const after010 = (v: string) => { const d = digits(v); return (d.length > 8 && d.startsWith('010') ? d.slice(3) : d).slice(0, 8); };
