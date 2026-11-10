@@ -42,6 +42,30 @@ function Drag({ className, style, children }: { className?: string; style?: Reac
   );
 }
 
+const PREP: [string, string?][] = [
+  ['겉옷과 가방은 중앙 테이블에 놓거나 호스트에게 맡겨요.', '남성분들은 자리를 이동해야 해서 맡기는 게 편해요!'],
+  ['마주한 분과 대화 나누고 계시면, 잠시 대기 후 진행합니다.'],
+  ['음료는 무제한으로 리필 가능합니다.'],
+  ['화장실은 한 곳이에요.', '쉬는 시간에 붐비고 수압이 약해서, 미리 해결하고 오시는 걸 추천합니다.'],
+];
+
+/** 등록을 마치고 라운지에 처음 들어오면 한 번 뜨는 준비사항. 닫으면 이 폰에서는 다시 안 뜬다 (아래 링크로 다시 볼 수 있다). */
+function Prep({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <div className="dim" onClick={onClose} />
+      <div className="sheet prep" role="dialog" aria-modal="true" aria-labelledby="prep-t">
+        <div className="grab" />
+        <p className="prep-eb">BEFORE YOU COME</p>
+        <h3 id="prep-t">준비 사항</h3>
+        <p className="ds">오셔서 이렇게 준비해 주세요</p>
+        <ol>{PREP.map(([t, sub], i) => <li key={t}><em>{String(i + 1).padStart(2, '0')}</em><b>{t}</b>{sub && <small>{sub}</small>}</li>)}</ol>
+        <button className="btn" onClick={onClose}>확인했어요</button>
+      </div>
+    </>
+  );
+}
+
 export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug: string; initial: LoungeView; when: string; loveType: number; onEdit: () => void }) {
   const [v, setV] = useState(initial);
   const me = v.cards.find((c) => c.me)!;
@@ -61,6 +85,10 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
   }, [refresh]);
 
   const before = v.phase === 'before';
+  const prepKey = `fl_prep_${slug}`;
+  const [prep, setPrep] = useState(false);
+  useEffect(() => { try { if (!localStorage.getItem(prepKey)) setPrep(true); } catch { setPrep(true); } }, [prepKey]);
+  const closePrep = () => { setPrep(false); try { localStorage.setItem(prepKey, '1'); } catch {} };
 
   return (
     <main className="lounge">
@@ -93,6 +121,8 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
             ))}
           </section>}
 
+      <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
+
       {before && <>
         <IdealCloud tone="f" title="여자분들이 적은 이상형" lists={IDEAL.f} />
         <IdealCloud tone="m" title="남자분들이 적은 이상형" lists={IDEAL.m} />
@@ -108,6 +138,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
         )}
         {!before && <p className="ds" style={{ margin: 0, textAlign: 'center' }}>{me.number == null ? '호 번호가 아직 없어요 · 진행자에게 알려주세요' : '곧 호스트가 라운드를 시작해요'}</p>}
       </div>
+      {prep && <Prep onClose={closePrep} />}
     </main>
   );
 }

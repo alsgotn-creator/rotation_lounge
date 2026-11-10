@@ -515,3 +515,12 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 .drag{touch-action:none;cursor:grab;position:relative;z-index:1}
 .drag.on{cursor:grabbing;z-index:5}
 .drag.on .lg-p,.drag.on.lg-p{animation-play-state:paused}
+
+/* 라운지 · 준비사항 팝업 */
+.prep{max-height:88vh;overflow:auto;text-align:center}
+.prep-eb{margin:0 0 4px;font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--mute)}
+.prep ol{list-style:none;margin:18px 0 20px;padding:0;border-top:1px solid var(--text)}
+.prep li{display:flex;flex-direction:column;gap:3px;padding:14px 4px;border-bottom:1px solid var(--line)}
+.prep li em{font-style:normal;font-size:13px;font-weight:800;color:var(--mute)}
+.prep li b{font-size:15px;font-weight:800;line-height:1.45;word-break:keep-all}
+.prep li small{font-size:13px;color:var(--mute);line-height:1.45;word-break:keep-all}
