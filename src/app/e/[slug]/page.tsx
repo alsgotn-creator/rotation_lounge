@@ -28,7 +28,8 @@ export default async function Lounge({ params, searchParams }: { params: Promise
       <div className="big" style={{ background: 'var(--surf2)', boxShadow: 'none' }}><span style={{ color: 'var(--acc)' }}><Icon name="lock" /></span></div>
       <h2 className="q">끝난 모임이에요</h2>
       <p className="ds">함께해주셔서 고마웠어요.<br />다음 모임에서 또 만나요!</p>
-      <p className="preview" style={{ marginTop: 24 }}>문의 {BUSINESS.email}</p>
+      <a className="btn" href="/" style={{ marginTop: 28, maxWidth: 280, textDecoration: 'none' }}>첫 화면으로</a>
+      <p className="preview" style={{ marginTop: 16 }}>문의 {BUSINESS.email}</p>
     </main>
   );
 
@@ -36,8 +37,9 @@ export default async function Lounge({ params, searchParams }: { params: Promise
     <main className="fin">
       <div className="big" style={{ background: 'var(--surf2)', boxShadow: 'none' }}><span style={{ color: 'var(--acc)' }}><Icon name="lock" /></span></div>
       <h2 className="q">입장 링크가 필요해요</h2>
-      <p className="ds">{bad ? '링크가 맞지 않거나 새 링크로 바뀌었어요.' : '이 라운지는 참가가 확정된 분만 들어올 수 있어요.'}<br />첫 화면의 <a href="/"><b>라운지 입장</b></a>에 신청할 때 쓴 휴대폰 번호를 넣어주세요.</p>
-      <p className="preview" style={{ marginTop: 24 }}>문의 {BUSINESS.email}</p>
+      <p className="ds">{bad ? '링크가 맞지 않거나, 신청이 취소됐거나, 새 링크로 바뀌었어요.' : '이 라운지는 참가가 확정된 분만 들어올 수 있어요.'}<br />첫 화면의 <a href="/"><b>라운지 입장</b></a>에 신청할 때 쓴 휴대폰 번호를 넣어주세요.</p>
+      <a className="btn" href="/" style={{ marginTop: 28, maxWidth: 280, textDecoration: 'none' }}>첫 화면으로</a>
+      <p className="preview" style={{ marginTop: 16 }}>문의 {BUSINESS.email}</p>
     </main>
   );
 
