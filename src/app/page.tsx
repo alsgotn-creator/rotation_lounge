@@ -49,26 +49,6 @@ export default async function Landing() {
       </section>
 
       <section className="lsec">
-        <p className="eb">일정</p>
-        <h3>오실 날을 골라주세요</h3>
-        {sessions.length === 0 && <p className="ds" style={{ fontSize: 14 }}>지금 열린 일정이 없어요. 곧 다음 일정을 열게요.</p>}
-        {sessions.map((s) => s.closed ? (
-          <div key={s.id} className="opt" style={{ opacity: .4, cursor: 'default' }}>
-            <div className="d">{s.mon}<b>{s.day}</b>{s.dow}</div>
-            <div className="t"><strong>{s.time} · {s.place}</strong>{yy(s.birthFrom)}~{yy(s.birthTo)}년생</div>
-            <span className="end">마감</span>
-          </div>
-        ) : (
-          <Link key={s.id} className="opt" href={`/apply?s=${s.id}`}>
-            <div className="d">{s.mon}<b>{s.day}</b>{s.dow}</div>
-            <div className="t"><strong>{s.time} · {s.place}</strong>{yy(s.birthFrom)}~{yy(s.birthTo)}년생<br />
-              {s.seatsF <= 1 || s.seatsM <= 1 ? <em>여성 {s.seatsF} · 남성 {s.seatsM}자리 남음</em> : <>여성 {s.seatsF} · 남성 {s.seatsM}자리 남음</>}</div>
-            <Icon name="next" />
-          </Link>
-        ))}
-      </section>
-
-      <section className="lsec">
         <p className="eb">진행 순서</p>
         <h3>신청은 1분,<br />호스트가 승인하면 입장해요</h3>
         <div className="stp">
