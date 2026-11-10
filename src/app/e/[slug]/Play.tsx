@@ -1,11 +1,12 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Lounge from './Lounge';
 import Round from './Round';
 import NoteWrite from './NoteWrite';
 import Choice from './Choice';
 import Closing from './Closing';
 import { RollingPaper } from '../../../components/RollingPaper';
+import { api } from '../../../lib/api';
 import type { LoungeView } from '../../../lib/server/lounge';
 import type { PlayView } from '../../../lib/server/play';
 
@@ -14,12 +15,13 @@ export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: s
   const [v, setV] = useState<PlayView | null>(null);
   const [offset, setOffset] = useState(0);
   const [paperOpen, setPaperOpen] = useState(true); // 최종선택에 들어오면 롤링페이퍼부터
+  const seq = useRef(0);
 
   const load = useCallback(async () => {
-    const t0 = Date.now();
-    const r = await fetch(`/api/e/${slug}/play`, { cache: 'no-store' }).catch(() => null);
-    const j = await r?.json().catch(() => null);
-    if (j?.ok) { setV(j.view); setOffset(j.view.serverNow - (t0 + Date.now()) / 2); }
+    const t0 = Date.now(), my = ++seq.current;
+    const j = await api<{ view: PlayView }>(`/api/e/${slug}/play`);
+    if (my !== seq.current) return; // 더 늦게 보낸 요청이 먼저 돌아왔다 → 이 옛 응답은 버린다
+    if (j.ok && j.view) { setV(j.view); setOffset(j.view.serverNow - (t0 + Date.now()) / 2); }
   }, [slug]);
 
   // shortcut: 3초마다 새로 읽는다. 타이머는 서버 시각 기준으로 화면에서 계산하니 어긋나지 않는다. 실시간 신호는 다음 단계.

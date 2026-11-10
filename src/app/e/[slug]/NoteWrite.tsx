@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
+import { api } from '../../../lib/api';
+import { ho } from '../../../lib/domain/lounge';
 import { containsContact, NOTE_MAX, PAPER_FONTS } from '../../../lib/domain/notes';
 import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
@@ -12,16 +14,15 @@ export default function NoteWrite({ slug, pending, onDone }: { slug: string; pen
   const [busy, setBusy] = useState(false);
   const [font, setFont] = useState<string>(PAPER_FONTS[0][0]);
   const { to, round } = pending;
-  const label = `${to.gender === 'f' ? '여' : '남'}${to.number}호`;
+  const label = ho(to.gender, to.number);
   const contact = text.trim() && containsContact(text);
 
   const send = async (body: string) => {
     if (contact) return setErr('연락처로 보이는 내용이 있어요');
     setBusy(true); setErr('');
-    const r = await fetch(`/api/e/${slug}/note`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ round, toId: to.id, body, font }) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    const j = await api(`/api/e/${slug}/note`, { round, toId: to.id, body, font });
     setBusy(false);
-    if (!j.ok && r.status !== 409) return setErr(j.message);
+    if (!j.ok && j.http !== 409) return setErr(j.message ?? '다시 시도해주세요.');
     setText(''); onDone();
   };
 

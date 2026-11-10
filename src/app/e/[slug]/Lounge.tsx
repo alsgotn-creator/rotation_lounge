@@ -3,12 +3,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Character } from '../../../components/Character';
 import { Icon } from '../../../components/Icon';
 import { IdealCloud } from '../../../components/IdealCloud';
+import { api } from '../../../lib/api';
 import { IDEAL } from '../../../lib/domain/ideal';
+import { ho } from '../../../lib/domain/lounge';
 import { PALETTE, phrases } from '../../../lib/domain/loveType';
 import type { Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
-
-const ho = (g: 'f' | 'm', n: number) => `${g === 'f' ? '여' : '남'}${n}호`;
 
 /** 누를 때마다 통통 / 흔들 / 찌그러짐을 돌아가며, 하트가 떠오른다. */
 function Poke({ children }: { children: React.ReactNode }) {
@@ -27,9 +27,8 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
   const others = v.cards.filter((c) => !c.me);
 
   const refresh = useCallback(async () => {
-    const r = await fetch(`/api/e/${slug}/lounge`, { cache: 'no-store' }).catch(() => null);
-    const j = await r?.json().catch(() => null);
-    if (j?.ok) setV(j.view);
+    const j = await api<{ view: LoungeView }>(`/api/e/${slug}/lounge`);
+    if (j.ok && j.view) setV(j.view);
   }, [slug]);
 
   // shortcut: 4초마다 새로 읽는다. 라운드 타이머 단계(계획서 Task 7)에서 Supabase 실시간 신호로 바꾸기.
@@ -86,7 +85,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
         {me.number != null && before && (
           <div className="lg-seat"><b>{ho(me.gender, me.number)}</b><span>첫 대화는 <em>{me.number}번 테이블</em>에서 시작해요</span></div>
         )}
-        {!before && <p className="note" style={{ margin: 0 }}>곧 호스트가 라운드를 시작해요</p>}
+        {!before && <p className="ds" style={{ margin: 0, textAlign: 'center' }}>{me.number == null ? '호 번호가 아직 없어요 · 진행자에게 알려주세요' : '곧 호스트가 라운드를 시작해요'}</p>}
       </div>
     </main>
   );

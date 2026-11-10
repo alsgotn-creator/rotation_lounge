@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Icon } from '../../../../components/Icon';
 import { FloorPlan } from '../../../../components/FloorPlan';
 import { RoundTimer } from '../../../../components/RoundTimer';
+import { api } from '../../../../lib/api';
+import { ho } from '../../../../lib/domain/lounge';
 import { notStarted, type Round } from '../../../../lib/domain/seating';
 import type { HostCmd, Moved, Person, Phase, ResetWhat } from '../../../../lib/server/run';
 
@@ -23,31 +25,32 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const [toast, setToast] = useState('');
   const [custom, setCustom] = useState('');
   const [moved, setMoved] = useState<Moved[] | null>(null);
+  const seq = useRef(0);
 
   const load = useCallback(async () => {
-    const t0 = Date.now();
-    const r = await fetch(`/api/host/${slug}/run`, { cache: 'no-store' }).catch(() => null);
-    const j = await r?.json().catch(() => null);
-    if (j?.ok) { setV(j.view); setOffset(j.serverNow - (t0 + Date.now()) / 2); }
+    const t0 = Date.now(), my = ++seq.current;
+    const j = await api<{ view: View; serverNow: number }>(`/api/host/${slug}/run`);
+    if (j.http === 401) { location.href = '/host'; return; } // 12시간 쿠키가 끝났다 → 다시 로그인
+    if (my !== seq.current) return; // 명령 뒤의 새 응답을 옛 폴링 응답이 덮어쓰지 않게
+    if (j.ok && j.view) { setV(j.view); setOffset(j.serverNow! - (t0 + Date.now()) / 2); }
   }, [slug]);
   // shortcut: 2초마다 새로 읽는다 (실시간 신호는 다음 단계). 타이머 자체는 서버 시각으로 매 0.25초 계산.
-  useEffect(() => { load(); const t = setInterval(load, 2000); return () => clearInterval(t); }, [load]);
+  useEffect(() => { load(); const t = setInterval(() => document.visibilityState === 'visible' && load(), 2000); return () => clearInterval(t); }, [load]);
 
   const show = (m: string) => { setToast(m); setTimeout(() => setToast(''), 2600); };
   const send = async (cmd: HostCmd) => {
     setBusy(true);
-    const r = await fetch(`/api/host/${slug}/run`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(cmd) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    const j = await api<{ moved: Moved[] }>(`/api/host/${slug}/run`, cmd);
     setBusy(false);
-    if (!j.ok) show(j.message);
+    if (!j.ok) show(j.message ?? '다시 시도해주세요.');
     await load();
     return j;
   };
   const reset = async (what: ResetWhat, msg: string) => { if (window.confirm(`${msg}
 되돌릴 수 없어요. 초기화할까요?`)) { const j = await send({ type: 'reset', what }); if (j.ok) show('초기화했어요'); } };
   const ResetBtn = ({ what, msg }: { what: ResetWhat; msg: string }) => <button className="lnk run-reset" disabled={busy} onClick={() => reset(what, msg)}>초기화</button>;
-  const compact = async () => { const j = await send({ type: 'compact' }); if (j.ok) setMoved(j.moved); };
-  const hoOf = (g: 'f' | 'm', n: number | null) => (n == null ? '번호 없음' : `${g === 'f' ? '여' : '남'}${n}호`);
+  const compact = async () => { const j = await send({ type: 'compact' }); if (j.ok) setMoved(j.moved ?? []); };
+  const hoOf = (g: 'f' | 'm', n: number | null) => (n == null ? '번호 없음' : ho(g, n));
   const movedText = (moved ?? []).filter((m) => m.to != null).map((m) => `[플러팅 라운지] ${m.name}님, 오늘 번호가 ${hoOf(m.gender, m.to)}로 바뀌었어요. 첫 대화는 ${m.to}번 테이블이에요.`).join('\n\n');
 
   // 진행 알림: 이번 라운드 롤링페이퍼가 다 모였는지, 최종 선택을 다 냈는지. 완료로 바뀌는 순간 토스트와 진동.
@@ -70,7 +73,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const { ev, current } = v;
   const byId = new Map(v.people.map((p) => [p.id, p]));
   const copy = async (t: string, ok: string) => { try { await navigator.clipboard.writeText(t); show(ok); } catch { show('복사하지 못했어요'); } };
-  const label = (p: Person) => `${p.gender === 'f' ? '여' : '남'}${p.number ?? '-'}호`;
+  const label = (p: Person) => ho(p.gender, p.number);
   const open = current && !current.closedAt;
   const waitStart = !!open && notStarted(current!); // 자리 이동 중: 타이머가 멈춰 있다
   const seated = v.people.filter((p) => p.number != null && !p.excluded);

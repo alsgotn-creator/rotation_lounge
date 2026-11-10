@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
 import { Icon } from '../../../components/Icon';
+import { api } from '../../../lib/api';
+import { ho } from '../../../lib/domain/lounge';
 import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
 import { Reveal } from './Round';
-
-const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}호`;
 
 /** 최종 선택: 이성 전원의 캐릭터를 3열로. 0명도 가능, 단계가 끝나기 전까지 고칠 수 있다. */
 export default function Choice({ slug, view, onSaved, onPaper }: { slug: string; view: PlayView; onSaved: () => void; onPaper: () => void }) {
@@ -26,10 +26,9 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
   };
   const save = async () => {
     setBusy(true); setMsg('');
-    const r = await fetch(`/api/e/${slug}/choices`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ids: sel }) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    const j = await api(`/api/e/${slug}/choices`, { ids: sel });
     setBusy(false);
-    if (!j.ok) return setMsg(j.message);
+    if (!j.ok) return setMsg(j.message ?? '다시 시도해주세요.');
     onSaved();
   };
   const person = info ? choice.candidates.find((c) => c.id === info) : null;

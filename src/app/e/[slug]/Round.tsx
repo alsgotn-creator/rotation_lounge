@@ -5,10 +5,8 @@ import { Character } from '../../../components/Character';
 import { useNow } from '../../../components/RoundTimer';
 import { elapsedMs, notStarted, REVEAL_MS } from '../../../lib/domain/seating';
 import { PALETTE } from '../../../lib/domain/loveType';
+import { ho, type PublicCard } from '../../../lib/domain/lounge';
 import type { PlayView, Profile } from '../../../lib/server/play';
-import type { PublicCard } from '../../../lib/domain/lounge';
-
-const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}호`;
 /** 남은 시간은 숫자 없이 막대로만: 내 캐릭터가 왼쪽에서 출발해 시간이 끝나면 오른쪽 끝에 도착한다. */
 function Track({ round, offsetMs, me }: { round: NonNullable<PlayView['round']>; offsetMs: number; me: PublicCard | null }) {
   const now = useNow(offsetMs);
@@ -86,8 +84,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
     if (!added.length) return;
     added.forEach((id) => seen.current!.add(id));
     setFresh((f) => new Set([...f, ...added]));
-    const t = setTimeout(() => setFresh(new Set()), 10_000);
-    return () => clearTimeout(t);
+    setTimeout(() => setFresh(new Set()), 10_000); // cleanup 으로 지우면 3초 뒤 다음 응답(view.met 새 객체)이 타이머를 끊어 배지가 영영 남는다
   }, [view.met]);
 
   const chip = round.partners.length === 0 ? null

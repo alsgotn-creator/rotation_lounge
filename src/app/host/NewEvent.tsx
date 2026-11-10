@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '../../lib/api';
 
 export default function NewEvent() {
   const router = useRouter();
@@ -10,10 +11,9 @@ export default function NewEvent() {
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr('');
-    const r = await fetch('/api/host/events', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(f) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    const j = await api<{ slug: string }>('/api/host/events', f);
     setBusy(false);
-    if (!j.ok) return setErr(j.message);
+    if (!j.ok) return setErr(j.message ?? '다시 시도해주세요.');
     router.push(`/host/${j.slug}`);
   };
   return (

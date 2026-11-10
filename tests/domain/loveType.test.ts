@@ -52,4 +52,13 @@ describe('registration validation', () => {
     expect(registrationError({ ...ok, prop: 'crown' })).toMatch('꾸미기');
     expect(registrationError({ ...ok, prop: 'blush,blush' })).toMatch('꾸미기');
   });
+  test('malformed JSON from the API never throws (wrong types → message, not 500)', () => {
+    const bad = (patch: object) => registrationError({ ...ok, ...patch } as typeof ok);
+    expect(bad({ nickname: 123 })).toMatch('다시');
+    expect(bad({ keywords: [1] })).toMatch('다시');
+    expect(bad({ keywords: 'x' })).toMatch('다시');
+    expect(bad({ prop: 5 })).toMatch('다시');
+    expect(bad({ mbti: null })).toMatch('다시');
+    expect(registrationError(null as unknown as typeof ok)).toMatch('다시');
+  });
 });

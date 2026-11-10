@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
 import { Character } from '../../../components/Character';
+import { api } from '../../../lib/api';
 import { QUESTIONS, PALETTE, loveType, phrases } from '../../../lib/domain/loveType';
 import { ACCS, ACC_KO, CHARS, EYEWEAR, GLASSED, parseAccs, registrationError, type Acc, type Shape } from '../../../lib/domain/register';
 
@@ -55,10 +56,9 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
     const e = registrationError(body);
     if (e) return setErr(e);
     setBusy(true); setErr('');
-    const r = await fetch(`/api/e/${slug}/register`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    const j = await api(`/api/e/${slug}/register`, body);
     setBusy(false);
-    if (!j.ok) return setErr(j.message);
+    if (!j.ok) return setErr(j.message ?? '다시 시도해주세요.');
     onCancel?.(); router.refresh(); window.scrollTo(0, 0);
   };
 

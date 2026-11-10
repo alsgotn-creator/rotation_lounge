@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
+import { api } from '../../../lib/api';
 import type { PublicCard } from '../../../lib/domain/lounge';
 import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
@@ -13,9 +14,9 @@ function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
   const send = async () => {
     setSt('busy');
-    const r = await fetch(`/api/e/${slug}/review`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ body: text }) }).catch(() => null);
-    setSt(r?.ok ? 'done' : 'err');
-    if (r?.ok) onDone();
+    const r = await api(`/api/e/${slug}/review`, { body: text });
+    setSt(r.ok ? 'done' : 'err');
+    if (r.ok) onDone();
   };
   return (
     <section className="cls-rv">
@@ -32,9 +33,9 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
   const join = async () => {
     setSt('busy');
-    const r = await fetch(`/api/e/${slug}/wine`, { method: 'POST' }).catch(() => null);
-    setSt(r?.ok ? 'done' : 'err');
-    if (r?.ok) onDone();
+    const r = await api(`/api/e/${slug}/wine`, {});
+    setSt(r.ok ? 'done' : 'err');
+    if (r.ok) onDone();
   };
   return (
     <section className="cls-wine">

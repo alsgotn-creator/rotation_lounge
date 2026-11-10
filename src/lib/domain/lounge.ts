@@ -7,10 +7,13 @@ export type PublicCard = {
 
 type Row = { id: string; gender: 'f' | 'm'; number: number | null; shape: string; prop: string; love_type: number; keywords: string[]; excluded?: boolean };
 
-/** 대기실 카드: 제외된 사람 빼고, 나를 맨 앞에 */
+/** '여3호' · 번호가 없으면 '여-호' */
+export const ho = (g: 'f' | 'm', n: number | null | undefined) => `${g === 'f' ? '여' : '남'}${n ?? '-'}호`;
+
+/** 대기실 카드: 제외된 사람 빼고(나는 빠져도 남긴다 — 내 화면이 깨지지 않게), 나를 맨 앞에 */
 export function loungeCards(rows: Row[], meId: string): PublicCard[] {
   return rows
-    .filter((r) => !r.excluded)
+    .filter((r) => !r.excluded || r.id === meId)
     .map((r) => ({ id: r.id, gender: r.gender, number: r.number, shape: r.shape, prop: r.prop, color: r.love_type, keywords: r.keywords, me: r.id === meId }))
     .sort((a, b) => Number(b.me) - Number(a.me));
 }

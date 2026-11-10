@@ -175,9 +175,11 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       return { ok: true };
     }
     case 'exclude': {
-      await db().from('participants').update({ excluded: cmd.excluded }).eq('id', cmd.participantId).eq('event_id', eventId);
+      await db().from('participants').update({ excluded: !!cmd.excluded }).eq('id', cmd.participantId).eq('event_id', eventId);
       return { ok: true };
     }
+    default:
+      return no('알 수 없는 명령이에요.'); // 모르는 type 이면 undefined 가 돌아가서 라우트가 500을 낸다
   }
 }
 

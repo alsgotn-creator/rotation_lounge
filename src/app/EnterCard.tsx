@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { api } from '../lib/api';
 import { digits } from '../lib/signup/validate';
 
 /** 승인된 분은 신청한 휴대폰 번호만 넣으면 라운지로 들어간다. */
@@ -10,10 +11,9 @@ export default function EnterCard() {
   async function go(ev: React.FormEvent) {
     ev.preventDefault();
     setBusy(true); setMsg('');
-    const r = await fetch('/api/enter', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ phone: `010${phone}` }) }).catch(() => null);
-    const j = await r?.json().catch(() => null);
-    if (j?.ok) { location.href = `/e/${j.slug}`; return; }
-    setMsg(j?.message ?? '연결이 불안정해요. 다시 시도해주세요.'); setBusy(false);
+    const j = await api<{ slug: string }>('/api/enter', { phone: `010${phone}` });
+    if (j.ok) { location.href = `/e/${j.slug}`; return; }
+    setMsg(j.message ?? '다시 시도해주세요.'); setBusy(false);
   }
   return (
     <form className="price enter" onSubmit={go}>

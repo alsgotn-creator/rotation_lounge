@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
+import { api } from '../../../lib/api';
 import type { AppStatus, Session } from '../../../lib/signup/rules';
 
 export type Row = {
@@ -42,10 +43,9 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
 
   const act = async (r: Row, action: string) => {
     setBusy(true);
-    const res = await fetch(`/api/host/applications/${r.id}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action }) });
-    const j = await res.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    const j = await api<{ inviteToken?: string; number: number | null; status: AppStatus }>(`/api/host/applications/${r.id}`, { action });
     setBusy(false);
-    if (!j.ok) return show(j.message);
+    if (!j.ok) return show(j.message ?? '다시 시도해주세요.');
     if (j.inviteToken) setMsg({
       title: `${r.name}님께 보낼 입장 링크`,
       text: `[플러팅 라운지] ${r.name}님, 승인됐어요. 자리가 확정됐어요!\n오늘 ${r.name}님은 ${r.gender === 'f' ? '여자' : '남자'} ${j.number}호예요.\n\n아래 링크로 사전 등록을 해주세요 (약 5분).\n${location.origin}/e/${event.slug}/join/${j.inviteToken}\n\n이 링크는 ${r.name}님 전용이에요. 다른 사람과 공유하지 말아주세요.`,
@@ -58,13 +58,13 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
     catch { show('길게 눌러서 복사해주세요'); }
   };
   const setLayout = async (patch: { tables?: number; perTable?: number }) => {
-    const r = await fetch('/api/host/events', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: event.id, ...patch }) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
-    show(j.ok ? '바꿨어요' : j.message);
+    const j = await api('/api/host/events', { id: event.id, ...patch }, 'PATCH');
+    show(j.ok ? '바꿨어요' : j.message ?? '다시 시도해주세요.');
     router.refresh();
   };
   const toggleApply = async () => {
-    await fetch('/api/host/events', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: event.id, applyOpen: !event.applyOpen }) });
+    const j = await api('/api/host/events', { id: event.id, applyOpen: !event.applyOpen }, 'PATCH');
+    if (!j.ok) show(j.message ?? '다시 시도해주세요.');
     router.refresh();
   };
 

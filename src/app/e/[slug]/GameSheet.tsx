@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { api } from '../../../lib/api';
 import { KINDS } from '../../../lib/domain/cards';
+import { ho } from '../../../lib/domain/lounge';
 import type { PlayView } from '../../../lib/server/play';
-
-const ho = (g: 'f' | 'm', n: number) => `${g === 'f' ? '여' : '남'}${n}호`;
 
 /** 라운드 화면에 늘 펼쳐져 있는 선택형 페어 게임. 종류를 누르면 카드가 나오고, 같은 테이블 모두가 고르면 답이 함께 열린다. */
 export default function GameSheet({ slug, game, onChange }: { slug: string; game: PlayView['game']; onChange: () => void }) {
@@ -12,10 +12,9 @@ export default function GameSheet({ slug, game, onChange }: { slug: string; game
 
   const post = async (body: object) => {
     setBusy(true); setErr('');
-    const r = await fetch(`/api/e/${slug}/game`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    const j = await r.json().catch(() => ({ ok: false, message: '다시 시도해주세요.' }));
+    const j = await api(`/api/e/${slug}/game`, body);
     setBusy(false);
-    if (!j.ok && r.status !== 409) return setErr(j.message);
+    if (!j.ok && j.http !== 409) return setErr(j.message ?? '다시 시도해주세요.');
     onChange();
   };
 

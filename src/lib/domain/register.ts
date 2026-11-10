@@ -19,11 +19,13 @@ export type RegistrationInput = {
 
 /** 사전 등록 입력 검사. 문제가 없으면 null, 있으면 사용자에게 보여줄 문장 */
 export function registrationError(r: RegistrationInput): string | null {
-  const nick = r.nickname?.trim() ?? '';
+  // 바깥(API)에서 들어온 JSON은 모양을 믿을 수 없다: 문자열 아닌 값에 .trim()을 부르면 500이 난다
+  if (!r || typeof r.nickname !== 'string' || typeof r.area !== 'string' || typeof r.mbti !== 'string' || !Array.isArray(r.keywords) || r.keywords.some((k) => typeof k !== 'string') || (r.prop != null && typeof r.prop !== 'string')) return '입력을 다시 확인해주세요.';
+  const nick = r.nickname.trim();
   if (nick.length < 1 || nick.length > 12) return '닉네임은 1~12자로 적어주세요.';
-  if (!r.area?.trim() || r.area.trim().length > 20) return '사는 곳을 적어주세요.';
-  if (!/^[EI][NS][FT][JP]$/i.test(r.mbti ?? '')) return 'MBTI를 골라주세요.';
-  const kw = (r.keywords ?? []).map((k) => k.trim()).filter(Boolean);
+  if (!r.area.trim() || r.area.trim().length > 20) return '사는 곳을 적어주세요.';
+  if (!/^[EI][NS][FT][JP]$/.test(r.mbti.toUpperCase())) return 'MBTI를 골라주세요.';
+  const kw = r.keywords.map((k) => k.trim()).filter(Boolean);
   if (kw.length < 1 || kw.length > 2 || kw.some((k) => k.length > 15)) return '키워드는 1~2개, 15자 이내로 적어주세요.';
   if (!Array.isArray(r.answers) || r.answers.length !== 15 || r.answers.some((a) => !Number.isInteger(a) || a < 1 || a > 5)) return '질문 15개에 모두 답해주세요.';
   if (!SHAPES.includes(r.shape as Shape)) return '캐릭터를 골라주세요.';

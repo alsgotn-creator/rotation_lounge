@@ -15,6 +15,9 @@ describe('lounge', () => {
   test('me first, excluded people hidden', () => {
     expect(loungeCards(rows, 'b').map((c) => [c.id, c.me])).toEqual([['b', true], ['a', false]]);
   });
+  test('an excluded viewer still sees their own card (the lounge screen needs it)', () => {
+    expect(loungeCards(rows, 'c').map((c) => [c.id, c.me])).toEqual([['c', true], ['a', false], ['b', false]]);
+  });
   test('seat columns: right 1..4 top→bottom, left 7,6,5 (clockwise)', () => {
     expect(seatColumns(7)).toEqual({ right: [1, 2, 3, 4], left: [7, 6, 5] });
     expect(seatColumns(8)).toEqual({ right: [1, 2, 3, 4], left: [8, 7, 6, 5] });

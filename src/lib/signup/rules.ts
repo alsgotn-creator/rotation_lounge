@@ -61,7 +61,6 @@ export function pickNumber(taken: number[], capacity: number, rand = Math.random
   const free = Array.from({ length: capacity }, (_, i) => i + 1).filter((n) => !taken.includes(n));
   return free.length ? free[Math.floor(rand() * free.length)] : null;
 }
-export const hoLabel = (g: Gender, n: number) => `${g === 'f' ? '여' : '남'}${n}호`;
 
 /**
  * 빈 번호 없이 1..k로 당기기 (k = 사람 수). 이미 1..k 안에 있는 사람은 그대로 두고,

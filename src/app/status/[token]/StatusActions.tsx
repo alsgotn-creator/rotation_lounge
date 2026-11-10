@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
+import { api } from '../../../lib/api';
 
 export default function StatusActions({ token, copy, cancelOnly }: { token: string; copy?: string; cancelOnly?: boolean }) {
   const router = useRouter();
@@ -10,7 +11,7 @@ export default function StatusActions({ token, copy, cancelOnly }: { token: stri
   const show = (t: string) => { setToast(t); setTimeout(() => setToast(''), 2200); };
   const doCopy = async () => { try { await navigator.clipboard.writeText(copy!); show('계좌번호를 복사했어요'); } catch { show(copy!); } };
   const cancel = async () => {
-    const r = await fetch(`/api/status/${token}/cancel`, { method: 'POST' });
+    const r = await api(`/api/status/${token}/cancel`, {});
     setAsk(false);
     if (r.ok) router.refresh(); else show('취소하지 못했어요. 다시 시도해주세요.');
   };
