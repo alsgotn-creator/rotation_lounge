@@ -5,7 +5,6 @@ import { Character } from '../../../components/Character';
 import { useNow } from '../../../components/RoundTimer';
 import { elapsedMs, notStarted, REVEAL_MS } from '../../../lib/domain/seating';
 import { PALETTE } from '../../../lib/domain/loveType';
-import type { Prop, Shape } from '../../../lib/domain/register';
 import type { PlayView, Profile } from '../../../lib/server/play';
 import type { PublicCard } from '../../../lib/domain/lounge';
 
@@ -17,7 +16,29 @@ function Track({ round, offsetMs, me }: { round: NonNullable<PlayView['round']>;
   return (
     <div className={`trk${pct >= 100 ? ' up' : ''}${round.timer.pausedAt ? ' paused' : ''}`} role="progressbar" aria-label="대화 시간" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
       <div className="trk-bar"><i style={{ width: `${pct}%` }} /></div>
-      {me && <span className="trk-me" style={{ left: `${pct}%` }}><Character shape={me.shape as Shape} color={me.color} prop={me.prop as Prop} size={48} /></span>}
+      {me && <span className="trk-me" style={{ left: `${pct}%` }}><Character shape={me.shape} color={me.color} size={48} /></span>}
+    </div>
+  );
+}
+
+/** 테이블에 마주 앉은 장면: 왼쪽은 나, 오른쪽은 이번 상대(들). 캐릭터 아랫단은 테이블이 가린다. */
+function Scene({ me, partners }: { me: PublicCard | null; partners: PublicCard[] }) {
+  if (!partners.length) return null;
+  const small = partners.length > 1;
+  return (
+    <div className="scene" aria-hidden="true">
+      <div className="scene-l">{me && <Character shape={me.shape} color={me.color} size={150} />}</div>
+      <div className={`scene-r${small ? ' many' : ''}`}>
+        {partners.map((p, i) => <Character key={p.id} shape={p.shape} color={p.color} size={small ? 112 : 150} delay={i + 1} flip />)}
+      </div>
+      <svg className="scene-tbl" viewBox="0 -24 360 144" fill="#fff" stroke="#111" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M128 6h14v8a7 7 0 0 1-14 0zM142 8h3a3 3 0 0 1 0 6h-3M218 6h14v8a7 7 0 0 1-14 0zM218 8h-3a3 3 0 0 0 0 6h3" />
+        <path d="M180 6v-16M180 -2c5-1 8-4 8-8" fill="none" />
+        <circle cx="180" cy="-14" r="6" />
+        <path d="M174 22c-4-5-3-10 2-12v-4h8v4c5 2 6 7 2 12z" />
+        <path d="M14 38c0-12 10-16 24-16h284c14 0 24 4 24 16s-10 16-24 16H38c-14 0-24-4-24-16z" />
+        <path d="M180 54v52M146 112h68" fill="none" />
+      </svg>
     </div>
   );
 }
@@ -65,7 +86,6 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
     return () => clearTimeout(t);
   }, [view.met]);
 
-  const many = round.partners.length > 1;
   const chip = round.partners.length === 0 ? null
     : round.perTable === 1 ? `${round.ordinal}번째 이성 · ${round.oppositeCount}명 중`
     : `${round.ordinal}번째 테이블 · 이성 ${round.oppositeCount}명 중 ${round.partners.length}명`;
@@ -80,10 +100,11 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
       <Track round={round} offsetMs={offsetMs} me={me} />
       {notStarted(round.timer) && <p className="rnd-wait">자리를 옮겨 앉아주세요 · 진행자가 시작하면 시간이 흘러가요</p>}
 
-      <section className={`pcs${many ? ' many' : ''}`}>
+      <Scene me={me} partners={round.partners} />
+
+      <section className="pcs">
         {round.partners.map((p) => (
           <article className="pc" key={p.id}>
-            <Character shape={p.shape as Shape} color={p.color} prop={p.prop as Prop} size={many ? 92 : 128} />
             <b className="pc-ho">{ho(p.gender, p.number)}</b>
             <div className="lg-kw">{p.keywords.map((k) => <span key={k}>{k}</span>)}</div>
             {view.met[p.id]

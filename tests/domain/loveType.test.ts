@@ -30,7 +30,7 @@ describe('love type', () => {
 });
 
 describe('registration validation', () => {
-  const ok = { nickname: '민지', area: '성동구', mbti: 'infp', keywords: ['필라테스 3년차'], answers: Array(15).fill(3), shape: 'cloud', prop: 'none', consent: true };
+  const ok = { nickname: '민지', area: '성동구', mbti: 'infp', keywords: ['필라테스 3년차'], answers: Array(15).fill(3), shape: 'f1', consent: true };
   test('valid input passes', () => expect(registrationError(ok)).toBeNull());
   test('rejects bad fields', () => {
     expect(registrationError({ ...ok, nickname: '' })).toMatch('닉네임');

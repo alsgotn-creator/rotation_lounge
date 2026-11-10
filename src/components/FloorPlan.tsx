@@ -1,6 +1,6 @@
 import { Character } from './Character';
 import { seatColumns } from '../lib/domain/lounge';
-import type { Prop, Shape } from '../lib/domain/register';
+import type { Shape } from '../lib/domain/register';
 
 type P = { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; nickname?: string };
 export type TablePair = { table: number; f: P[]; m: P[] };
@@ -11,7 +11,7 @@ function Side({ list, label, faces }: { list: P[]; label: string; faces: boolean
     <div className="fp-side">
       {list.map((p) => (
         <div className="fp-seat" key={`${p.gender}${p.number}`}>
-          {faces && <Character shape={p.shape as Shape} color={p.color} prop={p.prop as Prop} size={list.length > 2 ? 30 : 40} delay={(p.number ?? 0) * 0.7} />}
+          {faces && <Character shape={p.shape as Shape} color={p.color} size={list.length > 2 ? 30 : 40} delay={(p.number ?? 0) * 0.7} />}
           <span>{p.gender === 'f' ? '여' : '남'}{p.number}호{p.nickname ? <small>{p.nickname}</small> : null}</span>
         </div>
       ))}

@@ -7,7 +7,7 @@ import { loungeView } from '../../../lib/server/lounge';
 import { invitedFromCookie, participantOf } from '../../../lib/server/invite';
 import { toSession } from '../../../lib/signup/rules';
 import { BUSINESS } from '../../../lib/signup/data';
-import type { Prop, Shape } from '../../../lib/domain/register';
+import type { Shape } from '../../../lib/domain/register';
 import Entry from './Entry';
 
 export const metadata: Metadata = { title: '라운지 · 플러팅 라운지', robots: { index: false } };
@@ -38,6 +38,6 @@ export default async function Lounge({ params, searchParams }: { params: Promise
   const given = { gender: me.gender, age: new Date(event.starts_at).getUTCFullYear() - me.birth_year, job: me.job };
   return (
     <Entry slug={slug} given={given} when={`${s.dateLabel} ${s.time}`} devStep={devStep} lounge={lounge}
-      me={p && { nickname: p.nickname, area: p.area, mbti: p.mbti, keywords: p.keywords, answers: p.answers, loveType: p.love_type, shape: p.shape as Shape, prop: p.prop as Prop }} />
+      me={p && { nickname: p.nickname, area: p.area, mbti: p.mbti, keywords: p.keywords, answers: p.answers, loveType: p.love_type, shape: p.shape as Shape }} />
   );
 }

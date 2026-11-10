@@ -22,20 +22,8 @@ export default async function Landing() {
   return (
     <main>
       <section className="hero">
-        <span className="tw" style={{ left: '12%', top: 120 }} />
-        <span className="tw" style={{ left: '86%', top: 150, animationDelay: '1.2s' }} />
-        <span className="tw" style={{ left: '20%', top: 330, animationDelay: '2.1s' }} />
-        <span className="tw" style={{ left: '82%', top: 300, animationDelay: '.6s' }} />
         <div className="art">
-          <img src="/lounge-arch.webp" width={880} height={1168} alt="아치 문 너머로 보이는 분홍 소파 라운지" />
-          <span className="glow lamp" style={{ left: '37.5%', top: '44%' }} />
-          <span className="glow lamp" style={{ left: '43.7%', top: '39%', animationDelay: '1.5s' }} />
-          <span className="glow candle" style={{ left: '50.3%', top: '70%' }} />
-          <span className="glow neon" style={{ left: '60%', top: '55.6%' }} />
-          <span className="glow spill" style={{ left: '50%', top: '92%' }} />
-          <span className="dust" style={{ left: '42%', top: '72%' }} />
-          <span className="dust" style={{ left: '56%', top: '76%', animationDelay: '2.4s' }} />
-          <span className="dust" style={{ left: '48%', top: '80%', animationDelay: '4.6s' }} />
+          <img src="/lounge-line.webp" width={880} height={1168} alt="작은 와인 라운지에서 마주 앉아 이야기하는 사람들" />
         </div>
         <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><Link href="/status">신청 내역</Link><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
         <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>

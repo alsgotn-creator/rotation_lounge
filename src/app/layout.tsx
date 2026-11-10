@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: '플러팅 라운지 · 로테이션 소개팅',
   description: '15분씩, 일곱 번의 설렘. 서로 고른 사람만 연결돼요.',
 };
-export const viewport: Viewport = { themeColor: '#0a122f', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = { themeColor: '#f4f4f5', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

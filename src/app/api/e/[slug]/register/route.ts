@@ -27,7 +27,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     age: new Date(event.starts_at).getUTCFullYear() - me.birth_year,
     nickname: b.nickname.trim(), area: b.area.trim(), mbti: b.mbti.toUpperCase(),
     keywords: b.keywords.map((k) => k.trim()).filter(Boolean),
-    answers: b.answers, love_type: loveType(b.answers), shape: b.shape, prop: b.prop,
+    answers: b.answers, love_type: loveType(b.answers), shape: b.shape,
     consent_at: now, updated_at: now,
   };
   const { error } = await db().from('participants').upsert(row, { onConflict: 'application_id' });

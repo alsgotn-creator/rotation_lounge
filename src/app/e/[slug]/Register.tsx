@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
 import { Character } from '../../../components/Character';
 import { QUESTIONS, PALETTE, loveType, phrases } from '../../../lib/domain/loveType';
-import { PROPS, PROP_KO, SHAPES, SHAPE_KO, registrationError, type Prop, type Shape } from '../../../lib/domain/register';
+import { CHARS, registrationError, type Shape } from '../../../lib/domain/register';
 
-export type Initial = { nickname: string; area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: Prop } | null;
+export type Initial = { nickname: string; area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape } | null;
 type Given = { gender: 'f' | 'm'; age: number; job: string };
 
 const MBTI_PAIRS: [string, string, string, string][] = [['E', '외향', 'I', '내향'], ['N', '직관', 'S', '감각'], ['F', '감정', 'T', '사고'], ['J', '계획', 'P', '즉흥']];
@@ -25,8 +25,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
   const [keywords, setKeywords] = useState<string[]>(initial?.keywords ?? []);
   const [kw, setKw] = useState('');
   const [answers, setAnswers] = useState<number[]>(initial?.answers ?? Array(QUESTIONS.length).fill(devStep && devStep > 5 ? 4 : 0));
-  const [shape, setShape] = useState<Shape>(initial?.shape ?? 'cloud');
-  const [prop, setProp] = useState<Prop>(initial?.prop ?? 'none');
+  const [shape, setShape] = useState<Shape>(initial?.shape ?? CHARS[given.gender][0]);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -47,7 +46,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
   })();
 
   const submit = async () => {
-    const body = { nickname, area, mbti: mbti.join(''), keywords, answers, shape, prop, consent };
+    const body = { nickname, area, mbti: mbti.join(''), keywords, answers, shape, consent };
     const e = registrationError(body);
     if (e) return setErr(e);
     setBusy(true); setErr('');
@@ -151,14 +150,10 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
         </>}
 
         {step === CHAR && <>
-          <h2 className="q">나의 컬러로 태어난<br />친구를 골라주세요</h2>
-          <div className="preview-chr"><Character shape={shape} color={type} prop={prop} size={180} /></div>
+          <h2 className="q">나를 닮은 캐릭터를<br />골라주세요</h2>
+          <div className="preview-chr"><Character shape={shape} color={type} size={180} /></div>
           <div className="shapes">
-            {SHAPES.map((s) => <button type="button" key={s} className={shape === s ? 'on' : ''} aria-pressed={shape === s} onClick={() => setShape(s)}><Character shape={s} color={type} prop="none" size={64} delay={SHAPES.indexOf(s)} />{SHAPE_KO[s]}</button>)}
-          </div>
-          <p className="eb" style={{ marginTop: 22 }}>소품</p>
-          <div className="chips" style={{ marginTop: 0 }}>
-            {PROPS.map((p) => <button type="button" key={p} onClick={() => setProp(p)} style={prop === p ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} aria-pressed={prop === p}>{PROP_KO[p]}</button>)}
+            {CHARS[given.gender].map((s, i) => <button type="button" key={s} className={shape === s ? 'on' : ''} aria-pressed={shape === s} aria-label={`캐릭터 ${i + 1}`} onClick={() => setShape(s)}><Character shape={s} color={type} size={84} delay={i} /></button>)}
           </div>
           <p className="hint">대기실에서는 이 캐릭터와 키워드만 보여요</p>
         </>}

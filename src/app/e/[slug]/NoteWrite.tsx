@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
 import { containsContact, NOTE_MAX, PAPER_FONTS } from '../../../lib/domain/notes';
-import type { Prop, Shape } from '../../../lib/domain/register';
+import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
 
 /** 라운드가 끝난 뒤 방금 대화한 상대에게 한마디 (꼭 써야 한다, 내 호 번호가 함께 전달된다). 다음 라운드가 시작돼도 쓸 때까지 이 화면이 먼저 나온다. */
@@ -27,7 +27,7 @@ export default function NoteWrite({ slug, pending, onDone }: { slug: string; pen
 
   return (
     <main className="nw">
-      <div className="nw-top"><Character shape={to.shape as Shape} color={to.color} prop={to.prop as Prop} size={96} /></div>
+      <div className="nw-top"><Character shape={to.shape as Shape} color={to.color} size={96} /></div>
       <h2 className="q" style={{ textAlign: 'center' }}>{label}에게 한마디</h2>
       <p className="ds" style={{ textAlign: 'center' }}>{round}번째 라운지에서 만난 분께 남기는 쪽지예요.</p>
       <div className="nw-fonts" role="radiogroup" aria-label="글씨체">

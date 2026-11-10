@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
 import { Icon } from '../../../components/Icon';
-import type { Prop, Shape } from '../../../lib/domain/register';
+import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
 import { Reveal } from './Round';
 
@@ -51,7 +51,7 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
             <div key={c.id} className={`chc-cell${on ? ' on' : ''}`}>
               <button className="chc-pick" aria-pressed={on} aria-label={`${ho(c.gender, c.number)} ${on ? '선택 취소' : '선택'}`} onClick={() => toggle(c.id)}>
                 {on && <span className="chc-heart" aria-hidden="true">{sel.indexOf(c.id) + 1}순위</span>}
-                <Character shape={c.shape as Shape} color={c.color} prop={c.prop as Prop} size={72} delay={(c.number ?? 0) * 0.5} />
+                <Character shape={c.shape as Shape} color={c.color} size={72} delay={(c.number ?? 0) * 0.5} />
                 <b>{ho(c.gender, c.number)}</b>
                 <span>{c.keywords[0]}</span>
               </button>

@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import { Character } from '../../../components/Character';
 import type { PublicCard } from '../../../lib/domain/lounge';
-import type { Prop, Shape } from '../../../lib/domain/register';
+import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
 
 const ho = (g: 'f' | 'm', n: number | null) => `${g === 'f' ? '여' : '남'}${n}호`;
-const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} prop={c.prop as Prop} size={size} delay={(c.number ?? 0) * 0.6} />;
+const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} size={size} delay={(c.number ?? 0) * 0.6} />;
 
 /** 마무리: 결과는 호스트가 열어줄 때까지 기다리고, 열리면 서로 고른 사람만 보여준다. 롤링페이퍼는 언제든 볼 수 있다. */
 function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {

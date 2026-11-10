@@ -28,9 +28,9 @@ Stack (user's choice): **Next.js**, deployed on **Vercel**, shared state/realtim
 
 ## Design direction
 
-풋풋하고 사랑이 느껴지되 **고급스럽게** — the user rejected pastel/cartoon/pixel mockups as too childish. Theme: midnight navy + rose gold, one font (Pretendard) except the rolling paper (handwriting font), portrait layouts only.
+**Changed 2026-11-10:** white / light-gray tone (tokens in `src/app/globals.css` `:root`: bg #f4f4f5, white cards, black text and black buttons), one font (Pretendard) except the rolling paper (handwriting font), portrait layouts only. The earlier navy + rose gold look is retired.
 
-Characters: glossy cloud-jelly body with big googly eyes (Higgsfield `gpt_image_2_5`, transparent PNG). Animation is **image-based, not video**: per character 3 aligned frames (base / smile / eyes-closed); body "breathes" via CSS scale, and only the face region (masked) swaps to blink/smile. Colors follow the 16 love types.
+Characters: minimal 2D pen-line illustrations (thick black outlines, black hair, white face and clothes, two dot eyes, no mouth), 6 women (f1–f6) and 6 men (m1–m6); participants pick from their own gender's six. The id is stored in `participants.shape` (`prop` is no longer used). Each character has exactly **one accent item** (scarf, mug, beanie…) painted in the person's love-type color: `public/characters/<id>.webp` is the line art with the item left white, and `<id>-accent.webp` is the item's mask, filled with the color via CSS. Animation: a slight CSS "breathe" plus a blink overlay drawn at eye coordinates measured from the art (`EYES` in `src/components/Character.tsx`). Landing hero is `public/lounge-line.webp` in the same style.
 
 Splash (loading screen): app name **플러팅 / 라운지** in two lines, large, handwriting font with a rose-gold shimmer; below it a rose-gold fine-line illustration of a man and woman meeting at a café table (Higgsfield job `54867cda-4cbd-46a9-9aed-8bb5b514fb2d`, transparent PNG); twinkling stars and a thin loading bar. No characters on the splash.
 

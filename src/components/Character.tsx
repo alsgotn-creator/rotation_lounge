@@ -1,55 +1,32 @@
 import type { CSSProperties } from 'react';
-import type { Prop, Shape } from '../lib/domain/register';
+import { SHAPES, type Shape } from '../lib/domain/register';
 import { PALETTE } from '../lib/domain/loveType';
 
-const HAS_ASSETS = process.env.NEXT_PUBLIC_CHARACTER_ASSETS === '1';
-
-const BASE_HUE = 2; // 임시 그림(분홍)의 평균 색상각, 실측
-function hue(hex: string) {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
-  if (!d) return 0;
-  const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
-  return (h * 60 + 360) % 360;
-}
-/** 임시 그림을 연애 컬러 쪽으로 돌리는 필터 (밝기도 대충 맞춘다) */
-export function tint(color: number) {
-  const c = PALETTE[color];
-  const light = [1, 3, 5].reduce((s, i) => s + parseInt(c.slice(i, i + 2), 16), 0) / (3 * 255);
-  return `hue-rotate(${Math.round(hue(c) - BASE_HUE)}deg) brightness(${(0.75 + light * 0.4).toFixed(2)})`;
-}
-
-export function characterSrc(shape: Shape, color: number, frame: 'base' | 'smile' | 'blink', hasAssets = HAS_ASSETS) {
-  return hasAssets ? `/characters/${shape}/${String(color).padStart(2, '0')}-${frame}.webp` : `/characters/placeholder-${frame}.webp`;
-}
-
-// shortcut: 진짜 3모양×16색 그림(계획서 Task 15)이 나오기 전까지는 한 장을 색만 돌리고 비율로 모양을 흉내 낸다.
-const SHAPE_FAKE: Record<Shape, string> = { cloud: 'none', mochi: 'scale(1.24,.8)', drop: 'scale(.8,1.2)' };
-const PROP_ANCHOR: Record<Shape, { x: number; y: number; w: number }> = {
-  cloud: { x: 62, y: 6, w: 30 }, mochi: { x: 60, y: 10, w: 30 }, drop: { x: 58, y: 2, w: 28 },
+/** 눈 두 점의 위치와 지름 (그림 대비 %). 그림에서 자동으로 재서 넣었다: 왼눈 x,y · 오른눈 x,y · 지름 */
+const EYES: Record<Shape, [number, number, number, number, number]> = {
+  f1: [57.3, 32, 66.3, 31.7, 3], f2: [58.4, 34.9, 67.7, 34.4, 3.2], f3: [57.4, 34.1, 66.6, 33.8, 2.9],
+  f4: [58.5, 33.1, 68.3, 32.6, 3.2], f5: [56.6, 35.1, 67.3, 34.2, 2.7], f6: [59.9, 40.6, 68.9, 40.3, 3],
+  m1: [57.9, 36.5, 67.4, 35.9, 3.1], m2: [55, 35.7, 67, 35.2, 3], m3: [55.2, 34.1, 65.1, 33.5, 3],
+  m4: [54.7, 32, 63.7, 31.1, 2.9], m5: [56.4, 33.3, 64.6, 33, 2.5], m6: [56.8, 35, 67.2, 33.8, 2.9],
 };
 
-const PROP_SVG: Record<Exclude<Prop, 'none'>, React.ReactNode> = {
-  ribbon: <><path d="M32 30 10 16v28zM32 30l22-14v28z" fill="#ff8fa3" /><circle cx="32" cy="30" r="7" fill="#ffc49a" /></>,
-  flower: <>{[0, 72, 144, 216, 288].map((r) => <ellipse key={r} cx="32" cy="17" rx="9" ry="13" fill="#ffd1d9" transform={`rotate(${r} 32 32)`} />)}<circle cx="32" cy="32" r="8" fill="#ffc16b" /></>,
-  star: <path d="m32 6 7.6 16.4 17.9 2-13.3 12.1 3.7 17.6L32 45.3 16.1 54.1l3.7-17.6L6.5 24.4l17.9-2z" fill="#ffd86b" />,
-  heart: <path d="M32 54S8 40 8 22a12 12 0 0 1 24-4 12 12 0 0 1 24 4c0 18-24 32-24 32z" fill="#ff6f8e" />,
-  crown: <path d="M8 46 12 16l12 14 8-18 8 18 12-14 4 30z" fill="#ffd86b" stroke="#e6a94a" strokeWidth="2" strokeLinejoin="round" />,
-};
-
-export function Character({ shape, color, prop, size = 120, delay = 0 }: { shape: Shape; color: number; prop: Prop; size?: number; delay?: number }) {
-  const a = PROP_ANCHOR[shape];
-  const style = { width: size, height: size, '--d': `${-delay}s`, '--shape': SHAPE_FAKE[shape], filter: HAS_ASSETS ? undefined : tint(color) } as CSSProperties;
+/** 흑백 펜 선 캐릭터. 포인트 소품(마스크 그림)만 연애 컬러로 칠하고, 눈은 가끔 깜빡인다. */
+export function Character({ shape, color, size = 120, delay = 0, flip = false }: { shape: string; color: number; size?: number; delay?: number; flip?: boolean }) {
+  const id: Shape = (SHAPES as readonly string[]).includes(shape) ? (shape as Shape) : 'f1'; // 옛 캐릭터(구름 등)로 등록된 사람
+  const [x1, y1, x2, y2, d] = EYES[id];
+  const mask = `url(/characters/${id}-accent.webp)`;
+  const style = { width: size, height: size, '--d': `${-delay}s`, '--c': PALETTE[color] } as CSSProperties;
   return (
-    <div className="chr" style={style} aria-hidden="true">
+    <div className={flip ? 'chr flip' : 'chr'} style={style} aria-hidden="true">
       <div className="chr-body">
-        <img src={characterSrc(shape, color, 'base')} alt="" />
-        <img className="chr-face chr-smile" src={characterSrc(shape, color, 'smile')} alt="" />
-        <img className="chr-face chr-blink" src={characterSrc(shape, color, 'blink')} alt="" />
+        <img src={`/characters/${id}.webp`} alt="" />
+        <i className="chr-acc" style={{ maskImage: mask, WebkitMaskImage: mask }} />
+        <svg className="chr-blink" viewBox="0 0 100 100">
+          {[[x1, y1], [x2, y2]].map(([x, y]) => (
+            <g key={x}><circle cx={x} cy={y} r={d * 0.8} fill="#fff" /><path d={`M${x - d * 0.55} ${y}h${d * 1.1}`} stroke="#111" strokeWidth={d * 0.35} strokeLinecap="round" /></g>
+          ))}
+        </svg>
       </div>
-      {prop !== 'none' && (
-        <svg className="chr-prop" viewBox="0 0 64 64" style={{ left: `${a.x}%`, top: `${a.y}%`, width: `${a.w}%`, filter: HAS_ASSETS ? undefined : `hue-rotate(${-Math.round(hue(PALETTE[color]) - BASE_HUE)}deg)` }}>{PROP_SVG[prop]}</svg>
-      )}
     </div>
   );
 }

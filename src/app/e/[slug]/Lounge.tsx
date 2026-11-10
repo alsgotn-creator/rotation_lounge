@@ -5,7 +5,7 @@ import { Icon } from '../../../components/Icon';
 import { IdealCloud } from '../../../components/IdealCloud';
 import { IDEAL } from '../../../lib/domain/ideal';
 import { PALETTE, phrases } from '../../../lib/domain/loveType';
-import type { Prop, Shape } from '../../../lib/domain/register';
+import type { Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
 import type { PlayView } from '../../../lib/server/play';
 
@@ -61,7 +61,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, recommen
 
       <section className="lg-me">
         <small>나</small>
-        <Poke><Character shape={me.shape as Shape} color={me.color} prop={me.prop as Prop} size={128} /></Poke>
+        <Poke><Character shape={me.shape as Shape} color={me.color} size={128} /></Poke>
         <div className="lg-kw">{me.keywords.map((k) => <span key={k} className="on">{k}</span>)}</div>
         {me.number != null && <b className="lg-ho">{ho(me.gender, me.number)}</b>}
       </section>
@@ -71,7 +71,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, recommen
         : <section className="lg-crowd">
             {others.map((c, i) => (
               <div key={c.id} className="lg-p" style={{ animationDelay: `${-(i * 0.7) % 4}s` }}>
-                <Poke><Character shape={c.shape as Shape} color={c.color} prop={c.prop as Prop} size={74} delay={i * 0.9} /></Poke>
+                <Poke><Character shape={c.shape as Shape} color={c.color} size={74} delay={i * 0.9} /></Poke>
                 <div className="lg-kw">{c.keywords.slice(0, 2).map((k) => <span key={k}>{k}</span>)}</div>
               </div>
             ))}
