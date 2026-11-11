@@ -3,21 +3,24 @@ export type Axis = 0 | 1 | 2 | 3; // 거리감 · 표현 · 데이트 · 미래
 
 /** 한 줄에 들어가게 짧게 (테스트가 길이를 지킨다). axis null = 연애 컬러에는 안 들어가고 '가장 비슷한 사람' 추천에만 쓰인다. */
 export const QUESTIONS: { text: string; axis: Axis | null; reversed: boolean }[] = [
-  { text: '연락은 자주 할수록 좋아요', axis: 0, reversed: false },
-  { text: '혼자만의 시간이 꼭 필요해요', axis: 0, reversed: true },
-  { text: '취미도 같이 하고 싶어요', axis: 0, reversed: false },
-  { text: '좋으면 먼저 다가가요', axis: 1, reversed: false },
-  { text: '서운하면 바로 말해요', axis: 1, reversed: false },
-  { text: '표현은 많을수록 좋아요', axis: 1, reversed: false },
-  { text: '집 데이트가 제일 편해요', axis: 2, reversed: false },
-  { text: '주말엔 새로운 곳에 가요', axis: 2, reversed: true },
-  { text: '여행은 계획 없이 떠나요', axis: 2, reversed: true },
-  { text: '결혼은 꼭 하고 싶어요', axis: 3, reversed: false },
-  { text: '연애할 때 결혼도 생각해요', axis: 3, reversed: false },
-  { text: '지금 즐거운 게 더 중요해요', axis: 3, reversed: true },
-  { text: '외모보다 대화가 먼저예요', axis: null, reversed: false },
-  { text: '술자리는 즐기는 편이에요', axis: null, reversed: false },
-  { text: '연인의 이성 친구, 괜찮아요', axis: null, reversed: false },
+  // 한 화면에 5개씩, 주제를 섞어서
+  { text: '답장 늦으면 신경 쓰여요', axis: 0, reversed: false },
+  { text: '스킨십은 빠를수록 좋아요', axis: 1, reversed: false },
+  { text: '데이트는 집에서 넷플릭스', axis: 2, reversed: false },
+  { text: '1년 만나면 결혼 얘기해요', axis: 3, reversed: false },
+  { text: '외모, 솔직히 중요해요', axis: null, reversed: false },
+
+  { text: '고백은 내가 먼저 하는 편', axis: 1, reversed: false },
+  { text: '각자 약속 많아도 괜찮아요', axis: 0, reversed: true },
+  { text: '맛집 웨이팅 2시간도 OK', axis: 2, reversed: true },
+  { text: '결혼 안 해도 행복할 수 있어요', axis: 3, reversed: true },
+  { text: '전 애인과 친구 가능해요', axis: null, reversed: false },
+
+  { text: '내 폰, 애인이 봐도 돼요', axis: 0, reversed: false },
+  { text: '즉흥 여행, 당장 떠나요', axis: 2, reversed: true },
+  { text: '싸우면 하루쯤 시간 필요해요', axis: 1, reversed: true },
+  { text: '연애에도 돈 계획이 필요해요', axis: 3, reversed: false },
+  { text: '데이트 비용은 반반이 맞아요', axis: null, reversed: false },
 ];
 
 export const normalize = (answers: number[]) => answers.map((a, i) => (QUESTIONS[i].reversed ? 6 - a : a));

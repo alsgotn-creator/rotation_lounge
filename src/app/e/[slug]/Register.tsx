@@ -15,7 +15,7 @@ const MBTI_PAIRS: [string, string, string, string][] = [['E', '외향', 'I', '�
 const KW_EX = ['필라테스 3년차', '맛집 탐방러', '강아지 집사', '주말엔 등산', '영화 덕후'];
 const DOT = [34, 26, 20, 26, 34];
 const Q0 = 2;                       // 질문이 시작되는 단계 (0 동의 · 1 인적사항)
-const PER = 3, PAGES = Math.ceil(QUESTIONS.length / PER); // 가치관 질문은 한 화면에 3개씩
+const PER = 5, PAGES = Math.ceil(QUESTIONS.length / PER); // 가치관 질문은 한 화면에 5개씩 (3쪽)
 const RESULT = Q0 + PAGES, CHAR = RESULT + 1, LAST = CHAR;
 
 export default function Register({ slug, given, initial, onCancel, devStep }: { slug: string; given: Given; initial: Initial; onCancel?: () => void; devStep?: number }) {
