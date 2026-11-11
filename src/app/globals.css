@@ -270,7 +270,7 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .lounge{padding-bottom:190px;background:radial-gradient(120% 60% at 50% 30%,rgba(17,17,17,0.04),transparent 70%)}
 .lg-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0}
 .lg-head{text-align:center;margin-top:14px}
-.lg-head p{margin:0;font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--mute)}
+.lg-head p{margin:0;font-size:11px;font-weight:800;letter-spacing:.18em;padding-left:.18em;color:var(--mute)}
 .lg-head h1{margin:6px 0 0;font-size:26px;font-weight:900;letter-spacing:-.04em}
 .lg-head span{display:block;margin-top:6px;font-size:13px;color:var(--mute);font-weight:600}
 .lg-ring{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;grid-template-areas:"t t t" "l c r" "b b b";gap:10px 4px;padding:18px 8px 0}
