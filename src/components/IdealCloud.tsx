@@ -5,7 +5,7 @@ const h = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 
 
 const LABEL = { f: '여자분들이 적은', m: '남자분들이 적은' } as const;
 
-/** 여자분·남자분이 적은 이상형을 한 박스 안에서 성별로 나눠 칩으로 띄운다. 많이 적힌 건 크고 진하게. 숫자·작성자는 보여주지 않는다. */
+/** 여자분·남자분이 적은 이상형을 한 박스 안에서 성별로 나눠 칩으로 띄운다. 많이 적힌 건 크고 진하게, 나머지도 크기를 조금씩 흔든다. 숫자·작성자는 보여주지 않는다. */
 export function IdealCloud({ lists }: { lists: Record<'f' | 'm', string[][]> }) {
   const groups = (['f', 'm'] as const).map((g) => {
     const ws = cloud(lists[g]);
@@ -23,7 +23,7 @@ export function IdealCloud({ lists }: { lists: Record<'f' | 'm', string[][]> }) 
             {words.map((w) => {
               const r = h(g + w.word);
               return (
-                <span key={w.word} className={`${g}${w.hot ? ' hot' : ''}`} style={{ fontSize: 11 + 1.5 * Math.min(w.count, 4), transform: `translate(${(r % 7) - 3}px,${((r >> 4) % 9) - 4}px) rotate(${((r >> 8) % 7) - 3}deg)` }}>{w.word}</span>
+                <span key={w.word} className={`${g}${w.hot ? ' hot' : ''}`} style={{ fontSize: 11 + 1.5 * Math.min(w.count, 4) + ((r >> 12) % 4) * 0.75, /* 한 번씩만 적힌 것도 크기가 조금씩 다르게 */ transform: `translate(${(r % 7) - 3}px,${((r >> 4) % 9) - 4}px) rotate(${((r >> 8) % 7) - 3}deg)` }}>{w.word}</span>
               );
             })}
           </div>

@@ -19,23 +19,25 @@ function Side({ list, label, faces }: { list: P[]; label: string; faces: boolean
   );
 }
 
-/** 직사각형 배치: 오른쪽 열 1..⌈T/2⌉ 위→아래, 왼쪽 열 아래→위 (번호순이 시계 방향). 한 테이블에 여자 g명 · 남자 g명 */
+// 7테이블 매장 배치 (2026-11-11): 위 2 · 왼쪽 3 · 오른쪽 2, 위 오른쪽 1번부터 반시계 방향. 번호 → [행, 열]
+const ROOM7: Record<number, [number, number]> = { 1: [1, 2], 2: [1, 1], 3: [2, 1], 4: [3, 1], 5: [4, 1], 7: [3, 2], 6: [4, 2] };
+
+/** 직사각형 배치: 오른쪽 열 1..⌈T/2⌉ 위→아래, 왼쪽 열 아래→위 (번호순이 시계 방향). 7테이블은 ROOM7. 한 테이블에 여자 g명 · 남자 g명 */
 export function FloorPlan({ pairs, faces = true }: { pairs: TablePair[]; faces?: boolean }) {
+  const table = (n: number, style?: React.CSSProperties) => (
+    <div className="fp-t" key={n} style={style}>
+      <b className="fp-no">{n}</b>
+      <Side list={pairs[n - 1].f} label="여" faces={faces} />
+      <Side list={pairs[n - 1].m} label="남" faces={faces} />
+    </div>
+  );
+  if (pairs.length === 7) return (
+    <div className="fp fp7">{pairs.map((_, i) => table(i + 1, { gridRow: ROOM7[i + 1][0], gridColumn: ROOM7[i + 1][1] }))}</div>
+  );
   const cols = seatColumns(pairs.length);
-  const at = (n: number) => pairs[n - 1];
   return (
     <div className="fp">
-      {[cols.left, cols.right].map((col, ci) => (
-        <div className="fp-col" key={ci}>
-          {col.map((n) => (
-            <div className="fp-t" key={n}>
-              <b className="fp-no">{n}</b>
-              <Side list={at(n).f} label="여" faces={faces} />
-              <Side list={at(n).m} label="남" faces={faces} />
-            </div>
-          ))}
-        </div>
-      ))}
+      {[cols.left, cols.right].map((col, ci) => <div className="fp-col" key={ci}>{col.map((n) => table(n))}</div>)}
     </div>
   );
 }
