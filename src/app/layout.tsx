@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: '플러팅 라운지 · 로테이션 소개팅',
-  description: '15분씩, 일곱 번의 설렘. 서로 고른 사람만 연결돼요.',
+  description: '다양한 사람들과 15분의 설렘. 서로 고른 사람만 연결돼요.',
 };
 // viewportFit cover 가 있어야 iOS 홈 화면 앱에서 env(safe-area-inset-bottom) 값이 들어온다 (하단 고정 버튼 .ft)
 export const viewport: Viewport = { themeColor: '#f4f4f5', width: 'device-width', initialScale: 1, viewportFit: 'cover' };

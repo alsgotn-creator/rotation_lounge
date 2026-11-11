@@ -27,7 +27,7 @@ export default async function Landing() {
           <video className="mv" src="/lounge-line.mp4" autoPlay muted loop playsInline preload="auto" aria-hidden="true" />
         </div>
         <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
-        <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>
+        <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>다양한 사람들과 15분의 설렘</span></div>
         {open.length > 0 && <div className="bottom">
           {open.map((next) => <Link key={next.id} className="ticket" href={`/apply?s=${next.id}`}>
             <div className="dt">{next.mon}<b>{next.day}</b>{next.dow}</div>
@@ -44,10 +44,10 @@ export default async function Landing() {
 
       <section className="lsec">
         <p className="eb">이런 자리예요</p>
-        <h3>2시간 동안 일곱 명과<br />천천히 대화해요</h3>
-        <div className="fact" style={{ marginTop: 10 }}><i><Icon name="clock" /></i><div><b>15분씩, 일곱 번</b><span>자리를 옮기며 한 명씩 깊게 이야기해요</span></div></div>
+        <h3>2시간 동안 다양한 사람들과<br />15분의 설렘</h3>
+        <div className="fact" style={{ marginTop: 10 }}><i><Icon name="clock" /></i><div><b>15분씩, 한 명과</b><span>자리를 옮기며 한 명씩 깊게 이야기해요</span></div></div>
         <div className="fact"><i><Icon name="heart" /></i><div><b>서로 고른 사람만 연결돼요</b><span>한쪽만 고르면 아무 일도 일어나지 않아요</span></div></div>
-        <div className="fact"><i><Icon name="eyeOff" /></i><div><b>몇 명이 나를 골랐는지 몰라요</b><span>결과는 ‘매칭되었어요’ 한 줄만 보여요</span></div></div>
+        <div className="fact"><i><Icon name="eyeOff" /></i><div><b>몇 명이 나를 골랐는지 몰라요</b><span>결과는 문자로 보내드려요</span></div></div>
       </section>
 
       <section className="lsec">
