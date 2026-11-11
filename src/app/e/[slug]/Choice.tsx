@@ -12,25 +12,27 @@ import { Reveal } from './Round';
 export default function Choice({ slug, view, onSaved, onPaper }: { slug: string; view: PlayView; onSaved: () => void; onPaper: () => void }) {
   const choice = view.choice!;
   const [sel, setSel] = useState<string[]>(choice.picks);
+  const [fire, setFire] = useState<string | null>(choice.brave ?? null); // 용기 카드는 한 장
   const [busy, setBusy] = useState(false);
   const [shake, setShake] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
-  const dirty = sel.length !== choice.picks.length || sel.some((id, i) => id !== choice.picks[i]);
+  const dirty = sel.length !== choice.picks.length || sel.some((id, i) => id !== choice.picks[i]) || fire !== (choice.brave ?? null);
   const saved = choice.done && !dirty;
 
   const toggle = (id: string) => {
-    if (sel.includes(id)) return setSel(sel.filter((x) => x !== id));
+    if (sel.includes(id)) { if (fire === id) setFire(null); return setSel(sel.filter((x) => x !== id)); }
     if (sel.length >= choice.max) { setShake(true); setMsg(`최대 ${choice.max}명까지 고를 수 있어요`); setTimeout(() => setShake(false), 500); return; }
     setMsg(''); setSel([...sel, id]);
   };
   const save = async () => {
     setBusy(true); setMsg('');
-    const j = await api(`/api/e/${slug}/choices`, { ids: sel });
+    const j = await api(`/api/e/${slug}/choices`, { ids: sel, brave: fire });
     setBusy(false);
     if (!j.ok) return setMsg(j.message ?? '다시 시도해주세요.');
     onSaved();
   };
+  const fireP = choice.candidates.find((c) => c.id === fire);
   const person = info ? choice.candidates.find((c) => c.id === info) : null;
 
   return (
@@ -54,11 +56,18 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
                 <b>{ho(c.gender, c.number)}</b>
                 <span>{c.keywords[0]}</span>
               </button>
+              {on && <button className={`chc-fire${fire === c.id ? ' on' : ''}`} aria-pressed={fire === c.id} onClick={() => setFire(fire === c.id ? null : c.id)}>{fire === c.id ? '🔥 카드를 줬어요' : '🔥 카드 주기'}</button>}
               {met && <button className="chc-info" aria-label={`${ho(c.gender, c.number)} 정보 보기`} onClick={() => setInfo(c.id)}><Icon name="info" /></button>}
             </div>
           );
         })}
       </div>
+      <section className="chc-brave">
+        <b>🔥 용기 카드 한 장</b>
+        <p>고른 분 중 <em>딱 한 명</em>에게만 줄 수 있어요.<br />서로에게 카드를 줬다면, 오늘 끝나고 두 분만 따로 카페로 안내해드려요.</p>
+        <small>카드가 엇갈리면 아무도 몰라요. 매칭은 그대로 문자로 알려드려요. 안 줘도 괜찮아요.</small>
+        <span className="chc-brave-to">{fireP ? <>용기 카드는 <b>{ho(fireP!.gender, fireP!.number)}</b>에게 · 바꾸려면 다른 분의 🔥를 눌러요</> : sel.length ? '고른 분 아래 🔥 카드 주기를 눌러요' : '먼저 마음이 간 분을 골라주세요'}</span>
+      </section>
       {msg && <p role="alert" className="chc-msg">{msg}</p>}
       <div className="ft">
         <button className="btn" disabled={busy || saved} onClick={save}>{busy ? '저장하는 중…' : saved ? '✓ 선택을 마쳤어요 · 바꾸려면 다시 눌러요' : '선택 완료'}</button>

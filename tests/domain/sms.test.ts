@@ -13,5 +13,11 @@ describe('sms', () => {
     expect(t).toContain('2분 있어요');
     expect(t).toContain('남5호 b님 · 2');
   });
+  test('brave card adds the cafe notice only when given', () => {
+    const p = { label: '남3호', name: '준호', phone: '1' };
+    expect(matchSms('민지', [p], p)).toContain('🔥 남3호 준호님과는 서로 용기 카드');
+    expect(matchSms('민지', [p], p)).toContain('The November 라운지 이대점');
+    expect(matchSms('민지', [p])).not.toContain('🔥');
+  });
   test('no match', () => expect(noMatchSms('민지')).toContain('민지님'));
 });

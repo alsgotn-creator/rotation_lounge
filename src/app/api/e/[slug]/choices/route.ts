@@ -21,13 +21,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   if (ids.length > view.choice.max) return fail(`최대 ${view.choice.max}명까지 고를 수 있어요.`);
   const ok = new Set(opposite.map((o) => o.id));
   if (ids.some((id) => !ok.has(id))) return fail('고를 수 없는 사람이 있어요.');
+  const brave = typeof b.brave === 'string' && ids.includes(b.brave) ? b.brave : null; // 용기 카드는 고른 사람 중 한 명에게만
 
   const del = await db().from('choices').delete().eq('event_id', event.id).eq('from_id', p.id);
   if (del.error) return fail('저장하지 못했어요. 다시 시도해주세요.', 500);
   if (ids.length) {
-    // ids 순서가 곧 1·2·3순위. rank 칸이 아직 없으면(SQL 미실행) 순위 없이 저장한다.
-    let ins = await db().from('choices').insert(ids.map((to, i) => ({ event_id: event.id, from_id: p.id, to_id: to, rank: i + 1 })));
-    if (ins.error?.code === '42703' || ins.error?.code === 'PGRST204') ins = await db().from('choices').insert(ids.map((to) => ({ event_id: event.id, from_id: p.id, to_id: to })));
+    // ids 순서가 곧 1·2·3순위. brave·rank 칸이 아직 없으면(SQL 미실행) 그 칸을 빼고 저장한다.
+    const rows = (cols: ('rank' | 'brave')[]) => ids.map((to, i) => ({ event_id: event.id, from_id: p.id, to_id: to, ...(cols.includes('rank') && { rank: i + 1 }), ...(cols.includes('brave') && { brave: to === brave }) }));
+    const noCol = (e: { code?: string } | null) => e?.code === '42703' || e?.code === 'PGRST204';
+    let ins = await db().from('choices').insert(rows(['rank', 'brave']));
+    if (noCol(ins.error)) ins = await db().from('choices').insert(rows(['rank']));
+    if (noCol(ins.error)) ins = await db().from('choices').insert(rows([]));
     if (ins.error) return fail('저장하지 못했어요. 다시 시도해주세요.', 500);
   }
   await db().from('participants').update({ choice_done_at: new Date().toISOString() }).eq('id', p.id); // 칸이 없으면 무시된다

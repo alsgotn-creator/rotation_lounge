@@ -324,7 +324,7 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .person-row:last-child{border-bottom:0}
 .person-row.off{opacity:.45}
 .person-row select{height:38px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:800;padding:0 6px;font-family:inherit;color:var(--text)}
-.person-row div{flex:1;min-width:0}.person-row b{display:block;font-size:14px}.person-row span{font-size:12px;color:var(--mute)}
+.person-row div{flex:1;min-width:0}.person-row b{display:block;font-size:14px}.person-row span{font-size:12px;color:var(--mute)}.person-row div>span{display:block}
 .mini-in{width:56px;height:36px;border-radius:18px;border:0;background:var(--surf2);text-align:center;font-weight:700;font-size:14px}
 
 /* ---------- 대화 라운드 (참가자) ---------- */
@@ -378,6 +378,16 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .chc-heart{position:absolute;right:8px;top:6px;color:var(--acc);font-size:16px}
 .chc-info{position:absolute;left:4px;top:4px;width:32px;height:32px;border-radius:16px;border:0;background:var(--accbg);color:var(--acc);display:grid;place-items:center;cursor:pointer}
 .chc-info .ic{width:16px;height:16px}
+.chc-fire{display:block;width:100%;margin-top:6px;min-height:36px;border-radius:12px;border:1px dashed rgba(232,90,40,.5);background:#fff;color:#c2410c;font-size:12px;font-weight:800;cursor:pointer}
+.chc-fire.on{border-style:solid;border-color:transparent;background:linear-gradient(135deg,#ff7a3d,#e8466e);color:#fff;box-shadow:0 6px 16px -6px rgba(232,70,110,.6)}
+.chc-brave{margin:22px 16px 0;padding:18px 18px 16px;border-radius:20px;background:linear-gradient(160deg,#fff7f0,#fff);border:1px solid rgba(232,90,40,.25);text-align:center}
+.chc-brave>b{font-size:16px;font-weight:900}
+.chc-brave p{margin:8px 0 0;font-size:13.5px;line-height:1.6;font-weight:600}
+.chc-brave p em{font-style:normal;font-weight:900;color:#c2410c}
+.chc-brave small{display:block;margin-top:6px;font-size:12px;color:var(--mute);line-height:1.5}
+.chc-brave-to{display:block;margin-top:12px;padding-top:12px;border-top:1px dashed rgba(232,90,40,.25);font-size:13px;font-weight:700;color:var(--mute)}
+.chc-brave-to b{color:#c2410c;font-weight:900}
+.brave-tag{display:inline-block;margin-left:6px;font-style:normal;font-size:11px;font-weight:800;color:#c2410c;background:#fff1e8;border-radius:8px;padding:2px 7px;vertical-align:1px}
 .chc-msg{margin:14px 24px 0;text-align:center;color:var(--err);font-size:14px;font-weight:700}
 .cls{padding-bottom:130px}
 .cls-wait{display:grid;place-items:center;margin-bottom:6px;opacity:.9}

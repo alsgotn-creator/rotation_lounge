@@ -186,7 +186,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
 /** 호스트만 보는 최종 선택 현황·매칭 커플·쪽지 (참가자 응답에는 절대 넣지 않는다). 표가 아직 없으면 빈 값. */
 export async function loadHostExtras(eventId: string, people: Person[]) {
   const [ch0, nt, dn, ap, wn] = await Promise.all([
-    db().from('choices').select('from_id,to_id,rank').eq('event_id', eventId).order('rank'),
+    db().from('choices').select('from_id,to_id,rank,brave').eq('event_id', eventId).order('rank'),
     db().from('notes').select('id,round,from_id,to_id,body,hidden').eq('event_id', eventId).order('created_at'),
     db().from('participants').select('id,choice_done_at').eq('event_id', eventId),
     db().from('participants').select('id,age,job,application_id,applications(name,phone,email)').eq('event_id', eventId),
@@ -202,12 +202,12 @@ export async function loadHostExtras(eventId: string, people: Person[]) {
     const pp = people.find((x) => x.id === a.id);
     if (wineIds.has(a.application_id) && pp) wine.push({ gender: pp.gender, number: pp.number, name: a.applications?.name ?? '', age: a.age, job: a.job, phone: a.applications?.phone ?? '', email: a.applications?.email ?? '' });
   }
-  const choices = ch.error ? [] : (ch.data ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string }));
+  const choices = ch.error ? [] : (ch.data ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string, brave: !!(c as { brave?: boolean }).brave }));
   const active = people.filter((p) => !p.excluded && p.number != null);
   const picks = active.map((p) => ({ id: p.id, to: choices.filter((c) => c.fromId === p.id).map((c) => c.toId) }));
   const done = dn.error ? picks.filter((x) => x.to.length).length : (dn.data ?? []).filter((d) => d.choice_done_at && active.some((p) => p.id === d.id)).length;
   return {
-    picks, matches: mutualPairs(choices), done, total: active.length, contacts, wine,
+    picks, matches: mutualPairs(choices), brave: mutualPairs(choices.filter((c) => c.brave)), done, total: active.length, contacts, wine,
     notes: nt.error ? [] : (nt.data ?? []).filter((n) => n.body != null).map((n) => ({ id: n.id as string, round: n.round as number, fromId: n.from_id as string, toId: n.to_id as string, body: n.body as string, hidden: !!n.hidden })),
   };
 }

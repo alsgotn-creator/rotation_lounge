@@ -16,7 +16,7 @@ export type PlayView = {
   round: null | { no: number; total: number; timer: Round; perTable: number; partners: PublicCard[]; ordinal: number; oppositeCount: number };
   met: Record<string, Profile>;            // 5분 이상 함께 앉았던 사람만 (최종선택 때는 같이 앉았던 사람 모두). 한 번 공개되면 계속 보인다.
   pending: null | { round: number; to: PublicCard };
-  choice: null | { max: number; picks: string[]; done: boolean; candidates: PublicCard[] };
+  choice: null | { max: number; picks: string[]; brave: string | null; done: boolean; candidates: PublicCard[] };
   paper: null | { notes: { id: string; body: string; font: string; from: { gender: 'f' | 'm'; number: number | null } }[] };   // 최종선택 단계에만. 보낸 사람은 '여3호'처럼 호가 보인다
   game: null | { cardId: string; kind: string; prompt: string; options: string[]; mine: string | null; answered: number; total: number; answers: null | { gender: 'f' | 'm'; number: number; me: boolean; text: string }[] };
 };
@@ -55,7 +55,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     ids.length ? db().from('participants').select('id,age,job,area,mbti,love_type').in('id', ids) : null,
     ids.length ? db().from('participants').select('id,number,answers').in('id', [meId, ...opposite.map((p) => p.id)]) : null,
     me ? db().from('notes').select('round,to_id').eq('event_id', eventId).eq('from_id', meId) : null,
-    choosing ? db().from('choices').select('to_id,rank').eq('event_id', eventId).eq('from_id', meId).order('rank') : null,
+    choosing ? db().from('choices').select('to_id,rank,brave').eq('event_id', eventId).eq('from_id', meId).order('rank') : null,
     choosing ? db().from('participants').select('choice_done_at').eq('id', meId).single() : null,
     choosing ? paperQ('id,body,from_id,font') : null,
   ]);
@@ -94,7 +94,8 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   if (choosing) {
     const cq = cq0?.error ? await db().from('choices').select('to_id').eq('event_id', eventId).eq('from_id', meId) : cq0!; // rank 칸이 없을 때
     const picks = (cq.data ?? []).map((c) => c.to_id as string); // 순위 순서
-    choice = { max: ev.max_picks, picks, done: doneRow && !doneRow.error ? !!doneRow.data?.choice_done_at : picks.length > 0, candidates: opposite.sort((a, b) => a.number! - b.number!).map(card) };
+    const brave = ((cq.data ?? []) as { to_id: string; brave?: boolean }[]).find((c) => c.brave)?.to_id ?? null;
+    choice = { max: ev.max_picks, picks, brave, done: doneRow && !doneRow.error ? !!doneRow.data?.choice_done_at : picks.length > 0, candidates: opposite.sort((a, b) => a.number! - b.number!).map(card) };
   }
 
   // 받은 쪽지는 최종선택 단계에서 (고르기 전에) 읽는다. 매칭 결과는 앱에 보여주지 않고 진행자가 따로 연락한다.

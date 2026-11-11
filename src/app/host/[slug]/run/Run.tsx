@@ -14,7 +14,7 @@ type View = {
   ev: { slug: string; phase: Phase; table_count: number; per_table: number; locked: boolean; round_duration_sec: number; max_picks: number };
   current: Round | null; people: Person[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
-  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
+  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
 };
 const PHASE_KO: [Phase, string][] = [['before', '시작 전'], ['talk', '대화'], ['choice', '최종 선택'], ['closing', '마무리']];
 
@@ -72,6 +72,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   if (!v) return <main className="bd"><p className="ds">불러오는 중…</p></main>;
   const { ev, current } = v;
   const byId = new Map(v.people.map((p) => [p.id, p]));
+  const isBrave = (a: string, b: string) => !!v?.extras.brave?.some((m) => m.includes(a) && m.includes(b)); // 서로 용기 카드
   const copy = async (t: string, ok: string) => { try { await navigator.clipboard.writeText(t); show(ok); } catch { show('복사하지 못했어요'); } };
   const label = (p: Person) => ho(p.gender, p.number);
   const open = current && !current.closedAt;
@@ -172,18 +173,20 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           <p className="eb" style={{ marginTop: 22 }}>매칭 커플 ({v.extras.matches.length}) · 연락처 전달용</p>
           <div className="people">
             {v.extras.matches.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>아직 서로 고른 커플이 없어요</p>}
-            {v.extras.matches.map(([a, b]) => { const pa = byId.get(a)!, pb = byId.get(b)!; return (
-              <div key={a + b} className="person-row"><div><b>{label(pa)} ♥ {label(pb)}</b><span>{pa.nickname}({pa.name}) · {v.extras.contacts[a]?.phone}</span><span>{pb.nickname}({pb.name}) · {v.extras.contacts[b]?.phone}</span></div></div>); })}
+            {v.extras.matches.map(([a, b]) => { const pa = byId.get(a)!, pb = byId.get(b)!, fire = isBrave(a, b); return (
+              <div key={a + b} className="person-row"><div><b>{label(pa)} {fire ? '🔥' : '♥'} {label(pb)}{fire && <em className="brave-tag">서로 용기 카드 · 카페 안내</em>}</b><span>{pa.nickname}({pa.name}) · {v.extras.contacts[a]?.phone}</span><span>{pb.nickname}({pb.name}) · {v.extras.contacts[b]?.phone}</span></div></div>); })}
           </div>
           <p className="eb" style={{ marginTop: 22 }}>결과 문자 · 업무용 폰으로 보내기</p>
           <div className="people">
             {v.extras.picks.map((x) => {
               const p = byId.get(x.id)!, phone = v.extras.contacts[x.id]?.phone ?? '';
               const mine = v.extras.matches.filter((m) => m.includes(x.id)).map((m) => byId.get(m[0] === x.id ? m[1] : m[0])!);
-              const text = mine.length ? matchSms(p.name, mine.map((o) => ({ label: label(o), name: o.name, phone: v.extras.contacts[o.id]?.phone ?? '' }))) : noMatchSms(p.name);
+              const who = (o: typeof p) => ({ label: label(o), name: o.name, phone: v.extras.contacts[o.id]?.phone ?? '' });
+              const fire = mine.find((o) => isBrave(x.id, o.id));
+              const text = mine.length ? matchSms(p.name, mine.map(who), fire && who(fire)) : noMatchSms(p.name);
               return (
                 <div key={x.id} className="person-row">
-                  <div><b>{label(p)} {p.name} {mine.length ? '♥ 매칭' : ''}</b><span>{phone}</span></div>
+                  <div><b>{label(p)} {p.name} {mine.length ? '♥ 매칭' : ''}{fire ? ' 🔥' : ''}</b><span>{phone}</span></div>
                   <button className="lnk" style={{ margin: 0 }} onClick={() => copy(phone, '번호를 복사했어요')}>번호</button>
                   <button className="lnk" style={{ margin: 0, fontWeight: 800, color: 'var(--text)' }} onClick={() => copy(text, '문자를 복사했어요. 문자 앱에 붙여넣어 주세요')}>문자 복사</button>
                 </div>); })}
