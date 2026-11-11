@@ -14,7 +14,7 @@ type View = {
   ev: { slug: string; phase: Phase; table_count: number; per_table: number; locked: boolean; round_duration_sec: number; max_picks: number };
   current: Round | null; people: Person[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
-  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
+  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; byGender: Record<'f' | 'm', { done: number; total: number }>; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
 };
 const PHASE_KO: [Phase, string][] = [['before', '시작 전'], ['talk', '대화'], ['choice', '최종 선택'], ['closing', '마무리']];
 
@@ -61,6 +61,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const notesAll = notesShow && notesGot >= notesNeed;
   const choiceShow = v?.ev.phase === 'choice' && v.extras.total > 0;
   const choiceAll = choiceShow && v!.extras.done >= v!.extras.total;
+  const byG = v ? `여 ${v.extras.byGender.f.done}/${v.extras.byGender.f.total} · 남 ${v.extras.byGender.m.done}/${v.extras.byGender.m.total}` : '';
   const was = useRef({ notes: '', choice: false });
   useEffect(() => {
     const key = notesAll ? `${cur?.no}` : '';
@@ -94,7 +95,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </div>
 
         {notesShow && <p className={`run-alert${notesAll ? ' ok' : ''}`} role="status">{notesAll ? `✓ ${cur!.no}라운드 롤링페이퍼 모두 전달됐어요` : `${cur!.no}라운드 롤링페이퍼 ${notesGot}/${notesNeed}장 도착`}</p>}
-        {choiceShow && <p className={`run-alert${choiceAll ? ' ok' : ''}`} role="status">{choiceAll ? '✓ 모두 최종 선택을 제출했어요' : `최종 선택 ${v.extras.done}/${v.extras.total}명 제출`}</p>}
+        {choiceShow && <p className={`run-alert${choiceAll ? ' ok' : ''}`} role="status">{choiceAll ? '✓ 모두 최종 선택을 제출했어요' : `최종 선택 제출 · ${byG}`}</p>}
 
         <section className="run-card">
           <div className="run-h"><b>{current ? `${current.no}라운드` : '라운드 전'}<em> / {ev.table_count}</em></b>
@@ -162,7 +163,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </div>
 
         {(ev.phase === 'choice' || ev.phase === 'closing') && <>
-          <p className="eb run-eb" style={{ marginTop: 26 }}>최종 선택 · {v.extras.done}/{v.extras.total}명 완료<ResetBtn what="choices" msg="모든 참가자의 최종 선택을 지워요." /></p>
+          <p className="eb run-eb" style={{ marginTop: 26 }}>최종 선택 · {byG} 완료<ResetBtn what="choices" msg="모든 참가자의 최종 선택을 지워요." /></p>
           <div className="people">
             {v.extras.picks.map((x) => { const p = byId.get(x.id)!; return (
               <div key={x.id} className="person-row" style={{ alignItems: 'flex-start' }}>

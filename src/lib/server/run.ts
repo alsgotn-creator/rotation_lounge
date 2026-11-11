@@ -205,9 +205,12 @@ export async function loadHostExtras(eventId: string, people: Person[]) {
   const choices = ch.error ? [] : (ch.data ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string, brave: !!(c as { brave?: boolean }).brave }));
   const active = people.filter((p) => !p.excluded && p.number != null);
   const picks = active.map((p) => ({ id: p.id, to: choices.filter((c) => c.fromId === p.id).map((c) => c.toId) }));
-  const done = dn.error ? picks.filter((x) => x.to.length).length : (dn.data ?? []).filter((d) => d.choice_done_at && active.some((p) => p.id === d.id)).length;
+  const doneIds = new Set(dn.error ? picks.filter((x) => x.to.length).map((x) => x.id) : (dn.data ?? []).filter((d) => d.choice_done_at).map((d) => d.id as string));
+  // 최종 선택 진행은 남녀 따로 센다 (여 n/8 · 남 n/8)
+  const count = (g: 'f' | 'm') => { const gs = active.filter((p) => p.gender === g); return { done: gs.filter((p) => doneIds.has(p.id)).length, total: gs.length }; };
+  const byGender = { f: count('f'), m: count('m') };
   return {
-    picks, matches: mutualPairs(choices), brave: mutualPairs(choices.filter((c) => c.brave)), done, total: active.length, contacts, wine,
+    picks, matches: mutualPairs(choices), brave: mutualPairs(choices.filter((c) => c.brave)), done: byGender.f.done + byGender.m.done, total: active.length, byGender, contacts, wine,
     notes: nt.error ? [] : (nt.data ?? []).filter((n) => n.body != null).map((n) => ({ id: n.id as string, round: n.round as number, fromId: n.from_id as string, toId: n.to_id as string, body: n.body as string, hidden: !!n.hidden })),
   };
 }
