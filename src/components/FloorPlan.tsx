@@ -19,10 +19,13 @@ function Side({ list, label, faces }: { list: P[]; label: string; faces: boolean
   );
 }
 
-// 7테이블 매장 배치 (2026-11-11): 위 2 · 왼쪽 3 · 오른쪽 2, 위 오른쪽 1번부터 반시계 방향. 번호 → [행, 열]
-const ROOM7: Record<number, [number, number]> = { 1: [1, 2], 2: [1, 1], 3: [2, 1], 4: [3, 1], 5: [4, 1], 7: [3, 2], 6: [4, 2] };
+// 매장 배치 (2026-11-11): 위 2 · 왼쪽 3 · 오른쪽 2(7테이블) 또는 3(8테이블), 위 오른쪽 1번부터 반시계 방향. 번호 → [행, 열]
+const ROOM: Record<number, Record<number, [number, number]>> = {
+  7: { 1: [1, 2], 2: [1, 1], 3: [2, 1], 4: [3, 1], 5: [4, 1], 6: [4, 2], 7: [3, 2] },
+  8: { 1: [1, 2], 2: [1, 1], 3: [2, 1], 4: [3, 1], 5: [4, 1], 6: [4, 2], 7: [3, 2], 8: [2, 2] },
+};
 
-/** 직사각형 배치: 오른쪽 열 1..⌈T/2⌉ 위→아래, 왼쪽 열 아래→위 (번호순이 시계 방향). 7테이블은 ROOM7. 한 테이블에 여자 g명 · 남자 g명 */
+/** 직사각형 배치: 오른쪽 열 1..⌈T/2⌉ 위→아래, 왼쪽 열 아래→위 (번호순이 시계 방향). 7·8테이블은 ROOM. 한 테이블에 여자 g명 · 남자 g명 */
 export function FloorPlan({ pairs, faces = true }: { pairs: TablePair[]; faces?: boolean }) {
   const table = (n: number, style?: React.CSSProperties) => (
     <div className="fp-t" key={n} style={style}>
@@ -31,8 +34,9 @@ export function FloorPlan({ pairs, faces = true }: { pairs: TablePair[]; faces?:
       <Side list={pairs[n - 1].m} label="남" faces={faces} />
     </div>
   );
-  if (pairs.length === 7) return (
-    <div className="fp fp7">{pairs.map((_, i) => table(i + 1, { gridRow: ROOM7[i + 1][0], gridColumn: ROOM7[i + 1][1] }))}</div>
+  const room = ROOM[pairs.length];
+  if (room) return (
+    <div className="fp fp7">{pairs.map((_, i) => table(i + 1, { gridRow: room[i + 1][0], gridColumn: room[i + 1][1] }))}</div>
   );
   const cols = seatColumns(pairs.length);
   return (
