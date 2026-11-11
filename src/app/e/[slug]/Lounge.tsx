@@ -81,7 +81,6 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
     return (
       <Drag key={c.id} className="lg-p" style={{ animationDelay: `${-(i * 0.7) % 4}s` }}>
         <Poke><Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={60} delay={i * 0.9} flip={flip} /></Poke>
-        <div className="lg-kw">{c.keywords.slice(0, 2).map((k) => <span key={k}>{k}</span>)}</div>
       </Drag>
     );
   };
@@ -132,7 +131,6 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
           <div className="lg-me">
             <small>나</small>
             <Drag><Poke><Character shape={me.shape as Shape} color={me.color} acc={me.prop} size={92} /></Poke></Drag>
-            <div className="lg-kw">{me.keywords.map((k) => <span key={k} className="on">{k}</span>)}</div>
             {me.number != null && <b className="lg-ho">{ho(me.gender, me.number)}</b>}
           </div>
           {ring.b.slice(1).map((c) => person(c, true))}

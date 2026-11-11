@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '../../components/Icon';
 import { yy } from '../../lib/signup/data';
 import type { Session } from '../../lib/signup/rules';
-import { birthError, digits, formatPhone, isBirth, isName, isPhone } from '../../lib/signup/validate';
+import { after010, birthError, digits, formatPhone, isBirth, isName } from '../../lib/signup/validate';
 
 type Gender = '' | 'f' | 'm';
 type Avoid = { name: string; note: string };
-const STEPS = 5;
-const JOBS = ['개발자', '교사', '간호사', '마케터', '공무원'];
+const STEPS = 4;
+const JOBS = ['통역사', '디자이너', '무역업', '피부관리사', '광고업', '인천공항직원', '은행원'];
 
 export default function ApplyFlow({ sessions, initialSession }: { sessions: Session[]; initialSession: string | null }) {
   const router = useRouter();
@@ -18,17 +18,17 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const [step, setStep] = useState(pre ? 1 : 0);
   const [sessionId, setSessionId] = useState(pre?.id ?? '');
   const [gender, setGender] = useState<Gender>('');
-  const [basic, setBasic] = useState(0); // 0 이름 → 1 출생연도 → 2 번호 (토스식으로 위에 쌓임)
+  const [basic, setBasic] = useState(0); // 0 이름 → 1 출생연도 → 2 하는 일 → 3 번호 (토스식으로 위에 쌓임)
   const [name, setName] = useState('');
   const [birth, setBirth] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(''); // 010 뒤 8자리
   const [job, setJob] = useState('');
   const [avoidMode, setAvoidMode] = useState<'' | 'no' | 'yes'>('');
   const [avoid, setAvoid] = useState<Avoid[]>([]);
   const [draft, setDraft] = useState<Avoid>({ name: '', note: '' });
   const [sheet, setSheet] = useState(false);
   const [share, setShare] = useState(false); // 매칭되면 상대에게 이름·번호 전달 동의
-  const [done, setDone] = useState<string | null>(null); // 신청 내역 토큰
+  const [done, setDone] = useState(false);
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState('');
 
@@ -37,41 +37,44 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   // shortcut: 브라우저 뒤로가기는 단계가 아니라 페이지 단위로 동작함. 실제 오픈 전 history 연동 고려.
   const back = () => (step === 0 ? router.push('/') : go(step - 1));
 
-  if (done) return <Done phone={phone} token={done} />;
+  const tel = formatPhone(`010${phone}`);
+  if (done) return <Done phone={tel} />;
 
   const submit = async () => {
     if (!s || sending) return;
     setSending(true); setErr('');
     const fd = new FormData();
-    Object.entries({ eventId: s.id, gender, name: name.trim(), birth, phone, job: job.trim(), contactConsent: share ? 'yes' : '', avoid: JSON.stringify(avoidMode === 'yes' ? avoid : []) })
+    Object.entries({ eventId: s.id, gender, name: name.trim(), birth, phone: tel, job: job.trim(), contactConsent: share ? 'yes' : '', avoid: JSON.stringify(avoidMode === 'yes' ? avoid : []) })
       .forEach(([k, v]) => fd.append(k, v));
     try {
       const r = await fetch('/api/apply', { method: 'POST', body: fd });
       const j = await r.json().catch(() => ({ ok: false, message: '잠시 뒤에 다시 시도해주세요.' }));
       if (!j.ok) { setErr(j.message); return; }
-      setSheet(false); setDone(j.statusToken); window.scrollTo(0, 0);
+      setSheet(false); setDone(true); window.scrollTo(0, 0);
     } catch { setErr('인터넷 연결을 확인하고 다시 시도해주세요.'); }
     finally { setSending(false); }
   };
 
   // 단계별 다음 버튼 가능 여부
   const bErr = s ? birthError(birth, s.birthFrom, s.birthTo) : null;
-  const basicOk = [isName(name), !!s && isBirth(birth, s.birthFrom, s.birthTo), isPhone(phone)];
+  const basicOk = [isName(name), !!s && isBirth(birth, s.birthFrom, s.birthTo), job.trim().length >= 2, phone.length === 8];
   const canNext = [
     !!s, !!gender,
     basicOk[basic],
-    job.trim().length >= 2,
     avoidMode === 'no' || (avoidMode === 'yes' && avoid.length > 0),
   ][step];
 
   const next = () => {
     if (!canNext) return;
-    if (step === 2 && basic < 2) { setBasic(basic + 1); return; }
+    if (step === 2 && basic < 3) { setBasic(basic + 1); return; }
     if (step === STEPS - 1) { setSheet(true); return; }
     go(step + 1);
   };
 
-  const basicTitle = ['이름을 알려주세요', '태어난 해를 알려주세요', '휴대폰 번호를 알려주세요'][basic];
+  const basicTitle = ['이름을 알려주세요', '태어난 해를 알려주세요', '어떤 일을 하세요?', '휴대폰 번호를 알려주세요'][basic];
+  // 다 채우면 확인을 안 눌러도 다음 칸으로 (출생연도 4자리, 직업 칩, 번호 8자리). 이름은 길이가 제각각이라 확인 버튼으로.
+  const auto = (ok: boolean) => { const n = basic; if (ok) setTimeout(() => (n < 3 ? setBasic((b) => Math.max(b, n + 1)) : go(3)), 250); };
+  const okBtn = (n: number) => basic === n && <button className="btn inl" type="submit" disabled={!canNext}>확인</button>;
 
   return (
     <main>
@@ -114,26 +117,24 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
 
         {step === 2 && s && <>
           <h2 className="q" aria-live="polite">{basicTitle}</h2>
-          {basic >= 2 && <label className="fld new"><span>휴대폰 번호</span>
-            <input autoFocus inputMode="numeric" autoComplete="tel" placeholder="010-0000-0000" value={phone}
-              onChange={(e) => setPhone(formatPhone(e.target.value))} /></label>}
-          {basic >= 1 && <label className={`fld${basic === 1 ? ' new' : ''}${bErr ? ' err' : ''}`}><span>출생연도</span>
+          {basic >= 3 && <><label className="fld new"><span>휴대폰 번호</span>
+            <div className="tel010"><b>010</b><input autoFocus type="tel" inputMode="numeric" autoComplete="tel-local-suffix" placeholder="1234 5678" maxLength={14} aria-label="010 뒤 8자리"
+              value={phone.length > 4 ? `${phone.slice(0, 4)} ${phone.slice(4)}` : phone}
+              onChange={(e) => { const v = after010(e.target.value); setPhone(v); if (v.length === 8 && phone.length < 8) auto(true); }} /></div></label>{okBtn(3)}</>}
+          {basic >= 2 && <><label className={`fld${basic === 2 ? ' new' : ''}`}><span>하는 일</span>
+            <input autoFocus={basic === 2} placeholder="직군 정도면 충분해요" value={job} onChange={(e) => setJob(e.target.value)} /></label>
+            {basic === 2 && <div className="chips">{JOBS.map((j) => <button type="button" key={j} onClick={() => { setJob(j); auto(true); }}>{j}</button>)}</div>}
+            {okBtn(2)}</>}
+          {basic >= 1 && <><label className={`fld${basic === 1 ? ' new' : ''}${bErr ? ' err' : ''}`}><span>출생연도</span>
             <input autoFocus={basic === 1} inputMode="numeric" placeholder={`예: ${s.birthFrom + 3}`} maxLength={4} value={birth}
-              onChange={(e) => setBirth(digits(e.target.value).slice(0, 4))} />
-            {bErr && <p className="msg e">{bErr}</p>}</label>}
+              onChange={(e) => { const v = digits(e.target.value).slice(0, 4); setBirth(v); if (basic === 1) auto(isBirth(v, s.birthFrom, s.birthTo)); }} />
+            {bErr && <p className="msg e">{bErr}</p>}</label>{okBtn(1)}</>}
           <label className="fld"><span>이름</span>
             <input autoFocus={basic === 0} autoComplete="name" placeholder="실명으로 적어주세요" value={name} onChange={(e) => setName(e.target.value)} /></label>
+          {okBtn(0)}
         </>}
 
         {step === 3 && <>
-          <h2 className="q">어떤 일을 하세요?</h2>
-          <p className="ds">직군 정도면 충분해요. 대화 5분 뒤에 맞은편 한 사람에게만 보여요.</p>
-          <label className="fld"><span>하는 일</span>
-            <input autoFocus placeholder="예: UX 디자이너" value={job} onChange={(e) => setJob(e.target.value)} /></label>
-          <div className="chips">{JOBS.map((j) => <button type="button" key={j} onClick={() => setJob(j)}>{j}</button>)}</div>
-        </>}
-
-        {step === 4 && <>
           <h2 className="q">마주치고 싶지 않은<br />지인이 있나요?</h2>
           <p className="ds">적어주시면 같은 날 배정하지 않아요.</p>
           <div className="yn">
@@ -157,8 +158,8 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
         </>}
 
         {/* 일정·성별은 고르면 바로 넘어가서 버튼이 필요 없음 */}
-        {step >= 2 && !(step === 4 && avoidMode === '') && (
-          <div className="ft"><button className="btn" type="submit" disabled={!canNext}>{step === 2 && basic < 2 ? '확인' : '다음'}</button></div>
+        {step === 3 && avoidMode !== '' && (
+          <div className="ft"><button className="btn" type="submit" disabled={!canNext}>다음</button></div>
         )}
       </form>
 
@@ -172,9 +173,9 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
             {([
               ['일정', `${s.dateLabel} ${s.time}`, 0],
               ['이름', `${name.trim()} · ${gender === 'f' ? '여성' : '남성'} · ${birth}`, 2],
-              ['휴대폰', phone, 2],
-              ['하는 일', job.trim(), 3],
-              ['피하고 싶은 지인', avoidMode === 'yes' ? `${avoid.length}명` : '없음', 4],
+              ['휴대폰', tel, 2],
+              ['하는 일', job.trim(), 2],
+              ['피하고 싶은 지인', avoidMode === 'yes' ? `${avoid.length}명` : '없음', 3],
             ] as const).map(([k, v, to]) => (
               <button type="button" key={k} onClick={() => { setSheet(false); go(to); }} aria-label={`${k} 고치기`}><dt>{k}</dt><dd>{v}</dd></button>
             ))}
@@ -189,26 +190,18 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   );
 }
 
-function Done({ phone, token }: { phone: string; token: string }) {
-  const [copied, setCopied] = useState(false);
-  const link = `${typeof window === 'undefined' ? '' : window.location.origin}/status/${token}`;
-  const copy = async () => { try { await navigator.clipboard.writeText(link); setCopied(true); } catch { /* 길게 눌러 복사 */ } };
+function Done({ phone }: { phone: string }) {
   return (
     <main className="fin">
       <div className="big"><Icon name="check" /></div>
       <h2 className="q">신청을 마쳤어요</h2>
-      <p className="ds">호스트가 승인하면 라운지에 입장할 수 있어요.<br />아래 <b>내 신청 내역 링크</b>를 꼭 저장해주세요.</p>
-      <div className="card" style={{ paddingBottom: 18 }}>
-        <p className="ds" style={{ margin: 0, fontSize: 13 }}>내 신청 내역 링크</p>
-        <p style={{ margin: '6px 0 12px', fontSize: 13, fontWeight: 700, wordBreak: 'break-all' }}>{link}</p>
-        <button className="btn sub" style={{ height: 44, fontSize: 15 }} onClick={copy}>{copied ? '복사했어요' : '링크 복사하기'}</button>
-      </div>
+      <p className="ds">호스트가 확인하면 문자로 안내드릴게요.<br />라운지에는 <b>신청한 휴대폰 번호</b>로 들어와요.</p>
       <div className="card"><div className="tl">
         <div className="done"><i /><span><b>신청 완료</b><small>{phone}</small></span></div>
         <div className="now"><i /><span><b>호스트 확인 중</b><small>보통 하루 안에 끝나요</small></span></div>
-        <div><i /><span><b>승인 후 라운지 입장</b><small>호스트가 승인하면 나만의 라운지 링크를 드려요</small></span></div>
+        <div><i /><span><b>승인 후 라운지 입장</b><small>첫 화면 '라운지 입장'에 이 번호를 넣으면 돼요</small></span></div>
       </div></div>
-      <div className="ft"><Link className="btn" href={`/status/${token}`}>신청 내역 보기</Link><Link className="lnk" href="/">처음으로</Link></div>
+      <div className="ft"><Link className="btn" href="/">처음으로</Link></div>
     </main>
   );
 }

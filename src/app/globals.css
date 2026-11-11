@@ -360,13 +360,13 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .rnd-head h1{margin:0;font-size:30px;font-weight:900;letter-spacing:-.04em}
 .rnd-head h1 em{font-style:normal;color:var(--dim);font-size:20px}
 .rnd-chip{display:inline-block;margin-top:8px;padding:6px 14px;border-radius:15px;background:var(--accbg);color:var(--text);font-size:13px;font-weight:800}
-.pcs{padding:14px 20px 0}
+.pcs{padding:0 20px}
 .pc{display:flex;flex-direction:column;align-items:center;margin-top:10px;padding:16px 14px 18px;border-radius:24px;background:var(--surf);border:1px solid var(--line)}
-.scene{position:relative;aspect-ratio:360/260;margin:18px 16px 0}
-.scene .chr{width:44.4%!important;height:auto!important;aspect-ratio:1}
-.scene-l,.scene-r{position:absolute;bottom:28.5%;width:100%;display:flex}
-.scene-l{left:3%}.scene-r{right:3%;justify-content:flex-start;flex-direction:row-reverse}
-.scene-r.many .chr{width:31%!important}.scene-r.many .chr+.chr{margin-right:-5%}
+.scene{position:relative;aspect-ratio:360/160;margin:6px 16px 0}
+.scene .chr{width:30%!important;height:auto!important;aspect-ratio:1}
+.scene-l,.scene-r{position:absolute;bottom:22%;width:100%;display:flex}
+.scene-l{left:12%}.scene-r{right:12%;justify-content:flex-start;flex-direction:row-reverse}
+.scene-r.many .chr{width:23%!important}.scene-r.many .chr+.chr{margin-right:-5%}
 .scene-tbl{position:absolute;left:0;bottom:0;width:100%;height:auto}
 .pc-ho{margin-top:2px;font-size:20px;font-weight:900}
 .pc-wait{margin:14px 0 0;font-size:13px;color:var(--mute);text-align:center;line-height:1.6}
@@ -482,8 +482,9 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 /* 라운드 화면에 펼쳐 둔 같이 해보기 */
 .gm-inline{margin:22px 16px 0;padding:16px;border-radius:24px;background:var(--surf)}
 .gm-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.gm-kinds button{height:40px;border:1px solid var(--line);border-radius:999px;background:none;font-size:13px;font-weight:800;cursor:pointer;color:var(--mute)}
-.gm-kinds button.on{background:var(--accbg);color:var(--acc);border-color:transparent}
+.gm-kinds button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:64px;padding:8px 4px;border:0;border-radius:16px;background:var(--btn);color:var(--btntx);font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 8px 16px -10px rgba(0,0,0,.6);transition:transform .12s}
+.gm-kinds button small{font-size:11px;font-weight:600;opacity:.7}.gm-kinds button:active{transform:scale(.96)}
+.gm-kinds button.on{background:var(--accbg);color:var(--acc);box-shadow:inset 0 0 0 2px var(--acc)}
 .gm-inline .gm-prompt{font-size:18px;margin-top:14px}
 .gm-opts.many{display:grid;grid-template-columns:1fr 1fr;gap:8px}.gm-opts.many .opt{min-height:52px;font-size:15px;margin:0}
 .rnd-wait{margin:10px 16px 0;text-align:center;font-size:14px;font-weight:800;color:var(--acc)}
@@ -508,7 +509,7 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 .cls-wine-list{margin:10px 0 14px;padding-left:18px;font-size:14px;line-height:1.75;color:var(--mute)}
 .cls-wine-btn{height:auto;min-height:56px;padding:10px 0;flex-direction:column;line-height:1.3}.cls-wine-btn small{display:block;font-size:12px;font-weight:700;opacity:.8}
 
-.tel010{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line)}.enter .tel010 b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--mute)}.fld .tel010 input{flex:1;min-width:0;border-bottom:0}
+.tel010{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line)}.fld:focus-within .tel010{border-color:var(--acc)}.btn.inl{margin-top:16px;height:52px}.tel010 b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--mute)}.fld .tel010 input{flex:1;min-width:0;border-bottom:0}
 
 /* ---------- 정리 (2026-11-10): 깊이 · 위계 · 터치 영역 · 안전 영역. 같은 특이도는 뒤에 온 규칙이 이긴다 ---------- */
 /* 흰 카드: 얇은 선 + 아주 옅은 그림자 */
@@ -543,7 +544,7 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 
 /* 마무리 · 연말 와인 모임: 크리스마스 초대장처럼, 카드가 천천히 궤도를 그리며 기울어진다 */
 .wine-orbit{perspective:900px;margin:28px 0 0}
-.cls-wine{position:relative;overflow:hidden;margin:0;padding:26px 20px 20px;border-radius:22px;text-align:center;color:#fff7ea;
+.cls-wine{position:relative;overflow:hidden;margin:0 14px;padding:18px 16px 16px;border-radius:22px;text-align:center;color:#fff7ea;
   background:radial-gradient(120% 70% at 50% -10%,#c42e44 0%,#8a1430 42%,#4a0c22 78%,#2a0614 100%);
   border:1px solid rgba(232,196,120,.6);box-shadow:0 26px 40px -20px rgba(90,10,30,.6),inset 0 0 0 6px rgba(232,196,120,.12);
   transform-style:preserve-3d;animation:wine-orbit 10s ease-in-out infinite}
@@ -555,10 +556,10 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
   background-size:100% 50%;animation:wine-snow 8s linear infinite}
 @keyframes wine-snow{to{background-position:0 100%}}
 .wine-eyebrow{position:relative;margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#f3d58a}
-.cls-wine h3{position:relative;margin:0 0 6px;font-size:22px;font-weight:900;letter-spacing:-.02em;color:#fff}
-.cls-wine .cls-price{position:relative}.cls-wine .cls-price s{color:rgba(255,247,234,.55)}.cls-wine .cls-price b{color:#f3d58a}.cls-wine .cls-price em{background:rgba(243,213,138,.18);color:#f3d58a}
+.cls-wine h3{position:relative;margin:0 0 4px;font-size:19px;font-weight:900;letter-spacing:-.02em;color:#fff}
+.cls-wine .cls-price{position:relative;font-size:13px}.cls-wine .cls-price b{font-size:17px}.cls-wine>.ds{font-size:12.5px;line-height:1.55}.cls-wine .cls-wine-btn{min-height:48px;font-size:15px}.cls-wine .cls-wine-btn small{font-size:11px}.cls-wine .cls-price s{color:rgba(255,247,234,.55)}.cls-wine .cls-price b{color:#f3d58a}.cls-wine .cls-price em{background:rgba(243,213,138,.18);color:#f3d58a}
 .cls-wine .ds,.cls-wine .preview{position:relative;color:rgba(255,247,234,.85)}
-.cls-wine-list{position:relative;list-style:none;padding:12px 0;margin:12px 0 14px;border-top:1px dashed rgba(243,213,138,.4);border-bottom:1px dashed rgba(243,213,138,.4);color:rgba(255,247,234,.85)}
+.cls-wine-list{position:relative;list-style:none;padding:8px 0;margin:10px 0 10px;font-size:13px;line-height:1.6;border-top:1px dashed rgba(243,213,138,.4);border-bottom:1px dashed rgba(243,213,138,.4);color:rgba(255,247,234,.85)}
 .cls-wine .btn{position:relative;background:linear-gradient(180deg,#f6dc98,#d9a94e);color:#3b0a1c}
 @media (prefers-reduced-motion:reduce){.cls-wine,.cls-wine::after,.wine-snow{animation:none}}
 

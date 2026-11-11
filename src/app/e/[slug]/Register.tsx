@@ -89,7 +89,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
           </div>
           <p className="hint"><Icon name="info" />신청서에서 가져왔어요. 다시 쓰지 않아도 돼요</p>
           <button type="button" className={`agree${consent ? ' on' : ''}`} onClick={() => setConsent(!consent)} aria-pressed={consent} style={{ marginTop: 18 }}>
-            <span className="chk" /><span>개인정보 수집에 동의해요<small className="ds" style={{ display: 'block', fontSize: 12, marginTop: 4, fontWeight: 500 }}>사는 곳, MBTI, 키워드, 연애관 응답 · 행사 진행에만 써요 · 행사 30일 뒤 자동으로 지워요</small></span>
+            <span className="chk" /><span>개인정보 수집에 동의해요<small className="ds" style={{ display: 'block', fontSize: 12, marginTop: 4, fontWeight: 500 }}>사는 곳, MBTI, 키워드, 연애관 응답 · 행사 진행에만 써요 · 행사 하루 뒤 폐기해요</small></span>
           </button>
         </>}
 

@@ -47,7 +47,7 @@ function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
       <ul className="cls-wine-list">
         <li>12월 18일 진행 예정</li>
         <li>한 테이블 3:3 · 총 4테이블</li>
-        <li>관상게임 · 익명게임 · 올해 마무리 이야기</li>
+        <li>관상게임 · 익명게임 · 포송한 한해 마무리 콘텐츠</li>
         <li>인원이 모이지 않으면 진행되지 않아요</li>
       </ul>
       <p className="ds" style={{ margin: '0 0 14px', textAlign: 'center', fontWeight: 800 }}>옷깃만 믿고 오세요 😊</p>

@@ -26,7 +26,7 @@ export default async function Landing() {
           {/* 같은 그림을 움직인 5초 반복 영상. 못 틀거나 '동작 줄이기'면 아래 그림이 그대로 보인다 */}
           <video className="mv" src="/lounge-line.mp4" autoPlay muted loop playsInline preload="auto" aria-hidden="true" />
         </div>
-        <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><Link href="/status">신청 내역</Link><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
+        <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
         <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>
         {next && <div className="bottom">
           <Link className="ticket" href={`/apply?s=${next.id}`}>

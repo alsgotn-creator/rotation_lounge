@@ -29,21 +29,21 @@ function Scene({ me, partners }: { me: PublicCard | null; partners: PublicCard[]
     <div className="scene" aria-hidden="true">
       <div className="scene-l">{me && <Character shape={me.shape} color={me.color} acc={me.prop} size={150} />}</div>
       <div className={`scene-r${small ? ' many' : ''}`}>
-        {partners.map((p, i) => <Character key={p.id} shape={p.shape} color={p.color} acc={p.prop} size={small ? 112 : 150} delay={i + 1} flip />)}
+        {partners.map((p, i) => <Character key={p.id} shape={p.shape} color={p.color} acc={p.prop} size={small ? 84 : 110} delay={i + 1} flip />)}
       </div>
-      <svg className="scene-tbl" viewBox="0 -24 360 144" fill="#fff" stroke="#111" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M128 6h14v8a7 7 0 0 1-14 0zM142 8h3a3 3 0 0 1 0 6h-3M218 6h14v8a7 7 0 0 1-14 0zM218 8h-3a3 3 0 0 0 0 6h3" />
-        <path d="M180 6v-16M180 -2c5-1 8-4 8-8" fill="none" />
-        <circle cx="180" cy="-14" r="6" />
-        <path d="M174 22c-4-5-3-10 2-12v-4h8v4c5 2 6 7 2 12z" />
-        <path d="M14 38c0-12 10-16 24-16h284c14 0 24 4 24 16s-10 16-24 16H38c-14 0-24-4-24-16z" />
-        <path d="M180 54v52M146 112h68" fill="none" />
+      {/* 다리가 양끝에 있는 카페 테이블 (가운데 기둥 하나면 저울처럼 보인다) */}
+      <svg className="scene-tbl" viewBox="0 0 360 80" fill="#fff" stroke="#111" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M128 6h14v9a7 7 0 0 1-14 0zM142 8h3a3 3 0 0 1 0 6h-3M218 6h14v9a7 7 0 0 1-14 0zM218 8h-3a3 3 0 0 0 0 6h3" />
+        <path d="M70 46v24M290 46v24" />
+        <path d="M14 20h332v14H14z" />
+        <path d="M30 34h300v12H30z" />
+        <path d="M38 46v30M322 46v30" />
       </svg>
     </div>
   );
 }
 
-export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
+export function Reveal({ p, fresh, kw }: { p: Profile; fresh: boolean; kw: string[] }) {
   const [open, setOpen] = useState(false); // 컬러칩을 누르면 유형 풀이
   return (
     <div className="rv-box">
@@ -51,6 +51,7 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
       <div className="rv-grid">
         {[['나이', `${p.age}세`], ['직업', p.job], ['사는 곳', p.area], ['MBTI', p.mbti]].map(([k, v]) => <div key={k}><small>{k}</small><b>{v}</b></div>)}
       </div>
+      {kw.length > 0 && <div className="lg-kw rv-kw">{kw.map((k) => <span key={k}>{k}</span>)}</div>}
       <p className={`rv-sim${p.best ? ' best' : ''}`}>
         {p.best && <b>✦ 오늘 이성 중 나와 가장 비슷한 분이에요</b>}
         <span>연애 성향이 <em>{p.similar}%</em> 비슷해요</span>
@@ -112,9 +113,8 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
         {round.partners.map((p) => (
           <article className="pc" key={p.id}>
             <b className="pc-ho">{ho(p.gender, p.number)}</b>
-            <div className="lg-kw">{p.keywords.map((k) => <span key={k}>{k}</span>)}</div>
             {view.met[p.id]
-              ? <Reveal p={view.met[p.id]} fresh={fresh.has(p.id)} />
+              ? <Reveal p={view.met[p.id]} fresh={fresh.has(p.id)} kw={p.keywords} />
               : <p className="pc-wait">나이 · 직업 · 사는 곳 · MBTI는 <b>5분 뒤</b>에 공개돼요</p>}
           </article>
         ))}

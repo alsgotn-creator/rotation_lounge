@@ -22,7 +22,7 @@ export default function GameSheet({ slug, game, onChange }: { slug: string; game
     <section className="gm-inline" aria-label="같이 해보기">
       <div className="gm-kinds">
         {KINDS.map((k) => (
-          <button key={k.kind} className={game?.kind === k.kind ? 'on' : ''} disabled={busy} onClick={() => post({ type: 'draw', kind: k.kind })}>{k.label}</button>
+          <button key={k.kind} className={game?.kind === k.kind ? 'on' : ''} disabled={busy} onClick={() => post({ type: 'draw', kind: k.kind })}>{k.label}<small>{game?.kind === k.kind ? '다른 카드 ›' : '카드 뽑기 ›'}</small></button>
         ))}
       </div>
       {!game ? <p className="gm-hint">하나를 누르면 이 테이블 모두에게 같은 카드가 떠요</p> : <>
