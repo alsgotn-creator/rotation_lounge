@@ -10,7 +10,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const event = await getEvent({ slug });
   if (!event) return NextResponse.json({ ok: false }, { status: 404 });
   const me = await invitedFromCookie(event.id);
-  const p = me && (await participantOf(me.id));
+  if (!me) return NextResponse.json({ ok: false }, { status: 401 });
+  const [p, view] = await Promise.all([participantOf(me.id), loungeView(event.id, me.id)]); // 4초마다 부르는 길이라 한 번에
   if (!p) return NextResponse.json({ ok: false }, { status: 401 });
-  return NextResponse.json({ ok: true, view: await loungeView(event.id, p.id) }, { headers: { 'cache-control': 'no-store' } });
+  return NextResponse.json({ ok: true, view }, { headers: { 'cache-control': 'no-store' } });
 }
