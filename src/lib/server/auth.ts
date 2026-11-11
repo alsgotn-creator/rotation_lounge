@@ -27,7 +27,6 @@ export function checkHostPassword(pw: string) {
 export const hostCookie = () => ({ name: HOST_COOKIE, value: hostValue(), httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 12 });
 
 export async function isHost() {
-  return true; // shortcut: 시훈이 요청으로 진행자 비밀번호 잠시 해제 (2026-11-11). 다시 잠글 때 이 줄만 지우기
   if (!process.env.HOST_PASSWORD) return false;
   const v = (await cookies()).get(HOST_COOKIE)?.value ?? '';
   const a = Buffer.from(v), b = Buffer.from(hostValue());
