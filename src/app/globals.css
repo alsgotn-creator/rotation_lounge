@@ -304,6 +304,7 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .lg-ring .lg-p{width:72px;max-width:100%}
 .lg-ring .lg-p .lg-kw span{font-size:10.5px;padding:3px 7px;white-space:normal;text-align:center;line-height:1.3}
 .lg-ho{margin-top:6px;font-size:12px;font-weight:800;color:var(--btntx);background:var(--acc);border-radius:9px;padding:3px 9px}
+.lg-ho2{margin-top:2px;font-size:11px;font-weight:800;color:var(--mute);white-space:nowrap}
 .lg-kw{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:6px}
 .lg-kw span{font-size:12px;font-weight:700;padding:4px 9px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--text);white-space:nowrap}
 .lg-kw span.on{border-color:rgba(17,17,17,0.25);color:var(--text)}
@@ -544,7 +545,7 @@ h2.q.one{white-space:nowrap;font-size:clamp(18px,5.8vw,26px)}
 
 /* 마무리 · 연말 와인 모임: 크리스마스 초대장처럼, 카드가 천천히 궤도를 그리며 기울어진다 */
 .wine-orbit{perspective:900px;margin:28px 0 0}
-.cls-wine{position:relative;overflow:hidden;margin:0 14px;padding:18px 16px 16px;border-radius:22px;text-align:center;color:#fff7ea;
+.cls-wine{position:relative;overflow:hidden;margin:0 36px;padding:18px 16px 16px;border-radius:22px;text-align:center;color:#fff7ea;
   background:radial-gradient(120% 70% at 50% -10%,#c42e44 0%,#8a1430 42%,#4a0c22 78%,#2a0614 100%);
   border:1px solid rgba(232,196,120,.6);box-shadow:0 26px 40px -20px rgba(90,10,30,.6),inset 0 0 0 6px rgba(232,196,120,.12);
   transform-style:preserve-3d;animation:wine-orbit 10s ease-in-out infinite}

@@ -20,7 +20,7 @@ function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   };
   return (
     <section className="cls-rv">
-      <h3>오늘 어땠나요?</h3>
+      <h3>오늘 모임 어땠나요?</h3>
       <p className="ds">이름 없이 성별·나이만 보여요. 한 번 남기면 고쳐 쓸 수 있어요.</p>
       <textarea value={text} maxLength={120} rows={3} placeholder="한 줄 후기를 남겨주세요 (120자)" onChange={(e) => { setText(e.target.value); setSt('idle'); }} />
       <button className="btn" disabled={!text.trim() || st === 'busy'} onClick={send}>{st === 'done' ? '남겼어요 · 고쳐 쓰기' : '후기 남기기'}</button>

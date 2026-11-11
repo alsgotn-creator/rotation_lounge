@@ -81,6 +81,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
     return (
       <Drag key={c.id} className="lg-p" style={{ animationDelay: `${-(i * 0.7) % 4}s` }}>
         <Poke><Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={60} delay={i * 0.9} flip={flip} /></Poke>
+        {c.number != null && <b className="lg-ho2">{ho(c.gender, c.number)}</b>}
       </Drag>
     );
   };
