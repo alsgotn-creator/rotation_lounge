@@ -292,6 +292,7 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .lg-head{text-align:center;margin-top:14px}
 .lg-head p{margin:0;font-size:11px;font-weight:800;letter-spacing:.18em;padding-left:.18em;color:var(--mute)}
 .lg-head h1{margin:6px 0 0;font-size:26px;font-weight:900;letter-spacing:-.04em}
+.lg-soon{display:inline-block;vertical-align:middle;margin:-4px 0 0 8px;padding:4px 9px;border-radius:999px;background:var(--text);color:var(--bg);font-size:11px;font-weight:800;font-style:normal;letter-spacing:-.01em}
 .lg-head span{display:block;margin-top:6px;font-size:13px;color:var(--mute);font-weight:600}
 .lg-ring{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;grid-template-areas:"t t t" "l c r" "b b b";gap:10px 4px;padding:18px 8px 0}
 .lg-side{display:flex;align-items:flex-start;justify-content:space-around;min-width:0}
@@ -448,10 +449,13 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 /* 라운지: 이상형 키워드 구름 */
 .idc{text-align:center}
 .idc-t{font-size:13px;font-weight:800;color:var(--text);margin:0}
-.idc-lg{display:flex;justify-content:center;align-items:center;gap:4px;margin:4px 0 8px;font-size:11px;font-weight:700;color:var(--mute)}
-.idc-lg i{width:8px;height:8px;border-radius:4px;margin-left:6px}
-.idc-lg i.f,.idc-card span.f.hot{background:#e8466e}.idc-lg i.m,.idc-card span.m.hot{background:#4f74e3}
-.idc-card{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 6px;padding:16px 10px;border-radius:20px;background:var(--surf)}
+
+.idc-card span.f.hot{background:#e8466e}.idc-card span.m.hot{background:#4f74e3}
+.idc-card{padding:12px 10px;border-radius:20px;background:var(--surf)}
+.idc-g{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 6px;padding:4px 0}
+.idc-g+.idc-g{border-top:1px dashed var(--line);margin-top:8px;padding-top:12px}
+.idc-g>small{flex-basis:100%;font-size:11px;font-weight:800}
+.idc-g.f>small{color:#b8284f}.idc-g.m>small{color:#2f4fb0}
 .idc-card span{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid;font-weight:700;white-space:nowrap}
 .idc-card span.f{border-color:rgba(232,70,110,.35);background:rgba(232,70,110,.07);color:#b8284f}
 .idc-card span.m{border-color:rgba(79,116,227,.35);background:rgba(79,116,227,.07);color:#2f4fb0}

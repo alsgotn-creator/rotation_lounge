@@ -42,6 +42,9 @@ function Drag({ className, style, children }: { className?: string; style?: Reac
   );
 }
 
+/** 준비사항을 닫았는지 이 폰에 적어두는 키. 체크 방식으로 바뀌어서 이미 닫은 폰에도 한 번 더 뜨게 2로 올렸다 */
+export const prepKey = (slug: string) => `fl_prep2_${slug}`;
+
 const PREP: [string, string?][] = [
   ['겉옷과 가방은 중앙 테이블에 놓거나 호스트에게 맡겨요.', '남성분들은 자리를 이동해야 해서 맡기는 게 편해요!'],
   ['마주한 분과 대화 나누고 계시면, 잠시 대기 후 진행합니다.'],
@@ -100,11 +103,10 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
   }, [refresh]);
 
   const before = v.phase === 'before';
-  const prepKey = `fl_prep2_${slug}`; // 체크 방식으로 바뀌어서 이미 닫은 폰에도 한 번 더 뜬다
   const [prep, setPrep] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false); // 컬러칩을 누르면 유형 풀이
-  useEffect(() => { try { if (!localStorage.getItem(prepKey)) setPrep(true); } catch { setPrep(true); } }, [prepKey]);
-  const closePrep = () => { setPrep(false); try { localStorage.setItem(prepKey, '1'); } catch {} };
+  useEffect(() => { try { if (!localStorage.getItem(prepKey(slug))) setPrep(true); } catch { setPrep(true); } }, [slug]);
+  const closePrep = () => { setPrep(false); try { localStorage.setItem(prepKey(slug), '1'); } catch {} };
 
   return (
     <main className="lounge">
@@ -114,7 +116,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
       </div>
       <header className="lg-head">
         <p>ROTATION LOUNGE</p>
-        <h1>오늘의 라운지</h1>
+        <h1>오늘의 라운지{before && <em className="lg-soon">곧 시작합니다</em>}</h1>
         <span>{when} · 여 {v.counts.f} · 남 {v.counts.m}</span>
       </header>
 

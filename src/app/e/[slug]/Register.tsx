@@ -5,6 +5,7 @@ import { Icon } from '../../../components/Icon';
 import { Character } from '../../../components/Character';
 import { api } from '../../../lib/api';
 import { QUESTIONS, PALETTE, loveType, phrases, typeName } from '../../../lib/domain/loveType';
+import { prepKey } from './Lounge';
 import { ACCS, ACC_KO, CHARS, EYEWEAR, GLASSED, parseAccs, registrationError, type Acc, type Shape } from '../../../lib/domain/register';
 
 export type Initial = { area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: string } | null;
@@ -59,6 +60,8 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
     const j = await api(`/api/e/${slug}/register`, body);
     setBusy(false);
     if (!j.ok) return setErr(j.message ?? '다시 시도해주세요.');
+    // 처음 등록이면 준비사항 팝업이 다시 뜨게 (시연처럼 같은 폰으로 새 자리에 들어온 경우)
+    if (!initial) try { localStorage.removeItem(prepKey(slug)); } catch {}
     onCancel?.(); router.refresh(); window.scrollTo(0, 0);
   };
 
