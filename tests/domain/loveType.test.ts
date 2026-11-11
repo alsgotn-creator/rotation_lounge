@@ -4,12 +4,9 @@ import { registrationError } from '../../src/lib/domain/register';
 
 describe('love type', () => {
   const poleA = QUESTIONS.map((q) => (q.reversed ? 1 : 5)), poleB = poleA.map((v) => 6 - v);
-  test('15 questions, reversed #7 #8 #9 #12 #13', () => {
+  test('15 questions, reversed #8 #12 #13', () => {
     expect(QUESTIONS).toHaveLength(15);
-    expect(QUESTIONS.flatMap((q, i) => (q.reversed ? [i + 1] : []))).toEqual([7, 8, 9, 12, 13]);
-  });
-  test('every question fits one line (≤ 12 chars without spaces)', () => {
-    for (const q of QUESTIONS) expect(q.text.replace(/\s/g, '').length, q.text).toBeLessThanOrEqual(12);
+    expect(QUESTIONS.flatMap((q, i) => (q.reversed ? [i + 1] : []))).toEqual([8, 12, 13]);
   });
   test('pole A answers → 0, pole B → 15', () => {
     expect(loveType(poleA)).toBe(0);

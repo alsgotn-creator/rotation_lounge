@@ -255,7 +255,7 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .given2 b{display:block;margin-top:2px;font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .qrow{padding:20px 0 16px;border-bottom:1px solid var(--line)}
 .qrow:last-of-type{border-bottom:0}
-.qrow p{margin:0;font-size:18px;font-weight:800;letter-spacing:-.03em}
+.qrow p{margin:0;font-size:18px;font-weight:800;letter-spacing:-.03em;word-break:keep-all;line-height:1.35}
 .qrow.done p{color:var(--mute)}
 .qrow .scale{margin-top:16px;padding:0 10px}
 .qrow .scale-l{margin-top:8px;font-size:11.5px}

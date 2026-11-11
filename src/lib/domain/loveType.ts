@@ -1,26 +1,26 @@
 // 연애 컬러 16유형 (계획서 Task 2, 스펙 §5)
 export type Axis = 0 | 1 | 2 | 3; // 거리감 · 표현 · 데이트 · 미래
 
-/** 한 줄에 들어가게 짧게 (테스트가 길이를 지킨다). axis null = 연애 컬러에는 안 들어가고 '가장 비슷한 사람' 추천에만 쓰인다. */
+/** 문항 문구는 운영자가 직접 고른 것 (2026-11-11). 길면 두 줄로 넘어간다. axis null = 연애 컬러에는 안 들어가고 '가장 비슷한 사람' 추천에만 쓰인다. */
 export const QUESTIONS: { text: string; axis: Axis | null; reversed: boolean }[] = [
   // 한 화면에 5개씩, 주제를 섞어서
   { text: '답장 늦으면 신경 쓰여요', axis: 0, reversed: false },
-  { text: '스킨십은 빠를수록 좋아요', axis: 1, reversed: false },
-  { text: '데이트는 집에서 넷플릭스', axis: 2, reversed: false },
-  { text: '1년 만나면 결혼 얘기해요', axis: 3, reversed: false },
-  { text: '외모, 솔직히 중요해요', axis: null, reversed: false },
+  { text: '스킨십은 성격만큼 중요해요', axis: 1, reversed: false },
+  { text: '데이트는 외부보다 내부가 좋아요', axis: 2, reversed: false },
+  { text: '1년이면 결혼 준비할 수 있어요', axis: 3, reversed: false },
+  { text: '성격, 능력, 집안이 뛰어나도 외모가 마음에 안 들면 절대 안 돼요', axis: null, reversed: false },
 
   { text: '고백은 내가 먼저 하는 편', axis: 1, reversed: false },
-  { text: '각자 약속 많아도 괜찮아요', axis: 0, reversed: true },
+  { text: '취미가 많은 건 아직 결혼 준비가 안 됐다고 생각해요', axis: 3, reversed: false },
   { text: '맛집 웨이팅 2시간도 OK', axis: 2, reversed: true },
-  { text: '결혼 안 해도 행복할 수 있어요', axis: 3, reversed: true },
-  { text: '전 애인과 친구 가능해요', axis: null, reversed: false },
+  { text: '결혼은 아이를 낳지 않을 거면 안 하는 게 나아요', axis: null, reversed: false },
+  { text: '남사친 여사친은 있어도 괜찮아요', axis: null, reversed: false },
 
   { text: '내 폰, 애인이 봐도 돼요', axis: 0, reversed: false },
-  { text: '즉흥 여행, 당장 떠나요', axis: 2, reversed: true },
+  { text: '즉흥 여행 떠날 수 있어요', axis: 2, reversed: true },
   { text: '싸우면 하루쯤 시간 필요해요', axis: 1, reversed: true },
   { text: '연애에도 돈 계획이 필요해요', axis: 3, reversed: false },
-  { text: '데이트 비용은 반반이 맞아요', axis: null, reversed: false },
+  { text: '데이트 통장도 괜찮아요', axis: null, reversed: false },
 ];
 
 export const normalize = (answers: number[]) => answers.map((a, i) => (QUESTIONS[i].reversed ? 6 - a : a));
