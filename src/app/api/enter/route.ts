@@ -44,7 +44,7 @@ async function enterDemo() {
   const { error } = await db().from('participants').upsert({
     event_id: ev.id, application_id: a.id, gender: a.gender, job: a.job, number: a.number,
     age: new Date().getUTCFullYear() - a.birth_year, // 시연 모임 날짜(9999년)로 재면 나이가 이상해진다
-    nickname: g.nickname, area: g.area, mbti: g.mbti, keywords: g.keywords, answers: g.answers,
+    nickname: '', area: g.area, mbti: g.mbti, keywords: g.keywords, answers: g.answers,
     love_type: loveType(g.answers), shape: g.shape, prop: g.prop || 'none', consent_at: now, updated_at: now,
   }, { onConflict: 'application_id' });
   if (error) return fail('다시 시도해주세요.', 500);

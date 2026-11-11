@@ -6,7 +6,7 @@ import GameSheet from './GameSheet';
 import { Character } from '../../../components/Character';
 import { useNow } from '../../../components/RoundTimer';
 import { elapsedMs, notStarted, REVEAL_MS } from '../../../lib/domain/seating';
-import { PALETTE } from '../../../lib/domain/loveType';
+import { PALETTE, typeName } from '../../../lib/domain/loveType';
 import { ho, type PublicCard } from '../../../lib/domain/lounge';
 import type { PlayView, Profile } from '../../../lib/server/play';
 /** 남은 시간은 숫자 없이 막대로만: 내 캐릭터가 왼쪽에서 출발해 시간이 끝나면 오른쪽 끝에 도착한다. */
@@ -56,7 +56,7 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
       </p>
       <div className="rv-love">
         <span className="orb" style={{ ['--c' as string]: PALETTE[p.color], width: 30, height: 30, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
-        <div>{p.phrases.map((t) => <p key={t}>{t}</p>)}</div>
+        <div><b>{typeName(p.color)}</b><p>{p.phrases.slice(0, 2).join(' · ')}</p></div>
       </div>
     </div>
   );

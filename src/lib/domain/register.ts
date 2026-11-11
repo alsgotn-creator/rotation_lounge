@@ -13,16 +13,14 @@ export const GLASSED: readonly Shape[] = ['f5', 'm2']; // 그림에 이미 안�
 export const parseAccs = (v: string | null | undefined) => (v ?? '').split(',').filter((a): a is Acc => (ACCS as readonly string[]).includes(a));
 
 export type RegistrationInput = {
-  nickname: string; area: string; mbti: string; keywords: string[]; answers: number[];
+  area: string; mbti: string; keywords: string[]; answers: number[];
   shape: string; prop?: string; consent: boolean;
 };
 
 /** 사전 등록 입력 검사. 문제가 없으면 null, 있으면 사용자에게 보여줄 문장 */
 export function registrationError(r: RegistrationInput): string | null {
   // 바깥(API)에서 들어온 JSON은 모양을 믿을 수 없다: 문자열 아닌 값에 .trim()을 부르면 500이 난다
-  if (!r || typeof r.nickname !== 'string' || typeof r.area !== 'string' || typeof r.mbti !== 'string' || !Array.isArray(r.keywords) || r.keywords.some((k) => typeof k !== 'string') || (r.prop != null && typeof r.prop !== 'string')) return '입력을 다시 확인해주세요.';
-  const nick = r.nickname.trim();
-  if (nick.length < 1 || nick.length > 12) return '닉네임은 1~12자로 적어주세요.';
+  if (!r || typeof r.area !== 'string' || typeof r.mbti !== 'string' || !Array.isArray(r.keywords) || r.keywords.some((k) => typeof k !== 'string') || (r.prop != null && typeof r.prop !== 'string')) return '입력을 다시 확인해주세요.';
   if (!r.area.trim() || r.area.trim().length > 20) return '사는 곳을 적어주세요.';
   if (!/^[EI][NS][FT][JP]$/.test(r.mbti.toUpperCase())) return 'MBTI를 골라주세요.';
   const kw = r.keywords.map((k) => k.trim()).filter(Boolean);

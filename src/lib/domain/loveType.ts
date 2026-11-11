@@ -45,6 +45,10 @@ const PHRASES: [string, string][] = [
   ['둘만의 아늑한 데이트가 좋아요', '함께 새로운 곳을 걷는 게 좋아요'],
   ['함께할 미래를 그려보는 게 좋아요', '지금 이 순간에 집중해요'],
 ];
+/** 16유형 이름: (거리감·표현) 형용사 + (데이트·미래) 이름. 예) 다정한 둥지형 */
+const ADJ = ['다정한', '포근한', '솔직한', '담백한'], NOUN = ['둥지형', '아지트형', '항해형', '모험형'];
+export const typeName = (type: number) => `${ADJ[type >> 2]} ${NOUN[type & 3]}`;
+
 export const phrases = (type: number) => PHRASES.map((p, axis) => p[(type >> (3 - axis)) & 1]) as [string, string, string, string];
 
 /** 두 사람 응답이 얼마나 비슷한지 0~100%. 추천과 같은 거리(역문항 뒤집은 15문항의 유클리드 거리)를 최대 거리로 나눈다. */

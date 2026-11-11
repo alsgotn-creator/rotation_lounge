@@ -4,28 +4,27 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
 import { Character } from '../../../components/Character';
 import { api } from '../../../lib/api';
-import { QUESTIONS, PALETTE, loveType, phrases } from '../../../lib/domain/loveType';
+import { QUESTIONS, PALETTE, loveType, phrases, typeName } from '../../../lib/domain/loveType';
 import { ACCS, ACC_KO, CHARS, EYEWEAR, GLASSED, parseAccs, registrationError, type Acc, type Shape } from '../../../lib/domain/register';
 
-export type Initial = { nickname: string; area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: string } | null;
+export type Initial = { area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: string } | null;
 type Given = { gender: 'f' | 'm'; age: number; job: string };
 
 const MBTI_PAIRS: [string, string, string, string][] = [['E', '외향', 'I', '내향'], ['N', '직관', 'S', '감각'], ['F', '감정', 'T', '사고'], ['J', '계획', 'P', '즉흥']];
 const KW_EX = ['필라테스 3년차', '맛집 탐방러', '강아지 집사', '주말엔 등산', '영화 덕후'];
 const DOT = [34, 26, 20, 26, 34];
-const Q0 = 5;                       // 질문이 시작되는 단계
+const Q0 = 2;                       // 질문이 시작되는 단계 (0 동의 · 1 나를 소개)
 const RESULT = Q0 + QUESTIONS.length, CHAR = RESULT + 1, LAST = CHAR;
 
 export default function Register({ slug, given, initial, onCancel, devStep }: { slug: string; given: Given; initial: Initial; onCancel?: () => void; devStep?: number }) {
   const router = useRouter();
   const [step, setStep] = useState(devStep ?? (initial ? 1 : 0));
   const [consent, setConsent] = useState(!!initial);
-  const [nickname, setNickname] = useState(initial?.nickname ?? '');
   const [area, setArea] = useState(initial?.area ?? '');
   const [mbti, setMbti] = useState<string[]>(initial ? initial.mbti.split('') : ['', '', '', '']);
   const [keywords, setKeywords] = useState<string[]>(initial?.keywords ?? []);
   const [kw, setKw] = useState('');
-  const [answers, setAnswers] = useState<number[]>(initial?.answers ?? Array(QUESTIONS.length).fill(devStep && devStep > 5 ? 4 : 0));
+  const [answers, setAnswers] = useState<number[]>(initial?.answers ?? Array(QUESTIONS.length).fill(devStep && devStep > Q0 ? 4 : 0));
   const [shape, setShape] = useState<Shape>(initial?.shape ?? CHARS[given.gender][0]);
   const [accs, setAccs] = useState<Acc[]>(parseAccs(initial?.prop));
   const glassed = GLASSED.includes(shape);
@@ -43,16 +42,13 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
 
   const canNext = (() => {
     if (step === 0) return consent;
-    if (step === 1) return nickname.trim().length >= 1 && nickname.trim().length <= 12;
-    if (step === 2) return area.trim().length >= 1;
-    if (step === 3) return mbti.every(Boolean);
-    if (step === 4) return keywords.length >= 1;
+    if (step === 1) return area.trim().length >= 1 && mbti.every(Boolean) && keywords.length >= 1;
     if (step === RESULT) return true;
     return step === CHAR;
   })();
 
   const submit = async () => {
-    const body = { nickname, area, mbti: mbti.join(''), keywords, answers, shape, prop: myAccs.join(','), consent };
+    const body = { area, mbti: mbti.join(''), keywords, answers, shape, prop: myAccs.join(','), consent };
     const e = registrationError(body);
     if (e) return setErr(e);
     setBusy(true); setErr('');
@@ -64,7 +60,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
 
   const next = () => {
     if (!canNext) return;
-    if (step === 4 && !done) return go(Q0 + Math.max(0, answers.findIndex((a) => a === 0)));
+    if (step === 1 && !done) return go(Q0 + Math.max(0, answers.findIndex((a) => a === 0)));
     if (step === LAST) return submit();
     go(step + 1);
   };
@@ -95,43 +91,32 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
           </div>
           <p className="hint"><Icon name="info" />신청서에서 가져왔어요. 다시 쓰지 않아도 돼요</p>
           <button type="button" className={`agree${consent ? ' on' : ''}`} onClick={() => setConsent(!consent)} aria-pressed={consent} style={{ marginTop: 18 }}>
-            <span className="chk" /><span>개인정보 수집에 동의해요<small className="ds" style={{ display: 'block', fontSize: 12, marginTop: 4, fontWeight: 500 }}>닉네임, 사는 곳, MBTI, 키워드, 연애관 응답 · 행사 진행에만 써요 · 행사 30일 뒤 자동으로 지워요</small></span>
+            <span className="chk" /><span>개인정보 수집에 동의해요<small className="ds" style={{ display: 'block', fontSize: 12, marginTop: 4, fontWeight: 500 }}>사는 곳, MBTI, 키워드, 연애관 응답 · 행사 진행에만 써요 · 행사 30일 뒤 자동으로 지워요</small></span>
           </button>
         </>}
 
         {step === 1 && <>
-          <h2 className="q">라운지에서 쓸<br />닉네임을 알려주세요</h2>
-          <p className="ds">대기실에서는 캐릭터와 키워드만 보여요.</p>
-          <label className="fld"><span>닉네임</span><input autoFocus maxLength={12} placeholder="예: 민지" value={nickname} onChange={(e) => setNickname(e.target.value)} /></label>
-        </>}
-
-        {step === 2 && <>
-          <h2 className="q">어디에 사세요?</h2>
-          <p className="ds">구나 동네 정도면 충분해요.</p>
-          <label className="fld"><span>사는 곳</span><input autoFocus maxLength={20} placeholder="예: 성동구" value={area} onChange={(e) => setArea(e.target.value)} /></label>
-          <div className="safe"><Icon name="lock" /><div>나이·직업·사는 곳·MBTI는 <b>대화 5분 뒤</b>, 맞은편 상대에게만 보여요.</div></div>
-        </>}
-
-        {step === 3 && <>
-          <h2 className="q">MBTI를 골라주세요</h2>
-          {MBTI_PAIRS.map(([a, ak, b, bk], i) => (
-            <div className="mbti" key={a} style={i === 0 ? { marginTop: 26 } : undefined}>
-              {[[a, ak], [b, bk]].map(([v, k]) => (
-                <button type="button" key={v} className={mbti[i] === v ? 'on' : ''} aria-pressed={mbti[i] === v} onClick={() => { const m = [...mbti]; m[i] = v; setMbti(m); }}>{v}<small>{k}</small></button>
+          <h2 className="q">나를 소개해주세요</h2>
+          <div className="intro">
+            <div className="kv"><span>하는 일</span><b>{given.job}</b></div>
+            <label className="fld"><span>사는 곳</span><input maxLength={20} placeholder="예: 성동구 (구나 동네 정도)" value={area} onChange={(e) => setArea(e.target.value)} /></label>
+            <div className="fld"><span>MBTI</span><div className="mbti4">
+              {MBTI_PAIRS.map(([a, ak, b, bk], i) => (
+                <div className="mbti" key={a}>
+                  {[[a, ak], [b, bk]].map(([v, k]) => (
+                    <button type="button" key={v} className={mbti[i] === v ? 'on' : ''} aria-pressed={mbti[i] === v} onClick={() => { const m = [...mbti]; m[i] = v; setMbti(m); }}>{v}<small>{k}</small></button>
+                  ))}
+                </div>
               ))}
-            </div>
-          ))}
-        </>}
-
-        {step === 4 && <>
-          <h2 className="q">나를 보여줄 키워드를<br />1~2개 적어주세요</h2>
-          <p className="ds">대기실에서 캐릭터 옆에 보여요. 대화를 여는 첫 질문이 돼요.</p>
-          <label className="fld"><span>키워드 ({keywords.length}/2)</span>
-            <input autoFocus={keywords.length < 2} disabled={keywords.length >= 2} maxLength={15} placeholder={keywords.length >= 2 ? '2개를 다 적었어요' : '예: 필라테스 3년차'} value={kw}
-              onChange={(e) => setKw(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && kw.trim()) { e.preventDefault(); addKw(kw); } }} /></label>
-          {kw.trim() && keywords.length < 2 && <button type="button" className="btn sub" style={{ height: 44, fontSize: 15, marginTop: 10 }} onClick={() => addKw(kw)}>‘{kw.trim()}’ 추가</button>}
-          {keywords.length > 0 && <div className="kw">{keywords.map((k) => <span key={k}>{k}<button type="button" aria-label={`${k} 지우기`} onClick={() => setKeywords(keywords.filter((x) => x !== k))}><Icon name="x" /></button></span>)}</div>}
-          {keywords.length < 2 && <div className="chips">{KW_EX.filter((k) => !keywords.includes(k)).map((k) => <button type="button" key={k} onClick={() => addKw(k)}>{k}</button>)}</div>}
+            </div></div>
+            <label className="fld"><span>나를 보여줄 키워드 ({keywords.length}/2) · 캐릭터 옆에 보여요</span>
+              <input disabled={keywords.length >= 2} maxLength={15} placeholder={keywords.length >= 2 ? '2개를 다 적었어요' : '예: 필라테스 3년차'} value={kw}
+                onChange={(e) => setKw(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && kw.trim()) { e.preventDefault(); addKw(kw); } }} /></label>
+            {kw.trim() && keywords.length < 2 && <button type="button" className="btn sub" style={{ height: 40, fontSize: 14, marginTop: 8 }} onClick={() => addKw(kw)}>‘{kw.trim()}’ 추가</button>}
+            {keywords.length > 0 && <div className="kw">{keywords.map((k) => <span key={k}>{k}<button type="button" aria-label={`${k} 지우기`} onClick={() => setKeywords(keywords.filter((x) => x !== k))}><Icon name="x" /></button></span>)}</div>}
+            {keywords.length < 2 && <div className="chips">{KW_EX.filter((k) => !keywords.includes(k)).map((k) => <button type="button" key={k} onClick={() => addKw(k)}>{k}</button>)}</div>}
+          </div>
+          <div className="safe"><Icon name="lock" /><div>직업·사는 곳·MBTI는 <b>대화 5분 뒤</b>, 맞은편 상대에게만 보여요.</div></div>
         </>}
 
         {isQ && <>
@@ -150,6 +135,7 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
         {step === RESULT && done && <>
           <h2 className="q" style={{ textAlign: 'center' }}>나의 연애 컬러예요</h2>
           <div className="orb" style={{ ['--c' as string]: PALETTE[type] }} role="img" aria-label="나의 연애 컬러" />
+          <p className="ltype">{typeName(type)}</p>
           {phrases(type).map((p) => <p className="phr" key={p} style={{ margin: 0 }}>{p}</p>)}
           <div className="rec">당신과 가장 비슷한 사람은<br /><b style={{ color: 'var(--text)' }}>모두 등록하면 알려드릴게요</b></div>
         </>}

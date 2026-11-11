@@ -6,7 +6,7 @@ import { IdealCloud } from '../../../components/IdealCloud';
 import { api } from '../../../lib/api';
 import { IDEAL } from '../../../lib/domain/ideal';
 import { ho } from '../../../lib/domain/lounge';
-import { PALETTE, phrases } from '../../../lib/domain/loveType';
+import { PALETTE, typeName } from '../../../lib/domain/loveType';
 import type { Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
 
@@ -143,7 +143,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
       <div className="ft">
         <div className="lg-mine">
           <span className="orb" style={{ ['--c' as string]: PALETTE[loveType], width: 28, height: 28, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
-          <span>{phrases(loveType).join(' · ')}</span>
+          <span>나는 <b>{typeName(loveType)}</b></span>
         </div>
         {me.number != null && before && (
           <div className="lg-seat"><b>{ho(me.gender, me.number)}</b><span>첫 대화는 <em>{me.number}번 테이블</em>에서 시작해요</span></div>

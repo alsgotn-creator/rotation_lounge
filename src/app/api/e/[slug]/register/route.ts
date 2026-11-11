@@ -25,7 +25,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const row = {
     event_id: event.id, application_id: me.id, gender: me.gender, job: me.job, number: me.number,
     age: new Date(event.starts_at).getUTCFullYear() - me.birth_year,
-    nickname: b.nickname.trim(), area: b.area.trim(), mbti: b.mbti.toUpperCase(),
+    nickname: '', area: b.area.trim(), mbti: b.mbti.toUpperCase(),
     keywords: b.keywords.map((k) => k.trim()).filter(Boolean),
     answers: b.answers, love_type: loveType(b.answers), shape: b.shape, prop: b.prop || 'none',
     consent_at: now, updated_at: now,

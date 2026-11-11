@@ -35,11 +35,9 @@ describe('love type', () => {
 });
 
 describe('registration validation', () => {
-  const ok = { nickname: '민지', area: '성동구', mbti: 'infp', keywords: ['필라테스 3년차'], answers: Array(15).fill(3), shape: 'f1', consent: true };
+  const ok = { area: '성동구', mbti: 'infp', keywords: ['필라테스 3년차'], answers: Array(15).fill(3), shape: 'f1', consent: true };
   test('valid input passes', () => expect(registrationError(ok)).toBeNull());
   test('rejects bad fields', () => {
-    expect(registrationError({ ...ok, nickname: '' })).toMatch('닉네임');
-    expect(registrationError({ ...ok, nickname: '열세글자닉네임입니다아아아' })).toMatch('닉네임');
     expect(registrationError({ ...ok, mbti: 'ABCD' })).toMatch('MBTI');
     expect(registrationError({ ...ok, keywords: [] })).toMatch('키워드');
     expect(registrationError({ ...ok, keywords: ['a', 'b', 'c'] })).toMatch('키워드');
@@ -54,11 +52,16 @@ describe('registration validation', () => {
   });
   test('malformed JSON from the API never throws (wrong types → message, not 500)', () => {
     const bad = (patch: object) => registrationError({ ...ok, ...patch } as typeof ok);
-    expect(bad({ nickname: 123 })).toMatch('다시');
+    expect(bad({ area: 123 })).toMatch('다시');
     expect(bad({ keywords: [1] })).toMatch('다시');
     expect(bad({ keywords: 'x' })).toMatch('다시');
     expect(bad({ prop: 5 })).toMatch('다시');
     expect(bad({ mbti: null })).toMatch('다시');
     expect(registrationError(null as unknown as typeof ok)).toMatch('다시');
   });
+});
+
+test('16 type names are all different', async () => {
+  const { typeName } = await import('../../src/lib/domain/loveType');
+  expect(new Set(Array.from({ length: 16 }, (_, t) => typeName(t))).size).toBe(16);
 });

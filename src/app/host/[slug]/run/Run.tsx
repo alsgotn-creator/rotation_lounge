@@ -139,12 +139,12 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
           <div key={g} className="people">
             {v.people.filter((p) => p.gender === g).map((p) => (
               <div key={p.id} className={`person-row${p.excluded ? ' off' : ''}`}>
-                <select aria-label={`${p.nickname} 번호`} value={p.number ?? ''} disabled={busy}
+                <select aria-label={`${p.name} 번호`} value={p.number ?? ''} disabled={busy}
                   onChange={(e) => send({ type: 'setNumber', participantId: p.id, number: e.target.value ? Number(e.target.value) : null })}>
                   <option value="">번호 없음</option>
                   {Array.from({ length: ev.table_count * ev.per_table }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{g === 'f' ? '여' : '남'}{n}호</option>)}
                 </select>
-                <div><b>{p.nickname}</b><span>{p.name}</span></div>
+                <div><b>{p.name}</b></div>
                 <button className="lnk" style={{ margin: 0 }} onClick={() => send({ type: 'exclude', participantId: p.id, excluded: !p.excluded })}>{p.excluded ? '다시 넣기' : '안 옴 · 빼기'}</button>
               </div>
             ))}
@@ -167,14 +167,14 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
             {v.extras.picks.map((x) => { const p = byId.get(x.id)!; return (
               <div key={x.id} className="person-row" style={{ alignItems: 'flex-start' }}>
                 <b style={{ minWidth: 52, fontSize: 14 }}>{label(p)}</b>
-                <div><b>{p.nickname}</b><span>{x.to.length ? x.to.map((t) => label(byId.get(t)!)).join(', ') : '아직 / 아무도 안 골랐어요'}</span></div>
+                <div><b>{p.name}</b><span>{x.to.length ? x.to.map((t) => label(byId.get(t)!)).join(', ') : '아직 / 아무도 안 골랐어요'}</span></div>
               </div>); })}
           </div>
           <p className="eb" style={{ marginTop: 22 }}>매칭 커플 ({v.extras.matches.length}) · 연락처 전달용</p>
           <div className="people">
             {v.extras.matches.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>아직 서로 고른 커플이 없어요</p>}
             {v.extras.matches.map(([a, b]) => { const pa = byId.get(a)!, pb = byId.get(b)!, fire = isBrave(a, b); return (
-              <div key={a + b} className="person-row"><div><b>{label(pa)} {fire ? '🔥' : '♥'} {label(pb)}{fire && <em className="brave-tag">서로 용기 카드 · 카페 안내</em>}</b><span>{pa.nickname}({pa.name}) · {v.extras.contacts[a]?.phone}</span><span>{pb.nickname}({pb.name}) · {v.extras.contacts[b]?.phone}</span></div></div>); })}
+              <div key={a + b} className="person-row"><div><b>{label(pa)} {fire ? '🔥' : '♥'} {label(pb)}{fire && <em className="brave-tag">서로 용기 카드 · 카페 안내</em>}</b><span>{pa.name} · {v.extras.contacts[a]?.phone}</span><span>{pb.name} · {v.extras.contacts[b]?.phone}</span></div></div>); })}
           </div>
           <p className="eb" style={{ marginTop: 22 }}>결과 문자 · 업무용 폰으로 보내기</p>
           <div className="people">
