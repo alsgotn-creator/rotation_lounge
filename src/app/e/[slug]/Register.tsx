@@ -8,13 +8,14 @@ import { QUESTIONS, PALETTE, loveType, phrases, typeName } from '../../../lib/do
 import { ACCS, ACC_KO, CHARS, EYEWEAR, GLASSED, parseAccs, registrationError, type Acc, type Shape } from '../../../lib/domain/register';
 
 export type Initial = { area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: string } | null;
-type Given = { gender: 'f' | 'm'; age: number; job: string };
+export type Given = { name: string; number: number | null; gender: 'f' | 'm'; age: number; job: string };
 
 const MBTI_PAIRS: [string, string, string, string][] = [['E', '외향', 'I', '내향'], ['N', '직관', 'S', '감각'], ['F', '감정', 'T', '사고'], ['J', '계획', 'P', '즉흥']];
 const KW_EX = ['필라테스 3년차', '맛집 탐방러', '강아지 집사', '주말엔 등산', '영화 덕후'];
 const DOT = [34, 26, 20, 26, 34];
-const Q0 = 2;                       // 질문이 시작되는 단계 (0 동의 · 1 나를 소개)
-const RESULT = Q0 + QUESTIONS.length, CHAR = RESULT + 1, LAST = CHAR;
+const Q0 = 2;                       // 질문이 시작되는 단계 (0 동의 · 1 인적사항)
+const PER = 3, PAGES = Math.ceil(QUESTIONS.length / PER); // 가치관 질문은 한 화면에 3개씩
+const RESULT = Q0 + PAGES, CHAR = RESULT + 1, LAST = CHAR;
 
 export default function Register({ slug, given, initial, onCancel, devStep }: { slug: string; given: Given; initial: Initial; onCancel?: () => void; devStep?: number }) {
   const router = useRouter();
@@ -40,9 +41,12 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
   const type = done ? loveType(answers) : 0;
   const addKw = (k: string) => { const t = k.trim().slice(0, 15); if (t && keywords.length < 2 && !keywords.includes(t)) setKeywords([...keywords, t]); setKw(''); };
 
+  const page = step - Q0;
+  const isQ = page >= 0 && page < PAGES;
   const canNext = (() => {
     if (step === 0) return consent;
     if (step === 1) return area.trim().length >= 1 && mbti.every(Boolean) && keywords.length >= 1;
+    if (isQ) return answers.slice(page * PER, page * PER + PER).every((a) => a > 0);
     if (step === RESULT) return true;
     return step === CHAR;
   })();
@@ -60,17 +64,11 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
 
   const next = () => {
     if (!canNext) return;
-    if (step === 1 && !done) return go(Q0 + Math.max(0, answers.findIndex((a) => a === 0)));
+    if (step === 1 && !done) return go(Q0 + Math.floor(Math.max(0, answers.findIndex((a) => a === 0)) / PER));
     if (step === LAST) return submit();
     go(step + 1);
   };
-  const answer = (qi: number, v: number) => {
-    const n = [...answers]; n[qi] = v; setAnswers(n);
-    setTimeout(() => go(Q0 + qi + 1 <= RESULT ? Q0 + qi + 1 : RESULT), 220);
-  };
-
-  const qi = step - Q0;
-  const isQ = qi >= 0 && qi < QUESTIONS.length;
+  const answer = (qi: number, v: number) => { const n = [...answers]; n[qi] = v; setAnswers(n); };
   const total = LAST + 1;
 
   return (
@@ -96,9 +94,15 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
         </>}
 
         {step === 1 && <>
-          <h2 className="q">나를 소개해주세요</h2>
+          <h2 className="q">인적사항</h2>
+          <p className="ds">신청서에서 가져온 정보는 채워 두었어요.</p>
           <div className="intro">
-            <div className="kv"><span>하는 일</span><b>{given.job}</b></div>
+            <div className="given2">
+              <div><small>이름</small><b>{given.name}</b></div>
+              <div><small>번호</small><b>{given.number != null ? `${given.gender === 'f' ? '여' : '남'}${given.number}호` : '배정 전'}</b></div>
+              <div><small>나이</small><b>{given.age}세</b></div>
+              <div><small>하는 일</small><b>{given.job}</b></div>
+            </div>
             <label className="fld"><span>사는 곳</span><input maxLength={20} placeholder="예: 성동구 (구나 동네 정도)" value={area} onChange={(e) => setArea(e.target.value)} /></label>
             <div className="fld"><span>MBTI</span><div className="mbti4">
               {MBTI_PAIRS.map(([a, ak, b, bk], i) => (
@@ -120,16 +124,23 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
         </>}
 
         {isQ && <>
-          <p className="qno">{qi + 1} / {QUESTIONS.length}</p>
-          <h2 className="q one" style={{ marginTop: 8 }}>{QUESTIONS[qi].text}</h2>
-          <div className="scale" role="radiogroup" aria-label="얼마나 그런가요">
-            {DOT.map((d, i) => (
-              <button type="button" key={i} role="radio" aria-checked={answers[qi] === i + 1} aria-label={['전혀 아니에요', '아닌 편이에요', '보통이에요', '그런 편이에요', '완전 그래요'][i]}
-                className={answers[qi] === i + 1 ? 'on' : ''} style={{ width: d * 1.5, height: d * 1.5 }} onClick={() => answer(qi, i + 1)} />
-            ))}
-          </div>
-          <div className="scale-l"><span>전혀 아니에요</span><span>완전 그래요</span></div>
-          <p className="hint" style={{ justifyContent: 'center', marginTop: 40 }}>누르면 다음 질문으로 넘어가요</p>
+          <p className="qno">{page + 1} / {PAGES}</p>
+          <h2 className="q" style={{ marginTop: 8 }}>나와 얼마나 비슷한가요?</h2>
+          {QUESTIONS.slice(page * PER, page * PER + PER).map((q, k) => {
+            const qi = page * PER + k;
+            return (
+              <div className={`qrow${answers[qi] ? ' done' : ''}`} key={q.text}>
+                <p>{q.text}</p>
+                <div className="scale" role="radiogroup" aria-label={q.text}>
+                  {DOT.map((d, i) => (
+                    <button type="button" key={i} role="radio" aria-checked={answers[qi] === i + 1} aria-label={['전혀 아니에요', '아닌 편이에요', '보통이에요', '그런 편이에요', '완전 그래요'][i]}
+                      className={answers[qi] === i + 1 ? 'on' : ''} style={{ width: d, height: d }} onClick={() => answer(qi, i + 1)} />
+                  ))}
+                </div>
+                <div className="scale-l"><span>전혀 아니에요</span><span>완전 그래요</span></div>
+              </div>
+            );
+          })}
         </>}
 
         {step === RESULT && done && <>
@@ -155,14 +166,12 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
           <p className="hint">대기실에서는 이 캐릭터와 키워드만 보여요</p>
         </>}
 
-        {!isQ && (
-          <div className="ft">
-            {err && <p role="alert" style={{ margin: '0 0 10px', color: 'var(--err)', fontSize: 14, textAlign: 'center' }}>{err}</p>}
-            <button className="btn" type="submit" disabled={!canNext || busy}>
-              {step === 0 ? '시작하기' : step === RESULT ? '캐릭터 고르러 가기' : step === CHAR ? (busy ? '저장하는 중…' : initial ? '수정 완료' : '등록 완료') : '다음'}
-            </button>
-          </div>
-        )}
+        <div className="ft">
+          {err && <p role="alert" style={{ margin: '0 0 10px', color: 'var(--err)', fontSize: 14, textAlign: 'center' }}>{err}</p>}
+          <button className="btn" type="submit" disabled={!canNext || busy}>
+            {step === 0 ? '시작하기' : step === RESULT ? '캐릭터 고르러 가기' : step === CHAR ? (busy ? '저장하는 중…' : initial ? '수정 완료' : '등록 완료') : '다음'}
+          </button>
+        </div>
       </form>
     </main>
   );

@@ -46,7 +46,7 @@ export default async function Lounge({ params, searchParams }: { params: Promise
   const p = await participantOf(me.id);
   const lounge = p ? await loungeView(event.id, p.id) : null;
   const s = toSession(event, []);
-  const given = { gender: me.gender, age: new Date(event.starts_at).getUTCFullYear() - me.birth_year, job: me.job };
+  const given = { name: me.name, number: me.number, gender: me.gender, age: Math.min(new Date(event.starts_at).getUTCFullYear(), new Date().getUTCFullYear() + 1) - me.birth_year /* 시연 모임(9999년)에서 나이가 튀지 않게 */, job: me.job };
   return (
     <Entry slug={slug} given={given} when={`${s.dateLabel} ${s.time}`} devStep={devStep} lounge={lounge}
       me={p && { area: p.area, mbti: p.mbti, keywords: p.keywords, answers: p.answers, loveType: p.love_type, shape: p.shape as Shape, prop: p.prop }} />
