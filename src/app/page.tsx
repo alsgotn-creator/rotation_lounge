@@ -17,7 +17,7 @@ const FAQ = [
 export default async function Landing() {
   const [sessions, { data: rv }] = await Promise.all([listSessions(), hasDb() ? db().from('reviews').select('body,gender,age').order('created_at', { ascending: false }).limit(12) : { data: null }]);
   const reviews = (rv ?? []) as { body: string; gender: 'f' | 'm'; age: number }[]; // 테이블이 아직 없으면 빈 목록
-  const next = sessions.find((s) => !s.closed);
+  const open = sessions.filter((s) => !s.closed); // 신청 받는 모임 전부 (시연 모임도 자리가 남으면 보인다)
   return (
     <main>
       <section className="hero">
@@ -28,12 +28,12 @@ export default async function Landing() {
         </div>
         <nav className="nav"><span className="logo">플러팅<i>.</i>라운지</span><div className="navr"><span className="hostby"><small>HOST</small>{HOST_NAME}</span></div></nav>
         <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>15분씩, 일곱 번의 설렘</span></div>
-        {next && <div className="bottom">
-          <Link className="ticket" href={`/apply?s=${next.id}`}>
+        {open.length > 0 && <div className="bottom">
+          {open.map((next) => <Link key={next.id} className="ticket" href={`/apply?s=${next.id}`}>
             <div className="dt">{next.mon}<b>{next.day}</b>{next.dow}</div>
             <div className="tx"><strong>{next.time} · {next.place} 라운지</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · <em>여성 {next.seatsF} · 남성 {next.seatsM}자리 남음</em></div>
             <Icon name="next" />
-          </Link>
+          </Link>)}
         </div>}
       </section>
 
