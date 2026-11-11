@@ -44,6 +44,7 @@ function Scene({ me, partners }: { me: PublicCard | null; partners: PublicCard[]
 }
 
 export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
+  const [open, setOpen] = useState(false); // 컬러칩을 누르면 유형 풀이
   return (
     <div className="rv-box">
       {fresh && <span className="rv-new">✦ 방금 공개</span>}
@@ -54,10 +55,11 @@ export function Reveal({ p, fresh }: { p: Profile; fresh: boolean }) {
         {p.best && <b>✦ 오늘 이성 중 나와 가장 비슷한 분이에요</b>}
         <span>연애 성향이 <em>{p.similar}%</em> 비슷해요</span>
       </p>
-      <div className="rv-love">
+      <button type="button" className="rv-love" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span className="orb" style={{ ['--c' as string]: PALETTE[p.color], width: 30, height: 30, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
-        <div><b>{typeName(p.color)}</b><p>{p.phrases.slice(0, 2).join(' · ')}</p></div>
-      </div>
+        <span className="rv-love-t"><b>{typeName(p.color)}</b>{open && p.phrases.map((t) => <span key={t} className="rv-love-p">{t}</span>)}</span>
+        <small>{open ? '접기' : '풀이 보기'}</small>
+      </button>
     </div>
   );
 }

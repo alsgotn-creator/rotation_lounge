@@ -377,11 +377,13 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .rv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 8px}
 .rv-grid small{display:block;font-size:11px;font-weight:700;color:var(--mute)}
 .rv-grid b{font-size:16px;font-weight:800}
-.rv-love{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.rv-love{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;padding:12px 0 0;border:0;border-top:1px solid var(--line);background:none;text-align:left;font-family:inherit;color:inherit;cursor:pointer}
+.rv-love-t{flex:1;min-width:0}.rv-love-t b{display:block;font-size:14px;font-weight:800}
+.rv-love>small{align-self:flex-start;margin-top:6px;font-size:11.5px;font-weight:700;color:var(--mute);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 .rv-sim{display:flex;flex-direction:column;gap:4px;margin:12px 0 0;padding:10px 12px;border-radius:12px;background:var(--bg);font-size:13px;color:var(--mute);text-align:center}
 .rv-sim em{font-style:normal;font-weight:900;color:var(--text)}
 .rv-sim.best{background:var(--text);color:#fff}.rv-sim.best em{color:#fff}.rv-sim b{font-size:13px}
-.rv-love p{margin:0;font-size:12px;font-weight:600;line-height:1.7;color:var(--text)}
+.rv-love p,.rv-love-p{display:block;margin:0;font-size:12px;font-weight:600;line-height:1.7;color:var(--text)}
 /* ---------- 롤링페이퍼 쓰기 ---------- */
 .nw{padding:34px 20px 170px}
 .nw-top{display:grid;place-items:center}
