@@ -3,8 +3,7 @@ import { db, hasDb } from '../../../lib/server/supabase';
 import { signApp } from '../../../lib/server/auth';
 import { inviteCookie, isLocked } from '../../../lib/server/invite';
 import { formatPhone, isPhone } from '../../../lib/signup/validate';
-import { DEMO_PHONE, randomGuest } from '../../../lib/domain/demo';
-import { loveType } from '../../../lib/domain/loveType';
+import { DEMO_PHONE } from '../../../lib/domain/demo';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -32,21 +31,15 @@ function entered(ev: { id: string; slug: string }, appId: string) {
   return res;
 }
 
-// 시연용 게스트: demo- 모임의 확정 자리 하나에 앉히고, 사전 등록은 아무렇게나 채워서 바로 라운지로 보낸다
+// 시연용 게스트: demo- 모임의 확정 자리 하나에 앉히고, 그 자리의 등록 정보를 지워서 사전 등록(가치관 문제 포함)부터 직접 하게 한다
 async function enterDemo() {
-  const { data: ev } = await db().from('events').select('id,slug,starts_at').like('slug', 'demo-%').order('starts_at').limit(1).maybeSingle();
+  const { data: ev } = await db().from('events').select('id,slug').like('slug', 'demo-%').order('starts_at').limit(1).maybeSingle();
   if (!ev || (await isLocked(ev.id))) return fail('지금은 시연 모임이 없어요.', 404);
-  const { data: apps } = await db().from('applications').select('id,gender,birth_year,job,number').eq('event_id', ev.id).eq('status', 'confirmed');
+  const { data: apps } = await db().from('applications').select('id').eq('event_id', ev.id).eq('status', 'confirmed');
   if (!apps?.length) return fail('지금은 시연 모임이 없어요.', 404);
   const a = apps[Math.floor(Math.random() * apps.length)];
-  const g = randomGuest(a.gender);
-  const now = new Date().toISOString();
-  const { error } = await db().from('participants').upsert({
-    event_id: ev.id, application_id: a.id, gender: a.gender, job: a.job, number: a.number,
-    age: new Date().getUTCFullYear() - a.birth_year, // 시연 모임 날짜(9999년)로 재면 나이가 이상해진다
-    nickname: '', area: g.area, mbti: g.mbti, keywords: g.keywords, answers: g.answers,
-    love_type: loveType(g.answers), shape: g.shape, prop: g.prop || 'none', consent_at: now, updated_at: now,
-  }, { onConflict: 'application_id' });
+  // 그 자리에 대한 쪽지·선택도 같이 지워진다(on delete cascade). 시연 모임이라 괜찮다
+  const { error } = await db().from('participants').delete().eq('application_id', a.id);
   if (error) return fail('다시 시도해주세요.', 500);
   return entered(ev, a.id);
 }

@@ -15,7 +15,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   if (!me) return fail('입장 링크로 다시 들어와주세요.', 401);
 
   const { data: ev } = await db().from('events').select('phase').eq('id', event.id).single();
-  if (ev?.phase !== 'before') return fail('행사가 시작돼서 지금은 고칠 수 없어요.', 409);
+  if (ev?.phase !== 'before' && !slug.startsWith('demo-')) return fail('행사가 시작돼서 지금은 고칠 수 없어요.', 409); // 시연 모임은 진행 중에도 새로 등록할 수 있다
 
   const b = (await req.json().catch(() => ({}))) as RegistrationInput;
   const err = registrationError(b);
@@ -24,7 +24,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const now = new Date().toISOString();
   const row = {
     event_id: event.id, application_id: me.id, gender: me.gender, job: me.job, number: me.number,
-    age: new Date(event.starts_at).getUTCFullYear() - me.birth_year,
+    age: Math.min(new Date(event.starts_at).getUTCFullYear(), new Date().getUTCFullYear() + 1) - me.birth_year, // 시연 모임(9999년)에서 나이가 튀지 않게
     nickname: '', area: b.area.trim(), mbti: b.mbti.toUpperCase(),
     keywords: b.keywords.map((k) => k.trim()).filter(Boolean),
     answers: b.answers, love_type: loveType(b.answers), shape: b.shape, prop: b.prop || 'none',
