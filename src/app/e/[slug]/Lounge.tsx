@@ -6,7 +6,7 @@ import { IdealCloud } from '../../../components/IdealCloud';
 import { api } from '../../../lib/api';
 import { IDEAL } from '../../../lib/domain/ideal';
 import { ho } from '../../../lib/domain/lounge';
-import { PALETTE, typeName } from '../../../lib/domain/loveType';
+import { PALETTE, phrases, typeName } from '../../../lib/domain/loveType';
 import type { Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
 
@@ -102,6 +102,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
   const before = v.phase === 'before';
   const prepKey = `fl_prep2_${slug}`; // 체크 방식으로 바뀌어서 이미 닫은 폰에도 한 번 더 뜬다
   const [prep, setPrep] = useState(false);
+  const [typeOpen, setTypeOpen] = useState(false); // 컬러칩을 누르면 유형 풀이
   useEffect(() => { try { if (!localStorage.getItem(prepKey)) setPrep(true); } catch { setPrep(true); } }, [prepKey]);
   const closePrep = () => { setPrep(false); try { localStorage.setItem(prepKey, '1'); } catch {} };
 
@@ -141,10 +142,14 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
       <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
 
       <div className="ft">
-        <div className="lg-mine">
-          <span className="orb" style={{ ['--c' as string]: PALETTE[loveType], width: 28, height: 28, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
-          <span>나는 <b>{typeName(loveType)}</b></span>
-        </div>
+        <button type="button" className={`lg-mine${typeOpen ? ' open' : ''}`} aria-expanded={typeOpen} onClick={() => setTypeOpen(!typeOpen)}>
+          <span className="lg-mine-row">
+            <span className="orb" style={{ ['--c' as string]: PALETTE[loveType], width: 28, height: 28, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
+            <span>나는 <b>{typeName(loveType)}</b></span>
+            <small>{typeOpen ? '접기' : '풀이 보기'}</small>
+          </span>
+          {typeOpen && <span className="lg-mine-why">{phrases(loveType).map((p) => <span key={p}>{p}</span>)}</span>}
+        </button>
         {me.number != null && before && (
           <div className="lg-seat"><b>{ho(me.gender, me.number)}</b><span>첫 대화는 <em>{me.number}번 테이블</em>에서 시작해요</span></div>
         )}
