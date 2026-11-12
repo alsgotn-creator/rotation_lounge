@@ -11,8 +11,9 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- 첫 화면 ---------- */
 .hero{position:relative;height:calc(100svh - 190px);min-height:460px;max-height:900px;overflow:hidden} /* 아래 입장 카드가 첫 화면에 70%쯤 보이게 */
-.hero .art{position:absolute;left:0;right:0;top:22px;z-index:1;animation:enter 1.6s cubic-bezier(.2,.7,.2,1) both}
+.hero .art{position:absolute;left:7%;right:7%;top:56px;z-index:1;animation:enter 1.6s cubic-bezier(.2,.7,.2,1) both}
 .hero .art img{display:block;width:100%;height:auto}
+.hero .art{-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent),linear-gradient(180deg,transparent,#000 7%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent),linear-gradient(180deg,transparent,#000 7%);mask-composite:intersect} /* 줄인 그림의 흰 박스 가장자리를 배경에 녹인다 */
 .hero .art .mv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 @media (prefers-reduced-motion:reduce){.hero .art .mv{display:none}}
 .hero .art:after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:90px;background:linear-gradient(180deg,rgba(244,244,245,0),var(--bg))}
