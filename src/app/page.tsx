@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Icon } from '../components/Icon';
 import EnterCard from './EnterCard';
-import { PRICE, won, yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
+import { yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
 import { listSessions } from '../lib/server/signup';
 import { db, hasDb } from '../lib/server/supabase';
 
@@ -41,34 +41,6 @@ export default async function Landing() {
       <section id="enter" className="lsec" style={{ paddingTop: 8 }}>
         <p className="nx"><Icon name="down" />승인 후 입력하여 라운지 입장</p>
         <EnterCard />
-      </section>
-
-      <section className="lsec">
-        <p className="eb">이런 자리예요</p>
-        <h3>2시간 동안 다양한 사람들과<br />15분의 설렘</h3>
-        <div className="fact" style={{ marginTop: 10 }}><i><Icon name="clock" /></i><div><b>15분씩, 한 명과</b><span>자리를 옮기며 한 명씩 깊게 이야기해요</span></div></div>
-        <div className="fact"><i><Icon name="heart" /></i><div><b>서로 고른 사람만 연결돼요</b><span>한쪽만 고르면 아무 일도 일어나지 않아요</span></div></div>
-        <div className="fact"><i><Icon name="eyeOff" /></i><div><b>몇 명이 나를 골랐는지 몰라요</b><span>결과는 문자로 보내드려요</span></div></div>
-      </section>
-
-      <section className="lsec">
-        <p className="eb">진행 순서</p>
-        <h3>신청은 1분,<br />호스트가 승인하면 입장해요</h3>
-        <div className="stp">
-          <div><b>신청하기</b><span>이름, 출생연도, 연락처만 받아요</span></div>
-          <div><b>호스트 승인</b><span>보통 하루 안에 승인돼요. 그다음엔 신청한 휴대폰 번호만 넣으면 입장해요</span></div>
-          <div><b>사전 등록하기</b><span>라운지에 들어가 나를 소개하는 질문에 답해요</span></div>
-          <div><b>당일, 라운지에서 만나요</b><span>휴대폰 하나만 들고 오세요</span></div>
-        </div>
-      </section>
-
-      <section className="lsec">
-        <p className="eb">참가비</p>
-        <div className="price">
-          <div className="amt">{won(PRICE)}<small>1인</small></div>
-          <div className="kv"><span>모임 4일 전까지 취소</span><b>환불 가능</b></div>
-          <div className="kv"><span>그 이후 취소</span><b>환불 불가</b></div>
-        </div>
       </section>
 
       <section className="lsec">

@@ -38,7 +38,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   const back = () => (step === 0 ? router.push('/') : go(step - 1));
 
   const tel = formatPhone(`010${phone}`);
-  if (done) return <Done phone={tel} />;
+  if (done) return <Done />;
 
   const submit = async () => {
     if (!s || sending) return;
@@ -190,16 +190,16 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
   );
 }
 
-function Done({ phone }: { phone: string }) {
+function Done() {
   return (
     <main className="fin">
       <div className="big"><Icon name="check" /></div>
       <h2 className="q">신청을 마쳤어요</h2>
       <p className="ds">호스트가 확인하면 문자로 안내드릴게요.<br />라운지에는 <b>신청한 휴대폰 번호</b>로 들어와요.</p>
       <div className="card"><div className="tl">
-        <div className="done"><i /><span><b>신청 완료</b><small>{phone}</small></span></div>
-        <div className="now"><i /><span><b>호스트 확인 중</b><small>보통 하루 안에 끝나요</small></span></div>
-        <div><i /><span><b>승인 후 라운지 입장</b><small>첫 화면 '라운지 입장'에 이 번호를 넣으면 돼요</small></span></div>
+        <div className="done"><i /><span><b>신청 완료</b></span></div>
+        <div className="now"><i /><span><b>호스트 확인 중</b></span></div>
+        <div><i /><span><b>승인 후 라운지 입장</b></span></div>
       </div></div>
       <div className="ft"><Link className="btn" href="/">처음으로</Link></div>
     </main>
