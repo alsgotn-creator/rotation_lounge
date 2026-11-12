@@ -11,7 +11,7 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- 첫 화면 ---------- */
 .hero{position:relative;height:calc(100svh - 190px);min-height:460px;max-height:900px;overflow:hidden} /* 아래 입장 카드가 첫 화면에 70%쯤 보이게 */
-.hero .art{position:absolute;left:0;right:0;top:64px;z-index:1;animation:enter 1.6s cubic-bezier(.2,.7,.2,1) both}
+.hero .art{position:absolute;left:0;right:0;top:22px;z-index:1;animation:enter 1.6s cubic-bezier(.2,.7,.2,1) both}
 .hero .art img{display:block;width:100%;height:auto}
 .hero .art .mv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 @media (prefers-reduced-motion:reduce){.hero .art .mv{display:none}}
@@ -56,6 +56,7 @@ a{color:inherit;text-decoration:none}
 .stepno{position:absolute;top:-10px;left:14px;z-index:1;display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 9px 0 3px;border-radius:10px;background:var(--btn);color:var(--btntx);font-size:11px;font-weight:800}
 .stepno b{display:grid;place-items:center;width:14px;height:14px;border-radius:50%;background:var(--btntx);color:var(--btn);font-size:10px}
 .enter{position:relative}
+.nx{display:flex;align-items:center;justify-content:center;gap:4px;margin:0;font-size:12px;font-weight:700;color:var(--mute)}.nx .ic{width:15px;height:15px}
 html{scroll-behavior:smooth}
 .btn:disabled{background:var(--surf2);color:var(--dim);cursor:default;transform:none}
 .btn.sub{background:var(--surf2);color:var(--text)}

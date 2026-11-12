@@ -39,7 +39,7 @@ export default async function Landing() {
       </section>
 
       <section id="enter" className="lsec" style={{ paddingTop: 8 }}>
-        <p className="eb">라운지 입장</p>
+        <p className="nx"><Icon name="down" />승인 후 입력하여 라운지 입장</p>
         <EnterCard />
       </section>
 
