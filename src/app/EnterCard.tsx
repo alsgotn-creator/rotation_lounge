@@ -24,6 +24,7 @@ export default function EnterCard() {
   }
   return (
     <form ref={ref} className="price enter" onSubmit={go}>
+      <span className="stepno"><b>2</b>입장하기</span>
       <b>승인 받으셨나요?</b>
       <label className={`fld${msg ? ' err' : ''}`} style={{ marginTop: 14 }}>
         <span>신청할 때 쓴 휴대폰 번호</span>

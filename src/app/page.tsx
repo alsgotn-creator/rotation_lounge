@@ -30,6 +30,7 @@ export default async function Landing() {
         <div className="title"><p>ROTATION LOUNGE</p><h1>플러팅 라운지</h1><span>다양한 사람들과 15분의 설렘</span></div>
         {open.length > 0 && <div className="bottom">
           {open.map((next) => <Link key={next.id} className="ticket" href={`/apply?s=${next.id}`}>
+            <span className="stepno"><b>1</b>신청하기</span>
             <div className="dt">{next.mon}<b>{next.day}</b>{next.dow}</div>
             <div className="tx"><strong>{next.time} · {next.place} 라운지</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · <em>여성 {next.seatsF} · 남성 {next.seatsM}자리 남음</em></div>
             <Icon name="next" />
@@ -37,7 +38,7 @@ export default async function Landing() {
         </div>}
       </section>
 
-      <section className="lsec" style={{ paddingTop: 8 }}>
+      <section id="enter" className="lsec" style={{ paddingTop: 8 }}>
         <p className="eb">라운지 입장</p>
         <EnterCard />
       </section>
@@ -88,7 +89,7 @@ export default async function Landing() {
 
       <footer className="biz">상호 플러팅 라운지<br />문의 <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a> · 이용약관 · 개인정보처리방침</footer>
 
-      <div className="ft"><Link className="btn shine" href="/apply">라운지 입장 신청하기</Link></div>
+      <div className="ft two"><Link className="btn shine" href="/apply"><b className="n">1</b>신청하기</Link><a className="btn line" href="#enter"><b className="n">2</b>입장하기</a></div>
     </main>
   );
 }
