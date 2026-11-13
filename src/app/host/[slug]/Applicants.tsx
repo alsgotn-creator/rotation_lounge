@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '../../../components/Icon';
 import { api } from '../../../lib/api';
 import type { AppStatus, Session } from '../../../lib/signup/rules';
+import { QUESTIONS, typeName } from '../../../lib/domain/loveType';
 
 export type Row = {
   id: string; name: string; gender: 'f' | 'm'; birthYear: number; job: string; phone: string; email: string;
   status: AppStatus; paymentDue: string | null; createdAt: string; number: number | null; avoid: { name: string; note: string }[];
   photos: string[]; avoidHits: string[]; avoidedBy: string[];
+  profile: { area: string; mbti: string; keywords: string[]; answers: number[]; loveType: number } | null; // 사전 등록 전이면 null
 };
 type Ev = { id: string; slug: string; applyOpen: boolean; capacity: number; tables: number; perTable: number; price: number };
 
@@ -28,6 +30,7 @@ const ago = (iso: string) => {
   const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   return m < 60 ? `${Math.max(m, 1)}분 전` : m < 1440 ? `${Math.round(m / 60)}시간 전` : `${Math.round(m / 1440)}일 전`;
 };
+const SCALE = ['전혀 아니에요', '아닌 편이에요', '보통이에요', '그런 편이에요', '완전 그래요'];
 const kDue = (d: string) => new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(d + 'T12:00:00+09:00'));
 
 export default function Applicants({ event, session, rows }: { event: Ev; session: Session; rows: Row[] }) {
@@ -99,6 +102,17 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
             {open.avoidHits.length > 0 && <u>이 일정 신청자 중 같은 이름: {open.avoidHits.join(', ')}</u>}
           </div></div>}
           {open.avoidedBy.length > 0 && <div className="alert"><Icon name="info" /><div><b>이 사람을 피하고 싶어 하는 신청자</b>{open.avoidedBy.join(', ')}</div></div>}
+          {open.status === 'confirmed' && (open.profile ? <>
+            <p className="eb" style={{ marginTop: 22 }}>사전 등록</p>
+            <dl className="sum" style={{ marginTop: 6 }}>
+              {[['사는 곳', open.profile.area], ['MBTI', open.profile.mbti], ['키워드', open.profile.keywords.join(', ')], ['연애 컬러', typeName(open.profile.loveType)]]
+                .map(([k, v]) => <div className="kv" key={k} style={{ borderTop: 0 }}><span>{k}</span><b>{v || '-'}</b></div>)}
+            </dl>
+            <p className="eb" style={{ marginTop: 18 }}>연애관 질문</p>
+            <dl className="sum" style={{ marginTop: 6 }}>
+              {QUESTIONS.map((q, i) => <div className="kv" key={i} style={{ borderTop: 0, alignItems: 'flex-start' }}><span style={{ flex: 1, wordBreak: 'keep-all' }}>{i + 1}. {q.text}</span><b style={{ whiteSpace: 'nowrap' }}>{SCALE[open.profile!.answers[i] - 1] ?? '-'}</b></div>)}
+            </dl>
+          </> : <p className="hint" style={{ marginTop: 18 }}>아직 사전 등록 전이에요</p>)}
         </div>
         <div className="ft"><div className="btn2" style={acts.length === 1 ? { gridTemplateColumns: '1fr' } : undefined}>
           {acts.map(([a, label], i) => <button key={a} disabled={busy} className={`btn${i === 0 && acts.length > 1 ? ' sub' : ''}`} onClick={() => act(open, a)}>{label}</button>)}
