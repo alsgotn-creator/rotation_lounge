@@ -32,7 +32,8 @@ a{color:inherit;text-decoration:none}
 .title span{display:block;margin-top:8px;font-size:15px;font-weight:700;color:var(--mute);letter-spacing:-.02em;animation:up .8s .5s both}
 @keyframes enter{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:none}}
 @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.hero .bottom{position:absolute;left:0;right:0;bottom:14px;z-index:3;padding:0 20px;animation:up .8s .9s both;display:flex;flex-direction:column;gap:16px}
+.hero .bottom{position:absolute;left:0;right:0;bottom:14px;z-index:3;padding:0 20px;animation:up .5s .3s both;display:flex;flex-direction:column;gap:16px}
+#enter{animation:up .5s .5s both} /* 1(신청) 다음에 2(입장)가 바로 이어서 뜬다 */
 .ticket{position:relative;display:flex;align-items:center;gap:14px;border-radius:18px;padding:14px 16px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line)}
 .ticket:before,.ticket:after{content:"";position:absolute;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
 .ticket:before{left:-9px;clip-path:inset(0 0 0 50%)}.ticket:after{right:-9px;clip-path:inset(0 50% 0 0)}
