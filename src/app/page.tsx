@@ -32,7 +32,7 @@ export default async function Landing() {
           {open.map((next) => <Link key={next.id} className="ticket" href={`/apply?s=${next.id}`}>
             <span className="stepno"><b>1</b>신청하기</span>
             <div className="dt">{next.mon}<b>{next.day}</b>{next.dow}</div>
-            <div className="tx"><strong>{next.time} · {next.place} 라운지</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · <em>여성 {next.seatsF} · 남성 {next.seatsM}자리 남음</em></div>
+            <div className="tx"><strong>{next.time} · {next.place} {next.double ? '더블 라운지' : '라운지'}</strong>{yy(next.birthFrom)}~{yy(next.birthTo)}년생 · <em>여성 {next.seatsF} · 남성 {next.seatsM}자리 남음</em></div>
             <Icon name="next" />
           </Link>)}
         </div>}

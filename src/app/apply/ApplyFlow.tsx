@@ -93,7 +93,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
               <button type="button" key={x.id} disabled={x.closed} className={`opt${sessionId === x.id ? ' on' : ''}`}
                 onClick={() => { setSessionId(x.id); if (sessionId !== x.id) setGender(''); setTimeout(() => go(1), 180); }}>
                 <div className="d">{x.mon}<b>{x.day}</b>{x.dow}</div>
-                <div className="t"><strong>{x.time} · {x.place}</strong>{yy(x.birthFrom)}~{yy(x.birthTo)}년생
+                <div className="t"><strong>{x.time} · {x.place}{x.double ? ' · 더블 라운지' : ''}</strong>{yy(x.birthFrom)}~{yy(x.birthTo)}년생
                   {!x.closed && <><br /><em>여성 {x.seatsF} · 남성 {x.seatsM}자리 남음</em></>}</div>
                 {x.closed ? <span className="end">마감</span> : <span className="chk" />}
               </button>
@@ -104,7 +104,7 @@ export default function ApplyFlow({ sessions, initialSession }: { sessions: Sess
 
         {step === 1 && s && <>
           <h2 className="q">성별을 골라주세요</h2>
-          <p className="ds">{s.dateLabel} {s.time} · {s.place}</p>
+          <p className="ds">{s.dateLabel} {s.time} · {s.place}{s.double ? ' · 더블 라운지' : ''}</p>
           <div className="tiles">
             {([['f', '여성', '♀', s.seatsF], ['m', '남성', '♂', s.seatsM]] as const).map(([g, label, sym, seats]) => (
               <button type="button" key={g} disabled={seats === 0} className={`tile${gender === g ? ' on' : ''}`}

@@ -9,7 +9,7 @@ export type EventRow = {
 export type Session = {
   id: string; mon: string; day: string; dow: string; dateLabel: string;
   time: string; place: string; birthFrom: number; birthTo: number;
-  seatsF: number; seatsM: number; closed?: boolean;
+  seatsF: number; seatsM: number; closed?: boolean; double?: boolean;
 };
 
 /** 자리를 차지하는 상태: 입금 대기 + 확정. 새 신청은 자리를 잡지 않는다. */
@@ -37,6 +37,7 @@ export function toSession(e: EventRow, apps: { gender: Gender; status: AppStatus
     time,
     place: e.venue,
     birthFrom: e.birth_from, birthTo: e.birth_to, seatsF, seatsM,
+    double: e.title.includes('더블'), // 더블 라운지 일정은 제목이 '플러팅 더블 라운지'
     closed: !e.apply_open || d <= now || (seatsF === 0 && seatsM === 0),
   };
 }
