@@ -47,7 +47,8 @@ export const CARDS: GameCard[] = [
 
 /**
  * 더블 라운지 대화 주제: 순한맛 · 매운맛, 한 문장씩 (좁은 칸 두 줄 안에 들어가게 짧게).
- * 같은 만남이면 모든 테이블이 같은 주제(n번째 만남 = n번째)에서 시작하고, 화살표로 앞뒤를 넘긴다.
+ * 만남마다 겹치지 않는 묶음을 쓴다: 주제 수 ÷ 만남 수 만큼씩 나눠서, n번째 만남은 n번째 묶음 안에서만 넘긴다.
+ * 그래서 몇 번째 만남, 어느 테이블에 앉든 이미 본 주제는 다시 안 나온다. 같은 만남이면 모든 테이블이 같은 주제에서 시작한다.
  */
 export const DOUBLE_TOPICS = {
   mild: [
@@ -63,6 +64,34 @@ export const DOUBLE_TOPICS = {
     '반려동물은? 강아지 vs 고양이',
     '나는? 아침형 vs 저녁형',
     '데이트 마무리는? 카페 vs 술집',
+    '첫인상에서 먼저 보는 건? 눈빛 vs 말투',
+    '데이트 코스는? 내가 짜기 vs 맡기기',
+    '생일엔? 둘이서 조용히 vs 친구들과 파티',
+    '메시지 답장은? 바로 vs 여유 있게',
+    '영화는? 극장 vs 집에서 OTT',
+    '애칭, 꼭 있어야 한다 vs 이름이 좋다',
+    '커플템은? 좋다 vs 부끄럽다',
+    '휴가는? 국내 여행 vs 해외 여행',
+    '데이트 사진은? 많이 찍기 vs 눈에 담기',
+    '음식 취향이 정반대라면? 맞춰준다 vs 번갈아 먹는다',
+    '애인의 친구 모임, 같이 간다 vs 따로 논다',
+    '집 데이트 메뉴는? 요리하기 vs 배달',
+    '애정 표현은? 말로 vs 행동으로',
+    '하루 연락, 많을수록 좋다 vs 적당히',
+    '비 오는 날 데이트는? 실내 vs 우산 쓰고 산책',
+    '데이트는? 놀이공원 vs 한강 피크닉',
+    '내 연애 스타일은? 직진 vs 천천히',
+    '첫 만남 다음 연락은? 당일 vs 다음 날',
+    '애인과 운동, 같이 vs 각자',
+    '연애 초반 더치페이, 좋다 vs 어색하다',
+    '설레는 건? 밤새 통화 vs 아침 모닝콜',
+    '쉬는 날엔? 캠핑 vs 호캉스',
+    '데이트 중 휴대폰, 내려놓기 vs 상관없다',
+    '애인이 요리를 못하면? 내가 한다 vs 같이 배운다',
+    '끌리는 사람은? 취미가 같은 vs 다른',
+    '기념일은? 100일마다 vs 1년마다',
+    '장거리 연애, 할 수 있다 vs 어렵다',
+    '크리스마스엔? 데이트 명소 vs 집에서 둘이',
   ],
   spicy: [
     '바람, 그나마 나은 건? 신체적 vs 정신적',
@@ -77,6 +106,34 @@ export const DOUBLE_TOPICS = {
     '연인 사이 비밀, 있어도 된다 vs 없어야 한다',
     '애인이 전 연인과 가끔 연락, 된다 vs 안 된다',
     '사귀기 전 스킨십, 된다 vs 안 된다',
+    '애인 혼자 이성 친구 결혼식, 된다 vs 안 된다',
+    '연애 공백 5년, 신중한 사람 vs 이유가 있는 사람',
+    '애인이 전 연인 사진을 안 지웠다, 된다 vs 안 된다',
+    '친구의 전 연인과 연애, 된다 vs 안 된다',
+    '애인의 SNS 좋아요 확인, 한다 vs 안 한다',
+    '연봉 차이 큰 연애, 괜찮다 vs 부담된다',
+    '나이 차이는? 동갑 vs 연상·연하',
+    '애인이 이성과 단둘이 출장, 된다 vs 안 된다',
+    '애인과 위치 공유, 한다 vs 안 한다',
+    '이별 통보는? 만나서 vs 전화로',
+    '환승 이별, 이해된다 vs 절대 안 된다',
+    '애인이 내 친구와 단둘이 밥, 된다 vs 안 된다',
+    '첫 키스는? 사귄 날 vs 천천히',
+    '연애 경험, 많을수록 좋다 vs 적을수록 좋다',
+    '애인의 오랜 이성 친구, 괜찮다 vs 신경 쓰인다',
+    '헤어진 연인과 재회, 한다 vs 절대 안 한다',
+    '애인 폰에 소개팅 앱이 남아 있다, 된다 vs 안 된다',
+    '질투, 조금은 필요하다 vs 없어야 한다',
+    '결혼 상대는? 사랑 vs 현실',
+    '애인의 술자리 연락, 수시로 vs 끝나고 한 번',
+    '이성 친구 섞인 1박 여행, 된다 vs 안 된다',
+    '전 연인 SNS 몰래 보기, 된다 vs 안 된다',
+    '바람 상대, 더 싫은 건? 내 친구 vs 모르는 사람',
+    '연애 중 받은 고백, 애인에게 말한다 vs 안 말한다',
+    '결혼 후 돈 관리, 합친다 vs 따로',
+    '애인이 나보다 친구 먼저, 이해된다 vs 서운하다',
+    '헤어진 다음 날 새 데이트, 된다 vs 안 된다',
+    '하나만 고른다면? 사랑 vs 우정',
   ],
 };
 export type TopicKind = keyof typeof DOUBLE_TOPICS;
@@ -92,10 +149,10 @@ export function parseTopicId(id: string | null | undefined): TopicState {
   const kind = TOPIC_KINDS.find(([x]) => x === k)?.[0];
   return kind && /^-?\d+$/.test(s ?? '') ? { kind, step: Number(s) } : { kind: 'mild', step: 0 };
 }
-/** n번째 만남에서 step칸 넘긴 주제 (앞뒤로 돌아간다) */
-export function doubleTopic(kind: TopicKind, round: number, step = 0) {
-  const l = DOUBLE_TOPICS[kind];
-  return l[(((round - 1 + step) % l.length) + l.length) % l.length];
+/** total번 중 n번째 만남에서 step칸 넘긴 주제. 그 만남의 묶음 안에서만 앞뒤로 돈다 */
+export function doubleTopic(kind: TopicKind, round: number, step: number, total: number) {
+  const l = DOUBLE_TOPICS[kind], size = Math.max(1, Math.floor(l.length / Math.max(1, total)));
+  return l[((round - 1) * size + (((step % size) + size) % size)) % l.length];
 }
 
 export const cardById = (id: string) => CARDS.find((c) => c.id === id) ?? null;

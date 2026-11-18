@@ -11,11 +11,19 @@ describe('cards', () => {
     CARDS.filter((c) => c.kind === 'balance').forEach((c) => expect(c.options).toHaveLength(2));
     CARDS.filter((c) => c.kind === 'talk' || c.kind === 'scenario').forEach((c) => { expect(c.options.length).toBeGreaterThanOrEqual(3); expect(c.options.length).toBeLessThanOrEqual(7); });
   });
-  it('더블 라운지 주제: 맛마다 만남 12번까지 겹치지 않고, 화살표는 앞뒤로 돌아간다', () => {
+  it('더블 라운지 주제: 만남마다 묶음이 달라 몇 번을 넘겨도 다른 만남의 주제와 안 겹친다', () => {
     for (const k of ['mild', 'spicy'] as const) {
-      expect(new Set(Array.from({ length: 12 }, (_, i) => doubleTopic(k, i + 1))).size).toBe(12);
-      expect(doubleTopic(k, 1, -1)).toBe(DOUBLE_TOPICS[k].at(-1));
-      expect(doubleTopic(k, 2, 1)).toBe(DOUBLE_TOPICS[k][2]);
+      expect(DOUBLE_TOPICS[k].length).toBeGreaterThanOrEqual(40);
+      for (const total of [2, 4, 5, 8, 12]) {
+        const seen = new Map<string, number>();
+        for (let r = 1; r <= total; r++) for (let step = -30; step <= 30; step++) {
+          const x = doubleTopic(k, r, step, total);
+          expect(seen.get(x) ?? r).toBe(r);
+          seen.set(x, r);
+        }
+        expect(seen.size).toBe(Math.floor(DOUBLE_TOPICS[k].length / total) * total);
+      }
+      expect(doubleTopic(k, 1, 0, 4)).toBe(DOUBLE_TOPICS[k][0]);
     }
   });
   it('테이블 주제 상태는 저장 칸에서 그대로 돌아오고, 이상한 값은 순한맛 처음으로', () => {

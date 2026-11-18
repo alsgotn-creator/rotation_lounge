@@ -47,7 +47,7 @@ function Scene({ me, partners, mate }: { me: PublicCard | null; partners: Public
 }
 
 /** 더블 라운지 대화 주제: 같은 만남이면 모든 테이블이 같은 주제에서 시작하고, 한 명이 맛을 바꾸거나 넘기면 그 테이블 네 명이 같이 바뀐다. */
-function Topic({ slug, round, topic, onChange }: { slug: string; round: number; topic: TopicState; onChange: () => Promise<void> }) {
+function Topic({ slug, round, total, topic, onChange }: { slug: string; round: number; total: number; topic: TopicState; onChange: () => Promise<void> }) {
   const [mine, setMine] = useState<TopicState | null>(null); // 누른 사람 화면은 서버 응답을 기다리지 않고 바로 바꾼다
   const { kind, step } = mine ?? topic;
   const go = async (t: TopicState) => {
@@ -64,7 +64,7 @@ function Topic({ slug, round, topic, onChange }: { slug: string; round: number; 
       </div>
       <div className="tp-b">
         <button type="button" aria-label="이전 주제" onClick={() => go({ kind, step: step - 1 })}><Icon name="back" /></button>
-        <p aria-live="polite"><span>{doubleTopic(kind, round, step)}</span></p>
+        <p aria-live="polite"><span>{doubleTopic(kind, round, step, total)}</span></p>
         <button type="button" aria-label="다음 주제" onClick={() => go({ kind, step: step + 1 })}><Icon name="next" /></button>
       </div>
     </section>
@@ -143,7 +143,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
       {view.double && view.team && <p className="rnd-team">{view.team.name ? `팀 ${view.team.name}` : '우리 팀'} · 파트너와 함께 앉아요</p>}
       {view.double && round.partners.length === 0 && <p className="rnd-wait">이번 만남은 쉬어가요 · 파트너와 작전을 짜보세요</p>}
       <Scene me={me} partners={round.partners} mate={mate} />
-      {view.double && round.partners.length > 0 && view.topic && <Topic slug={slug} round={round.no} topic={view.topic} onChange={onRefresh} />}
+      {view.double && round.partners.length > 0 && view.topic && <Topic slug={slug} round={round.no} total={round.total} topic={view.topic} onChange={onRefresh} />}
 
       <section className={`pcs${view.double ? ' two' : ''}`}>
         {cards.map((p) => (
