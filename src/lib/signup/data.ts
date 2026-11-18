@@ -7,7 +7,7 @@ export const SAMPLE_EVENTS: EventRow[] = [
 ];
 
 export const PRICE = 30000;
-export const DOUBLE_PRICE = 33000; // 플러팅 더블 라운지 참가비
+export const DOUBLE_PRICE = 32000; // 플러팅 더블 라운지 참가비
 // 계좌는 잠시 비워둠(공개 안 함). 다시 보여주려면 값을 채울 것
 export const ACCOUNT = { bank: '', number: '', holder: '' };
 export const HOST_NAME = '옷깃';

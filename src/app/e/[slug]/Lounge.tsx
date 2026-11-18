@@ -157,7 +157,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
         {me.number != null && before && !double && (
           <div className="lg-seat"><b>{ho(me.gender, me.number)}</b><span>첫 대화는 <em>{me.number}번 테이블</em>에서 시작해요</span></div>
         )}
-        {!before && <p className="ds" style={{ margin: 0, textAlign: 'center' }}>{me.number == null ? '호 번호가 아직 없어요 · 진행자에게 알려주세요' : '곧 호스트가 라운드를 시작해요'}</p>}
+        {!before && <p className="ds" style={{ margin: 0, textAlign: 'center' }}>{me.number == null ? '호 번호가 아직 없어요 · 진행자에게 알려주세요' : '곧 호스트가 첫 만남을 시작해요'}</p>}
       </div>
       {prep && <Prep onClose={closePrep} />}
     </main>

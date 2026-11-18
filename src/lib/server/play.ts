@@ -9,7 +9,7 @@ import { paperFont } from '../domain/notes';
 import type { PublicCard } from '../domain/lounge';
 import { otherTeam, teamOf, teamTable } from '../domain/double';
 
-export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[]; similar: number; best: boolean }; // similar: 나와 비슷한 정도 %, best: 오늘 이성 중 가장 비슷한 사람
+export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[]; similar: number | null; best: boolean }; // similar: 나와 비슷한 정도 % (더블 파트너는 null: 매칭 기준이라 마지막까지 비밀), best: 오늘 이성 중 가장 비슷한 사람
 export type PlayView = {
   serverNow: number;
   me: PublicCard | null;                   // 나 (라운드 장면 왼쪽). 상대와 같은 응답에서 와야 섞이지 않는다
@@ -53,14 +53,17 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   const key = me && round && table && round.partners.length ? { event_id: eventId, round: round.no, table_no: table } : null;
   const ids = me ? metIds(me, rounds, T, g, seated, now, ev.phase === 'choice', at) : [];
   const choosing = !!me && ev.phase === 'choice';
+  // 더블: 신상은 이성만 (상대 팀 이성 + 내 파트너). 파트너 정보는 전날부터 공개돼 있다
+  const mateId = myTeam ? (myTeam.f === meId ? myTeam.m : myTeam.f) : null;
+  const pids = double ? [...ids.filter((id) => opposite.some((o) => o.id === id)), ...(mateId ? [mateId] : [])] : ids;
   const paperQ = (cols: string) => db().from('notes').select(cols).eq('event_id', eventId).eq('to_id', meId).eq('hidden', false).not('body', 'is', null).order('created_at');
 
   // 아래 조회는 서로 독립이다 → 한 번에 보낸다 (3초마다 14대가 부르는 길). 표·칸이 아직 없으면(마이그레이션 전) 각자 error 로 돌아와 건너뛴다.
   const [play, ans, profiles, answerRows, written, cq0, doneRow, paper0] = await Promise.all([
     key ? db().from('game_plays').select('card_id').match(key).maybeSingle() : null,
     key ? db().from('game_answers').select('participant_id,answer').match(key) : null,
-    ids.length ? db().from('participants').select('id,age,job,area,mbti,love_type').in('id', ids) : null,
-    ids.length ? db().from('participants').select('id,number,answers').in('id', [meId, ...opposite.map((p) => p.id)]) : null,
+    pids.length ? db().from('participants').select('id,age,job,area,mbti,love_type').in('id', pids) : null,
+    pids.length ? db().from('participants').select('id,number,answers').in('id', [meId, ...opposite.map((p) => p.id)]) : null,
     me ? db().from('notes').select('round,to_id').eq('event_id', eventId).eq('from_id', meId) : null,
     choosing ? db().from('choices').select('to_id,rank,brave').eq('event_id', eventId).eq('from_id', meId).order('rank') : null,
     choosing ? db().from('participants').select('choice_done_at').eq('id', meId).single() : null,
@@ -88,7 +91,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     const best = mine ? recommend({ id: meId, answers: mine }, others) : null;
     for (const r of profiles.data ?? []) {
       const theirs = others.find((o) => o.id === r.id)?.answers;
-      met[r.id as string] = { age: r.age, job: r.job, area: r.area, mbti: r.mbti, color: r.love_type, phrases: phrases(r.love_type), similar: mine && theirs ? similarity(mine, theirs) : 0, best: r.id === best };
+      met[r.id as string] = { age: r.age, job: r.job, area: r.area, mbti: r.mbti, color: r.love_type, phrases: phrases(r.love_type), similar: r.id === mateId ? null : mine && theirs ? similarity(mine, theirs) : 0, best: r.id === best && r.id !== mateId };
     }
   }
 

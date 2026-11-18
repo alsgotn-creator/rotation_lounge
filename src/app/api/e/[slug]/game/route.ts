@@ -3,7 +3,7 @@ import { db } from '../../../../../lib/server/supabase';
 import { getEvent } from '../../../../../lib/server/signup';
 import { invitedFromCookie, participantOf } from '../../../../../lib/server/invite';
 import { computePlay } from '../../../../../lib/server/play';
-import { drawCard, KINDS, TOPIC_KINDS, type CardKind } from '../../../../../lib/domain/cards';
+import { drawCard, KINDS, type CardKind } from '../../../../../lib/domain/cards';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -17,11 +17,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
   const { view, table } = await computePlay(event.id, p.id);
   if (!view.round || !table || view.round.partners.length === 0) return fail('지금은 게임을 할 수 없어요.', 409);
+  if (view.double) return fail('더블 라운지는 대화 주제만 있어요.', 409);
   const key = { event_id: event.id, round: view.round.no, table_no: table };
   const b = await req.json().catch(() => ({}));
 
   if (b.type === 'draw') {
-    if (!(view.double ? TOPIC_KINDS : KINDS).some((k) => k.kind === b.kind)) return fail('알 수 없는 카드 종류예요.');
+    if (!KINDS.some((k) => k.kind === b.kind)) return fail('알 수 없는 카드 종류예요.');
     const card = drawCard(b.kind as CardKind, view.game?.cardId);
     const up = await db().from('game_plays').upsert({ ...key, card_id: card.id, drawn_by: p.id });
     if (up.error) return fail('카드를 뽑지 못했어요. 다시 시도해주세요.', 500);

@@ -8,6 +8,7 @@ import { useNow } from '../../../components/RoundTimer';
 import { elapsedMs, notStarted, REVEAL_MS } from '../../../lib/domain/seating';
 import { PALETTE, typeName } from '../../../lib/domain/loveType';
 import { ho, type PublicCard } from '../../../lib/domain/lounge';
+import { doubleTopic } from '../../../lib/domain/cards';
 import type { PlayView, Profile } from '../../../lib/server/play';
 /** 남은 시간은 숫자 없이 막대로만: 내 캐릭터가 왼쪽에서 출발해 시간이 끝나면 오른쪽 끝에 도착한다. */
 function Track({ round, offsetMs, me }: { round: NonNullable<PlayView['round']>; offsetMs: number; me: PublicCard | null }) {
@@ -52,10 +53,10 @@ export function Reveal({ p, fresh, kw }: { p: Profile; fresh: boolean; kw: strin
         {[['나이', `${p.age}세`], ['직업', p.job], ['사는 곳', p.area], ['MBTI', p.mbti]].map(([k, v]) => <div key={k}><small>{k}</small><b>{v}</b></div>)}
       </div>
       {kw.length > 0 && <div className="lg-kw rv-kw">{kw.map((k) => <span key={k}>{k}</span>)}</div>}
-      <p className={`rv-sim${p.best ? ' best' : ''}`}>
+      {p.similar !== null && <p className={`rv-sim${p.best ? ' best' : ''}`}>
         {p.best && <b>✦ 오늘 이성 중 나와 가장 비슷한 분이에요</b>}
         <span>연애 성향이 <em>{p.similar}%</em> 비슷해요</span>
-      </p>
+      </p>}
       <button type="button" className="rv-love" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span className="orb" style={{ ['--c' as string]: PALETTE[p.color], width: 30, height: 30, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
         <span className="rv-love-t"><b>{typeName(p.color)}</b>{open && p.phrases.map((t) => <span key={t} className="rv-love-p">{t}</span>)}</span>
@@ -97,37 +98,41 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
     : view.double ? `${round.ordinal}번째 팀 · 상대 팀 ${round.oppositeCount}팀 중`
     : round.perTable === 1 ? `${round.ordinal}번째 이성 · ${round.oppositeCount}명 중`
     : `${round.ordinal}번째 테이블 · 이성 ${round.oppositeCount}명 중 ${round.partners.length}명`;
+  // 카드로 보여줄 사람: 기본형은 상대 전부, 더블은 이성 두 명 (상대 팀 이성 + 내 파트너)
+  const mate = view.double ? view.team?.partner ?? null : null;
+  const cards = view.double ? [...round.partners.filter((p) => p.gender !== me?.gender), ...(mate && round.partners.length ? [mate] : [])] : round.partners;
 
   return (
     <main className="rnd">
       <div className="lg-top"><span className="logo">플러팅<i>.</i>라운지</span></div>
       <header className="rnd-head">
-        <h1>Round {round.no}<em> / {round.total}</em></h1>
+        <h1>만남 {round.no}<em> / {round.total}</em></h1>
         {chip && <span className="rnd-chip">{chip}</span>}
       </header>
       <Track round={round} offsetMs={offsetMs} me={me} />
       {notStarted(round.timer) && <p className="rnd-wait">자리를 옮겨 앉아주세요 · 진행자가 시작하면 시간이 흘러가요</p>}
 
       {view.double && view.team && <p className="rnd-team">{view.team.name ? `팀 ${view.team.name}` : '우리 팀'} · 파트너와 함께 앉아요</p>}
-      {view.double && round.partners.length === 0 && <p className="rnd-wait">이번 라운드는 쉬는 시간이에요 · 파트너와 작전을 짜보세요</p>}
-      <Scene me={me} partners={round.partners} mate={view.double ? view.team?.partner : null} />
+      {view.double && round.partners.length === 0 && <p className="rnd-wait">이번 만남은 쉬어가요 · 파트너와 작전을 짜보세요</p>}
+      <Scene me={me} partners={round.partners} mate={mate} />
+      {view.double && round.partners.length > 0 && <section className="tp"><small>이번 대화 주제</small><p>{doubleTopic(round.no)}</p></section>}
 
-      <section className="pcs">
-        {round.partners.map((p) => (
+      <section className={`pcs${view.double ? ' two' : ''}`}>
+        {cards.map((p) => (
           <article className="pc" key={p.id}>
-            <b className="pc-ho">{ho(p.gender, p.number)}</b>
+            <b className="pc-ho">{ho(p.gender, p.number)}{p.id === mate?.id && <small> · 파트너</small>}</b>
             {view.met[p.id]
               ? <Reveal p={view.met[p.id]} fresh={fresh.has(p.id)} kw={p.keywords} />
-              : <p className="pc-wait">나이 · 직업 · 사는 곳 · MBTI는 <b>5분 뒤</b>에 공개돼요</p>}
+              : <p className="pc-wait">{view.double ? <>나이 · 직업 · MBTI는<br /><b>5분 뒤</b> 공개</> : <>나이 · 직업 · 사는 곳 · MBTI는 <b>5분 뒤</b>에 공개돼요</>}</p>}
           </article>
         ))}
       </section>
 
-      {round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} double={view.double} />}
+      {!view.double && round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} />}
       {round.partners.length > 0 && !hasProfile && (
         <div className="rnd-why">
           <p><span>신상정보를 바로 안 보여주는 이유는요, 조건과 정보를 모른 채,</span><span>그 사람 자체를 먼저 알아가길 바라는 컨셉이기 때문이에요.</span></p>
-          <small>대화를 도와줄 위의 게임이나 테이블 위 종이를 보고 이야기해도 좋아요.</small>
+          <small>{view.double ? '위의 대화 주제나 테이블 위 종이를 보고 이야기해도 좋아요.' : '대화를 도와줄 위의 게임이나 테이블 위 종이를 보고 이야기해도 좋아요.'}</small>
         </div>
       )}
     </main>

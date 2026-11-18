@@ -61,7 +61,7 @@ export default function TeamBox({ slug }: { slug: string }) {
             </form>}
       </div>
       <div className="tm-card">
-        <Character shape={p.shape as Shape} color={p.color} acc={p.prop} size={76} />
+        <Character shape={p.shape as Shape} color={p.color} acc={p.prop} size={54} />
         <div>
           <b>{ho(p.gender, p.number)} · 나의 파트너</b>
           <span>{p.age}세 · {p.job} · {p.area} · {p.mbti}</span>
@@ -70,9 +70,9 @@ export default function TeamBox({ slug }: { slug: string }) {
       </div>
       <dl className="tm-dl">
         <div><dt>파트너의 이상형</dt><dd>{p.ideal || '아직 안 적었어요'}</dd></div>
-        <div><dt>파트너의 매력 포인트</dt><dd>{p.charm || '아직 안 적었어요'}</dd></div>
-        <div className="mine"><dt>내가 적은 이상형</dt><dd>{t.mine.ideal}</dd></div>
-        <div className="mine"><dt>내가 적은 매력 포인트</dt><dd>{t.mine.charm}</dd></div>
+        <div><dt>파트너의 매력</dt><dd>{p.charm || '아직 안 적었어요'}</dd></div>
+        <div className="mine"><dt>나의 이상형</dt><dd>{t.mine.ideal}</dd></div>
+        <div className="mine"><dt>나의 매력</dt><dd>{t.mine.charm}</dd></div>
       </dl>
       <p className="tm-first">당일 첫 테이블은 <b>{t.firstTable}번</b>이에요. 파트너와 함께 앉아요.</p>
 
