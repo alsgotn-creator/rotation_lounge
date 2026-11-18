@@ -115,7 +115,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
       {view.double && view.team && <p className="rnd-team">{view.team.name ? `팀 ${view.team.name}` : '우리 팀'} · 파트너와 함께 앉아요</p>}
       {view.double && round.partners.length === 0 && <p className="rnd-wait">이번 만남은 쉬어가요 · 파트너와 작전을 짜보세요</p>}
       <Scene me={me} partners={round.partners} mate={mate} />
-      {view.double && round.partners.length > 0 && <section className="tp"><small>이번 대화 주제</small><p>{doubleTopic(round.no)}</p></section>}
+      {view.double && round.partners.length > 0 && <section className="tp"><small>이번 대화 주제</small><p>{doubleTopic(round.no).split(/(?<=[?,]) (?=[^?,]*$)/).map((x, i) => <span key={i}>{x}</span>)}</p></section>}
 
       <section className={`pcs${view.double ? ' two' : ''}`}>
         {cards.map((p) => (
