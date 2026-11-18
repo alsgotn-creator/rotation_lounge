@@ -9,7 +9,7 @@ import { paperFont } from '../domain/notes';
 import type { PublicCard } from '../domain/lounge';
 import { otherTeam, teamOf, teamTable } from '../domain/double';
 
-export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[]; similar: number | null; best: boolean }; // similar: 나와 비슷한 정도 % (더블 파트너는 null: 매칭 기준이라 마지막까지 비밀), best: 오늘 이성 중 가장 비슷한 사람
+export type Profile = { age: number; job: string; area: string; mbti: string; color: number; phrases: string[]; similar: number | null; best: boolean }; // similar: 나와 비슷한 정도 % (더블 라운지는 null: 파트너 매칭 기준이 마지막까지 비밀이고, 좁은 카드엔 정보만 둔다), best: 오늘 이성 중 가장 비슷한 사람
 export type PlayView = {
   serverNow: number;
   me: PublicCard | null;                   // 나 (라운드 장면 왼쪽). 상대와 같은 응답에서 와야 섞이지 않는다
@@ -91,7 +91,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     const best = mine ? recommend({ id: meId, answers: mine }, others) : null;
     for (const r of profiles.data ?? []) {
       const theirs = others.find((o) => o.id === r.id)?.answers;
-      met[r.id as string] = { age: r.age, job: r.job, area: r.area, mbti: r.mbti, color: r.love_type, phrases: phrases(r.love_type), similar: r.id === mateId ? null : mine && theirs ? similarity(mine, theirs) : 0, best: r.id === best && r.id !== mateId };
+      met[r.id as string] = { age: r.age, job: r.job, area: r.area, mbti: r.mbti, color: r.love_type, phrases: phrases(r.love_type), similar: double ? null : mine && theirs ? similarity(mine, theirs) : 0, best: !double && r.id === best };
     }
   }
 

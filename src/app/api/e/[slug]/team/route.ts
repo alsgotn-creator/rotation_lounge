@@ -10,7 +10,6 @@ const fail = (message: string, status = 400) => NextResponse.json({ ok: false, m
 export type TeamView = null | {
   no: number; name: string; firstTable: number;
   partner: { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; keywords: string[]; age: number; job: string; area: string; mbti: string; ideal: string; charm: string };
-  mine: { ideal: string; charm: string };
   messages: { id: string; me: boolean; body: string; at: string }[];
 };
 
@@ -32,15 +31,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   if (!t) return NextResponse.json({ ok: true, team: null }, { headers: { 'cache-control': 'no-store' } });
   const partnerId = t.f_id === p.id ? t.m_id : t.f_id;
   const [{ data: ps }, { data: msgs }, { data: ev }] = await Promise.all([
-    db().from('participants').select('id,gender,number,shape,prop,love_type,keywords,age,job,area,mbti,ideal,charm').in('id', [p.id, partnerId]),
+    db().from('participants').select('id,gender,number,shape,prop,love_type,keywords,age,job,area,mbti,ideal,charm').eq('id', partnerId),
     db().from('team_messages').select('id,from_id,body,created_at').eq('event_id', event.id).eq('team_no', t.no).order('created_at').limit(300),
     db().from('events').select('table_count').eq('id', event.id).single(),
   ]);
-  const o = (ps ?? []).find((r) => r.id === partnerId), mine = (ps ?? []).find((r) => r.id === p.id);
+  const o = ps?.[0];
   const team: TeamView = o ? {
     no: t.no, name: t.name, firstTable: teamTable(t.no, 1, ev?.table_count ?? 1),
     partner: { gender: o.gender, number: o.number, shape: o.shape, prop: o.prop, color: o.love_type, keywords: o.keywords, age: o.age, job: o.job, area: o.area, mbti: o.mbti, ideal: o.ideal ?? '', charm: o.charm ?? '' },
-    mine: { ideal: mine?.ideal ?? '', charm: mine?.charm ?? '' },
     messages: (msgs ?? []).map((m) => ({ id: m.id, me: m.from_id === p.id, body: m.body, at: m.created_at })),
   } : null;
   return NextResponse.json({ ok: true, team }, { headers: { 'cache-control': 'no-store' } });

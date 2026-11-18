@@ -71,8 +71,6 @@ export default function TeamBox({ slug }: { slug: string }) {
       <dl className="tm-dl">
         <div><dt>파트너의 이상형</dt><dd>{p.ideal || '아직 안 적었어요'}</dd></div>
         <div><dt>파트너의 매력</dt><dd>{p.charm || '아직 안 적었어요'}</dd></div>
-        <div className="mine"><dt>나의 이상형</dt><dd>{t.mine.ideal}</dd></div>
-        <div className="mine"><dt>나의 매력</dt><dd>{t.mine.charm}</dd></div>
       </dl>
       <p className="tm-first">당일 첫 테이블은 <b>{t.firstTable}번</b>이에요. 파트너와 함께 앉아요.</p>
 
