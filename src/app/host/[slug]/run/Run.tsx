@@ -112,8 +112,8 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
             {open && !waitStart && <button className="btn sub" disabled={busy} onClick={() => send({ type: current!.pausedAt ? 'resume' : 'pause' })}>{current!.pausedAt ? '다시 시작' : '일시정지'}</button>}
             {waitStart
               ? <button className="btn" disabled={busy} onClick={() => send({ type: 'resume' })}>자리 이동 끝 · 대화 시작</button>
-              : <button className="btn" disabled={busy || (current?.no ?? 0) >= ev.table_count} onClick={() => send({ type: 'nextRound' })}>
-              {!current ? '1라운드 자리 배정' : current.no >= ev.table_count ? '마지막 라운드예요' : double ? '다음 라운드 → 옮기는 팀 이동' : '다음 라운드 → 남자 이동'}</button>}
+              : <button className="btn" disabled={busy || (current?.no ?? 0) >= ev.table_count || (double && !v.teams.length)} onClick={() => send({ type: 'nextRound' })}>
+              {double && !v.teams.length ? '먼저 아래에서 파트너 매칭' : !current ? '1라운드 자리 배정' : current.no >= ev.table_count ? '마지막 라운드예요' : double ? '다음 라운드 → 옮기는 팀 이동' : '다음 라운드 → 남자 이동'}</button>}
           </div>
         </section>
 
