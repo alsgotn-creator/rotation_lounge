@@ -26,10 +26,10 @@ export async function loadRun(eventId: string) {
     eventLayout(eventId),
     db().from('events').select('locked').eq('id', eventId).single(), // locked 칸은 마이그레이션 0012 전에는 없을 수 있다 → 그때는 열린 것으로
     db().from('events').select('kind').eq('id', eventId).single(), // kind·teams 는 0014 전에는 없다 → 기본형
-    db().from('teams').select('no,f_id,m_id,name,fit,similar,mbti_same').eq('event_id', eventId).order('no'),
+    db().from('teams').select('no,f_id,m_id,name,fit,similar_pct,mbti_same').eq('event_id', eventId).order('no'),
   ]);
   const kind: 'rotation' | 'double' = !kd.error && kd.data?.kind === 'double' ? 'double' : 'rotation';
-  const teams: TeamRow[] = kind === 'double' && !tm.error ? (tm.data ?? []).map((t) => ({ no: t.no, f: t.f_id, m: t.m_id, name: t.name, fit: t.fit, similar: t.similar, mbtiSame: t.mbti_same })) : [];
+  const teams: TeamRow[] = kind === 'double' && !tm.error ? (tm.data ?? []).map((t) => ({ no: t.no, f: t.f_id, m: t.m_id, name: t.name, fit: t.fit, similar: t.similar_pct, mbtiSame: t.mbti_same })) : [];
   const rounds = ((rr ?? []) as RoundRow[]).map(toRound);
   const people: Person[] = (ps ?? []).map((p: Record<string, unknown>) => ({
     id: p.id as string, gender: p.gender as 'f' | 'm', number: p.number as number | null, excluded: p.excluded as boolean,
@@ -181,7 +181,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       // 팀 번호는 무작위 (앉아 있는 팀·옮기는 팀이 매칭 순서로 갈리지 않게)
       const order = made.map((t) => ({ t, k: Math.random() })).sort((a, b) => a.k - b.k).map((x) => x.t);
       await db().from('teams').delete().eq('event_id', eventId);
-      const { error } = await db().from('teams').insert(order.map((t, i) => ({ event_id: eventId, no: i + 1, f_id: t.f, m_id: t.m, fit: t.fit, similar: t.similar, mbti_same: t.mbtiSame })));
+      const { error } = await db().from('teams').insert(order.map((t, i) => ({ event_id: eventId, no: i + 1, f_id: t.f, m_id: t.m, fit: t.fit, similar_pct: t.similar, mbti_same: t.mbtiSame })));
       if (error) return no('팀을 저장하지 못했어요. Supabase에서 0014_double.sql을 먼저 실행해주세요.');
       await db().from('events').update({ table_count: tablesFor(order.length) }).eq('id', eventId);
       return { ok: true };

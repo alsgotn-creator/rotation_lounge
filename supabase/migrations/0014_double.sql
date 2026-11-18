@@ -17,7 +17,7 @@ create table if not exists teams (
   m_id uuid not null references participants(id) on delete cascade,
   name text not null default '',
   fit int not null default 0,
-  similar int not null default 0,
+  similar_pct int not null default 0,
   mbti_same int not null default 0,
   primary key (event_id, no),
   unique (event_id, f_id),
