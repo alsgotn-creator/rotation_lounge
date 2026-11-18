@@ -81,6 +81,17 @@ export const DOUBLE_TOPICS = {
 };
 export type TopicKind = keyof typeof DOUBLE_TOPICS;
 export const TOPIC_KINDS: [TopicKind, string][] = [['mild', '순한맛'], ['spicy', '매운맛']];
+/**
+ * 테이블이 보고 있는 주제(맛 + 넘긴 칸 수)는 game_plays.card_id 에 'spicy:3' 꼴로 둔다.
+ * 더블에는 카드 게임이 없어서 그 칸을 빌려 쓴다: 한 명이 넘기면 같은 테이블 네 명이 같이 넘어간다.
+ */
+export type TopicState = { kind: TopicKind; step: number };
+export const topicId = (t: TopicState) => `${t.kind}:${t.step}`;
+export function parseTopicId(id: string | null | undefined): TopicState {
+  const [k, s] = String(id ?? '').split(':');
+  const kind = TOPIC_KINDS.find(([x]) => x === k)?.[0];
+  return kind && /^-?\d+$/.test(s ?? '') ? { kind, step: Number(s) } : { kind: 'mild', step: 0 };
+}
 /** n번째 만남에서 step칸 넘긴 주제 (앞뒤로 돌아간다) */
 export function doubleTopic(kind: TopicKind, round: number, step = 0) {
   const l = DOUBLE_TOPICS[kind];

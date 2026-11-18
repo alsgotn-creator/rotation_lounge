@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CARDS, doubleTopic, DOUBLE_TOPICS, drawCard, KINDS } from './cards';
+import { CARDS, doubleTopic, DOUBLE_TOPICS, drawCard, KINDS, parseTopicId, topicId } from './cards';
 
 describe('cards', () => {
   it('원문을 모두 옮겼고 되묻기 안내는 없다', () => {
@@ -17,6 +17,10 @@ describe('cards', () => {
       expect(doubleTopic(k, 1, -1)).toBe(DOUBLE_TOPICS[k].at(-1));
       expect(doubleTopic(k, 2, 1)).toBe(DOUBLE_TOPICS[k][2]);
     }
+  });
+  it('테이블 주제 상태는 저장 칸에서 그대로 돌아오고, 이상한 값은 순한맛 처음으로', () => {
+    expect(parseTopicId(topicId({ kind: 'spicy', step: -3 }))).toEqual({ kind: 'spicy', step: -3 });
+    for (const bad of [null, '', 'b1', 'toString:1', 'spicy:x']) expect(parseTopicId(bad)).toEqual({ kind: 'mild', step: 0 });
   });
   it('다시 뽑으면 같은 종류의 다른 카드', () => {
     for (const { kind } of KINDS) {

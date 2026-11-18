@@ -3,11 +3,12 @@ import { db } from '../../../../../lib/server/supabase';
 import { getEvent } from '../../../../../lib/server/signup';
 import { invitedFromCookie, participantOf } from '../../../../../lib/server/invite';
 import { computePlay } from '../../../../../lib/server/play';
-import { drawCard, KINDS, type CardKind } from '../../../../../lib/domain/cards';
+import { drawCard, KINDS, TOPIC_KINDS, topicId, type CardKind, type TopicKind } from '../../../../../lib/domain/cards';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
 // 페어 게임: draw(카드 뽑기, 같은 테이블 누구나) / answer(내 답). 지금 앉아 있는 테이블의 진행 중 라운드에서만.
+// 더블 라운지는 topic(대화 주제 맛 · 넘기기, 같은 테이블 누구나)만.
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const event = await getEvent({ slug: (await params).slug });
   if (!event) return fail('행사를 찾지 못했어요.', 404);
@@ -17,9 +18,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
   const { view, table } = await computePlay(event.id, p.id);
   if (!view.round || !table || view.round.partners.length === 0) return fail('지금은 게임을 할 수 없어요.', 409);
-  if (view.double) return fail('더블 라운지는 대화 주제만 있어요.', 409);
   const key = { event_id: event.id, round: view.round.no, table_no: table };
   const b = await req.json().catch(() => ({}));
+
+  if (view.double) {
+    if (b.type !== 'topic' || !TOPIC_KINDS.some(([k]) => k === b.kind) || !Number.isInteger(b.step) || Math.abs(b.step) > 999) return fail('더블 라운지는 대화 주제만 있어요.', 409);
+    const up = await db().from('game_plays').upsert({ ...key, card_id: topicId({ kind: b.kind as TopicKind, step: b.step }), drawn_by: p.id });
+    if (up.error) return fail('주제를 넘기지 못했어요. 다시 시도해주세요.', 500);
+    return NextResponse.json({ ok: true });
+  }
 
   if (b.type === 'draw') {
     if (!KINDS.some((k) => k.kind === b.kind)) return fail('알 수 없는 카드 종류예요.');

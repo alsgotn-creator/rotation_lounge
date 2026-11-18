@@ -8,7 +8,8 @@ import { useNow } from '../../../components/RoundTimer';
 import { elapsedMs, notStarted, REVEAL_MS } from '../../../lib/domain/seating';
 import { PALETTE, typeName } from '../../../lib/domain/loveType';
 import { ho, type PublicCard } from '../../../lib/domain/lounge';
-import { doubleTopic, TOPIC_KINDS, type TopicKind } from '../../../lib/domain/cards';
+import { doubleTopic, TOPIC_KINDS, type TopicState } from '../../../lib/domain/cards';
+import { api } from '../../../lib/api';
 import { Icon } from '../../../components/Icon';
 import type { PlayView, Profile } from '../../../lib/server/play';
 /** 남은 시간은 숫자 없이 막대로만: 내 캐릭터가 왼쪽에서 출발해 시간이 끝나면 오른쪽 끝에 도착한다. */
@@ -45,20 +46,26 @@ function Scene({ me, partners, mate }: { me: PublicCard | null; partners: Public
   );
 }
 
-/** 더블 라운지 대화 주제: 같은 만남이면 모든 테이블이 같은 주제에서 시작한다. 맛 고르기와 넘기기는 각자 폰에서만 바뀐다. */
-function Topic({ round }: { round: number }) {
-  const [kind, setKind] = useState<TopicKind>('mild');
-  const [step, setStep] = useState(0);
+/** 더블 라운지 대화 주제: 같은 만남이면 모든 테이블이 같은 주제에서 시작하고, 한 명이 맛을 바꾸거나 넘기면 그 테이블 네 명이 같이 바뀐다. */
+function Topic({ slug, round, topic, onChange }: { slug: string; round: number; topic: TopicState; onChange: () => Promise<void> }) {
+  const [mine, setMine] = useState<TopicState | null>(null); // 누른 사람 화면은 서버 응답을 기다리지 않고 바로 바꾼다
+  const { kind, step } = mine ?? topic;
+  const go = async (t: TopicState) => {
+    setMine(t);
+    await api(`/api/e/${slug}/game`, { type: 'topic', ...t });
+    await onChange();
+    setMine(null);
+  };
   return (
     <section className="tp">
       <div className="tp-h">
         <small>이번 대화 주제</small>
-        <span className="tp-k">{TOPIC_KINDS.map(([k, label]) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setStep(0); }}>{label}</button>)}</span>
+        <span className="tp-k">{TOPIC_KINDS.map(([k, label]) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => k !== kind && go({ kind: k, step: 0 })}>{label}</button>)}</span>
       </div>
       <div className="tp-b">
-        <button type="button" aria-label="이전 주제" onClick={() => setStep(step - 1)}><Icon name="back" /></button>
+        <button type="button" aria-label="이전 주제" onClick={() => go({ kind, step: step - 1 })}><Icon name="back" /></button>
         <p aria-live="polite"><span>{doubleTopic(kind, round, step)}</span></p>
-        <button type="button" aria-label="다음 주제" onClick={() => setStep(step + 1)}><Icon name="next" /></button>
+        <button type="button" aria-label="다음 주제" onClick={() => go({ kind, step: step + 1 })}><Icon name="next" /></button>
       </div>
     </section>
   );
@@ -87,7 +94,7 @@ export function Reveal({ p, fresh, kw }: { p: Profile; fresh: boolean; kw: strin
   );
 }
 
-export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: string; view: PlayView; offsetMs: number; onRefresh: () => void; me: PublicCard | null }) {
+export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: string; view: PlayView; offsetMs: number; onRefresh: () => Promise<void>; me: PublicCard | null }) {
   const round = view.round!;
   preload(PAPER_FONTS_CSS, { as: 'style' }); // 대화하는 동안 미리 받아 두면 라운드 끝 쪽지 화면이 바로 뜬다
   const now = useNow(offsetMs);
@@ -136,7 +143,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
       {view.double && view.team && <p className="rnd-team">{view.team.name ? `팀 ${view.team.name}` : '우리 팀'} · 파트너와 함께 앉아요</p>}
       {view.double && round.partners.length === 0 && <p className="rnd-wait">이번 만남은 쉬어가요 · 파트너와 작전을 짜보세요</p>}
       <Scene me={me} partners={round.partners} mate={mate} />
-      {view.double && round.partners.length > 0 && <Topic key={round.no} round={round.no} />}
+      {view.double && round.partners.length > 0 && view.topic && <Topic slug={slug} round={round.no} topic={view.topic} onChange={onRefresh} />}
 
       <section className={`pcs${view.double ? ' two' : ''}`}>
         {cards.map((p) => (

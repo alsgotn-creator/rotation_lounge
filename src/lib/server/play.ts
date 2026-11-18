@@ -2,7 +2,7 @@ import 'server-only';
 import { db } from './supabase';
 import { loadRun, type Person } from './run';
 import { partnersOf, ordinal, tableOf, type Round } from '../domain/seating';
-import { cardById } from '../domain/cards';
+import { cardById, parseTopicId, type TopicState } from '../domain/cards';
 import { metIds, pendingNotes, type Pending } from '../domain/turns';
 import { phrases, recommend, similarity } from '../domain/loveType';
 import { paperFont } from '../domain/notes';
@@ -21,6 +21,7 @@ export type PlayView = {
   paper: null | { notes: { id: string; body: string; font: string; from: { gender: 'f' | 'm'; number: number | null } }[] };   // 최종선택 단계에만. 보낸 사람은 '여3호'처럼 호가 보인다
   double: boolean;                         // 더블 라운지(2:2 파트너)
   team: null | { no: number; name: string; partner: PublicCard | null; reveal: null | { similar: number; mbtiSame: number } }; // reveal: 마무리 단계에서만 (파트너 매칭 기준 공개)
+  topic: null | TopicState;                // 더블: 이 테이블이 보고 있는 대화 주제 (누가 넘기면 테이블 전체가 같이)
   game: null | { cardId: string; kind: string; prompt: string; options: string[]; mine: string | null; answered: number; total: number; answers: null | { gender: 'f' | 'm'; number: number; me: boolean; text: string }[] };
 };
 
@@ -117,6 +118,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   }
   const view: PlayView = {
     serverNow: now, me: byId.get(meId) ? { ...card(byId.get(meId)!), me: true } : null, phase: ev.phase, round, met, choice, paper, game, double,
+    topic: double && key ? parseTopicId(play && !play.error ? (play.data?.card_id as string | undefined) : null) : null,
     team: myTeam && {
       no: myTeam.no, name: myTeam.name,
       partner: (() => { const p = byId.get(myTeam.f === meId ? myTeam.m : myTeam.f); return p ? card(p) : null; })(),
