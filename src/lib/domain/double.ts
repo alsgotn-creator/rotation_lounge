@@ -31,18 +31,36 @@ type P = { id: string; answers: number[]; mbti: string };
 /** 잘 맞는 정도 0~100: 가치관 15문항 비슷한 정도 70% + MBTI 같은 글자 30% */
 export const fit = (a: P, b: P) => Math.round(0.7 * similarity(a.answers, b.answers) + 0.3 * (mbtiSame(a.mbti, b.mbti) / 4) * 100);
 
-/** 가장 안 맞는 남녀부터 차례로 짝짓는다. 남는 사람(성비가 다를 때)은 팀이 없다. */
+/**
+ * 모든 팀이 최대한 안 맞게 짝짓는다: 가장 잘 맞는 팀의 fit이 가장 낮아지는 짝짓기(병목 매칭).
+ * 차례로 가장 안 맞는 쌍부터 집으면 마지막에 남은 사람끼리 잘 맞는 팀이 생겨서 이렇게 한다.
+ * 남는 사람(성비가 다를 때)은 팀이 없다.
+ */
 export function pairTeams(fs: P[], ms: P[]): { f: string; m: string; fit: number; similar: number; mbtiSame: number }[] {
-  const all = fs.flatMap((f) => ms.map((m) => ({ f, m, fit: fit(f, m) })));
-  all.sort((a, b) => a.fit - b.fit || a.f.id.localeCompare(b.f.id) || a.m.id.localeCompare(b.m.id));
-  const used = new Set<string>();
-  const out: ReturnType<typeof pairTeams> = [];
-  for (const x of all) {
-    if (used.has(x.f.id) || used.has(x.m.id)) continue;
-    used.add(x.f.id); used.add(x.m.id);
-    out.push({ f: x.f.id, m: x.m.id, fit: x.fit, similar: similarity(x.f.answers, x.m.answers), mbtiSame: mbtiSame(x.f.mbti, x.m.mbti) });
-  }
-  return out;
+  const k = Math.min(fs.length, ms.length);
+  const F = fs.map((f) => ms.map((m) => fit(f, m)));
+  const order = F.map((row) => row.map((_, j) => j).sort((a, b) => row[a] - row[b] || a - b));
+  const match = (cap: number) => {
+    const owner: number[] = Array(ms.length).fill(-1); // 남자 j의 파트너 여자 index
+    const tryF = (i: number, seen: boolean[]): boolean => {
+      for (const j of order[i]) {
+        if (F[i][j] > cap || seen[j]) continue;
+        seen[j] = true;
+        if (owner[j] < 0 || tryF(owner[j], seen)) { owner[j] = i; return true; }
+      }
+      return false;
+    };
+    let n = 0;
+    for (let i = 0; i < fs.length && n < k; i++) if (tryF(i, [])) n++;
+    return n === k ? owner : null;
+  };
+  let owner: number[] = [];
+  for (const cap of [...new Set(F.flat())].sort((a, b) => a - b)) { const o = match(cap); if (o) { owner = o; break; } }
+  return owner.flatMap((i, j) => {
+    if (i < 0) return [];
+    const f = fs[i], m = ms[j];
+    return [{ f: f.id, m: m.id, fit: F[i][j], similar: similarity(f.answers, m.answers), mbtiSame: mbtiSame(f.mbti, m.mbti) }];
+  }).sort((a, b) => a.fit - b.fit);
 }
 
 /** 이상형 · 매력 포인트 (사전 등록, 파트너에게만 보인다) */

@@ -14,6 +14,14 @@ describe('double lounge', () => {
     expect(mbtiSame('INFP', 'ENFP')).toBe(3);
   });
 
+  it('keeps even the best-fitting team as unfit as possible (greedy left an 83 here)', () => {
+    const mk = (g: string, n: number) => ({ id: `${g}${n}`, answers: A(((n + (g === 'm' ? 2 : 0)) % 5) + 1), mbti: n % 2 ? 'INFP' : 'ESTJ' });
+    const t = pairTeams([1, 2, 3, 4, 5].map((n) => mk('f', n)), [1, 2, 3, 4, 5].map((n) => mk('m', n)));
+    expect(t).toHaveLength(5);
+    expect(new Set(t.map((x) => x.m)).size).toBe(5);
+    expect(Math.max(...t.map((x) => x.fit))).toBeLessThanOrEqual(60);
+  });
+
   it('leaves extra people without a team', () => {
     expect(pairTeams([{ id: 'f1', answers: A(3), mbti: 'INFP' }], [{ id: 'm1', answers: A(3), mbti: 'INFP' }, { id: 'm2', answers: A(1), mbti: 'ESTJ' }])).toHaveLength(1);
   });
