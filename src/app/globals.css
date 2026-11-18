@@ -607,25 +607,32 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .tm-name form{display:flex;gap:8px;width:100%;margin:6px 0}
 .tm-name input,.tm-in input{flex:1;min-width:0;height:40px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font:inherit;font-size:14px;font-weight:600;background:var(--bg);outline:none}
 .tm-name .btn,.tm-in .btn{width:auto;flex:none;height:40px;padding:0 14px;font-size:13px}
-.tm-card{display:flex;align-items:center;gap:10px;margin-top:6px;padding:6px 10px;border-radius:14px;background:var(--bg)}
-.tm-card b{display:block;font-size:14px;font-weight:900}
-.tm-card span{display:block;font-size:12px;color:var(--mute);font-weight:600;margin-top:2px}
-.tm-dl{margin:8px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.tm-dl div{padding:7px 10px;border-radius:12px;border:1px solid var(--line)}
-.tm-dl dt{font-size:11px;font-weight:800;color:var(--dim)}
-.tm-dl dd{margin:2px 0 0;font-size:13px;font-weight:700;line-height:1.4;word-break:keep-all}
-.tm-first{margin:8px 0 0;font-size:12.5px;font-weight:700;color:var(--mute)}
-.tm-first b{color:var(--text)}
-.tm-ct{margin:12px 0 6px;font-size:14px;font-weight:900}
-.tm-chat{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;padding:4px 0}
+.tm-sub{margin:0;font-size:12px;font-weight:700;color:var(--dim)}.tm-sub b{color:var(--text)}
+.tm-card{margin-top:8px;padding:8px 12px 10px;border-radius:14px;background:var(--bg)}
+.tm-who{display:flex;align-items:center;gap:10px}
+.tm-who b{display:block;font-size:14px;font-weight:900}.tm-who b small{margin-left:5px;font-size:11px;font-weight:800;color:var(--dim)}
+.tm-who span{display:block;margin-top:2px;font-size:12px;font-weight:600;color:var(--mute)}
+.tm-dl{margin:6px 0 0;padding-top:6px;border-top:1px solid var(--line)}
+.tm-dl div{display:flex;gap:10px;padding:2px 0}
+.tm-dl dt{flex:none;width:34px;font-size:11.5px;font-weight:800;line-height:1.55;color:var(--dim)}
+.tm-dl dd{margin:0;font-size:13px;font-weight:700;line-height:1.45;word-break:keep-all}
+.tm-chat{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-top:10px;padding:10px 0 4px;border-top:1px solid var(--line)}
 .tm-chat p{margin:0;align-self:flex-start;max-width:80%;padding:7px 11px;border-radius:16px 16px 16px 4px;background:var(--surf2);font-size:13.5px;line-height:1.45;font-weight:600;word-break:break-word}
 .tm-chat p.me{align-self:flex-end;border-radius:16px 16px 4px 16px;background:var(--btn);color:var(--btntx)}
 .tm-chat p.empty{align-self:stretch;max-width:none;background:none;text-align:center;color:var(--dim)}
 .tm-in{display:flex;gap:8px;margin-top:8px}
 /* 더블 라운지 만남 화면: 이번 대화 주제 한 문장 + 이성 두 명 카드를 한 줄에 */
-.tp{margin:8px 16px 0;padding:12px 16px;border-radius:18px;background:var(--surf);text-align:center}
-.tp small{font-size:11px;font-weight:800;color:var(--dim)}
-.tp p{margin:4px 0 0;font-size:16px;font-weight:900;line-height:1.45;letter-spacing:-.02em;word-break:keep-all}.tp p span{display:block}/* 질문 / 고를 것 두 줄 */
+.tp{margin:8px 16px 0;padding:10px 10px 12px;border-radius:18px;background:var(--surf);text-align:center}
+.tp-h{display:flex;align-items:center;justify-content:space-between;padding-left:6px}
+.tp-h small{font-size:11px;font-weight:800;color:var(--dim)}
+.tp-k{display:flex;gap:2px;padding:2px;border-radius:10px;background:var(--bg)}
+.tp-k button{border:0;background:none;padding:4px 10px;border-radius:8px;font:inherit;font-size:12px;font-weight:800;color:var(--dim);cursor:pointer}
+.tp-k button[aria-pressed=true]{background:var(--btn);color:var(--btntx)}
+.tp-b{display:flex;align-items:center;gap:4px;margin-top:8px}
+.tp-b>button{flex:none;display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:var(--bg);color:var(--text);cursor:pointer}
+.tp-b .ic{width:18px;height:18px}
+.tp-b p{flex:1;min-width:0;display:flex;flex-direction:column;height:2.9em;margin:0;overflow-y:auto;font-size:15px;font-weight:900;line-height:1.45;letter-spacing:-.02em;word-break:keep-all}
+.tp-b p span{margin:auto 0}/* 한 줄이면 가운데, 두 줄 넘으면 위에서부터 스크롤 */
 .pcs.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px;align-items:start}
 .pcs.two .pc{margin-top:8px;padding:10px 8px;border-radius:18px}
 .pcs.two .pc-ho{font-size:16px}.pcs.two .pc-ho small{font-size:12px;font-weight:800;color:var(--mute)}
@@ -634,7 +641,12 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .pcs.two .rv-grid{gap:2px 6px;text-align:center}.pcs.two .rv-grid small{display:none}.pcs.two .rv-grid b{font-size:14px;word-break:keep-all}
 .pcs.two .rv-kw{margin-top:6px}
 .pcs.two .rv-love{margin-top:8px;padding-top:8px;gap:6px}.pcs.two .rv-love .orb{width:20px!important;height:20px!important}
-.pcs.two .rv-love-t b{font-size:12px;word-break:keep-all}.pcs.two .rv-love>small{display:none}/* 좁은 칸: 컬러칩을 누르면 풀이가 열린다 */
+.pcs.two .rv-love-t b{font-size:12px;word-break:keep-all}.pcs.two .rv-love>small{display:none}
+.rv-love-i{display:none}
+.pcs.two .rv-love{flex-wrap:wrap}.pcs.two .rv-love-t{display:contents}.pcs.two .rv-love-t b{flex:1;min-width:0}
+.pcs.two .rv-love-i{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:50%;background:var(--surf);font-style:normal}
+.pcs.two .rv-love-i .ic{width:14px;height:14px;transition:transform .2s}.pcs.two .rv-love[aria-expanded=true] .rv-love-i .ic{transform:rotate(180deg)}
+.pcs.two .rv-love-p{order:1;flex-basis:100%;font-size:11.5px;line-height:1.55}/* 좁은 칸: 풀이는 이름 아래 칸 너비 전체로 */
 .rnd-team{margin:8px 16px 0;text-align:center;font-size:13px;font-weight:800;color:var(--mute)}
 .scene-l.many{gap:0}.scene-l.many .chr{width:23%!important}.scene-l.many .chr+.chr{margin-left:-5%}
 .chc-partner{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);padding:2px 8px;border-radius:9px;background:var(--btn);color:var(--btntx);font-size:11px;font-weight:800;white-space:nowrap}

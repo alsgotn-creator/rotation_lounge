@@ -8,7 +8,8 @@ import { useNow } from '../../../components/RoundTimer';
 import { elapsedMs, notStarted, REVEAL_MS } from '../../../lib/domain/seating';
 import { PALETTE, typeName } from '../../../lib/domain/loveType';
 import { ho, type PublicCard } from '../../../lib/domain/lounge';
-import { doubleTopic } from '../../../lib/domain/cards';
+import { doubleTopic, TOPIC_KINDS, type TopicKind } from '../../../lib/domain/cards';
+import { Icon } from '../../../components/Icon';
 import type { PlayView, Profile } from '../../../lib/server/play';
 /** 남은 시간은 숫자 없이 막대로만: 내 캐릭터가 왼쪽에서 출발해 시간이 끝나면 오른쪽 끝에 도착한다. */
 function Track({ round, offsetMs, me }: { round: NonNullable<PlayView['round']>; offsetMs: number; me: PublicCard | null }) {
@@ -44,6 +45,25 @@ function Scene({ me, partners, mate }: { me: PublicCard | null; partners: Public
   );
 }
 
+/** 더블 라운지 대화 주제: 같은 만남이면 모든 테이블이 같은 주제에서 시작한다. 맛 고르기와 넘기기는 각자 폰에서만 바뀐다. */
+function Topic({ round }: { round: number }) {
+  const [kind, setKind] = useState<TopicKind>('mild');
+  const [step, setStep] = useState(0);
+  return (
+    <section className="tp">
+      <div className="tp-h">
+        <small>이번 대화 주제</small>
+        <span className="tp-k">{TOPIC_KINDS.map(([k, label]) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setStep(0); }}>{label}</button>)}</span>
+      </div>
+      <div className="tp-b">
+        <button type="button" aria-label="이전 주제" onClick={() => setStep(step - 1)}><Icon name="back" /></button>
+        <p aria-live="polite"><span>{doubleTopic(kind, round, step)}</span></p>
+        <button type="button" aria-label="다음 주제" onClick={() => setStep(step + 1)}><Icon name="next" /></button>
+      </div>
+    </section>
+  );
+}
+
 export function Reveal({ p, fresh, kw }: { p: Profile; fresh: boolean; kw: string[] }) {
   const [open, setOpen] = useState(false); // 컬러칩을 누르면 유형 풀이
   return (
@@ -61,6 +81,7 @@ export function Reveal({ p, fresh, kw }: { p: Profile; fresh: boolean; kw: strin
         <span className="orb" style={{ ['--c' as string]: PALETTE[p.color], width: 30, height: 30, margin: 0, animation: 'none', flex: 'none' }} aria-hidden="true" />
         <span className="rv-love-t"><b>{typeName(p.color)}</b>{open && p.phrases.map((t) => <span key={t} className="rv-love-p">{t}</span>)}</span>
         <small>{open ? '접기' : '풀이 보기'}</small>
+        <i className="rv-love-i" aria-hidden="true"><Icon name="down" /></i>
       </button>
     </div>
   );
@@ -115,7 +136,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
       {view.double && view.team && <p className="rnd-team">{view.team.name ? `팀 ${view.team.name}` : '우리 팀'} · 파트너와 함께 앉아요</p>}
       {view.double && round.partners.length === 0 && <p className="rnd-wait">이번 만남은 쉬어가요 · 파트너와 작전을 짜보세요</p>}
       <Scene me={me} partners={round.partners} mate={mate} />
-      {view.double && round.partners.length > 0 && <section className="tp"><small>이번 대화 주제</small><p>{doubleTopic(round.no).split(/(?<=[?,]) (?=[^?,]*$)/).map((x, i) => <span key={i}>{x}</span>)}</p></section>}
+      {view.double && round.partners.length > 0 && <Topic key={round.no} round={round.no} />}
 
       <section className={`pcs${view.double ? ' two' : ''}`}>
         {cards.map((p) => (

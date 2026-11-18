@@ -11,9 +11,12 @@ describe('cards', () => {
     CARDS.filter((c) => c.kind === 'balance').forEach((c) => expect(c.options).toHaveLength(2));
     CARDS.filter((c) => c.kind === 'talk' || c.kind === 'scenario').forEach((c) => { expect(c.options.length).toBeGreaterThanOrEqual(3); expect(c.options.length).toBeLessThanOrEqual(7); });
   });
-  it('더블 라운지 주제: 만남마다 하나, 한 모임(최대 12번)에서 겹치지 않는다', () => {
-    expect(new Set(Array.from({ length: 12 }, (_, i) => doubleTopic(i + 1))).size).toBe(12);
-    expect(doubleTopic(1)).toBe(DOUBLE_TOPICS[0]);
+  it('더블 라운지 주제: 맛마다 만남 12번까지 겹치지 않고, 화살표는 앞뒤로 돌아간다', () => {
+    for (const k of ['mild', 'spicy'] as const) {
+      expect(new Set(Array.from({ length: 12 }, (_, i) => doubleTopic(k, i + 1))).size).toBe(12);
+      expect(doubleTopic(k, 1, -1)).toBe(DOUBLE_TOPICS[k].at(-1));
+      expect(doubleTopic(k, 2, 1)).toBe(DOUBLE_TOPICS[k][2]);
+    }
   });
   it('다시 뽑으면 같은 종류의 다른 카드', () => {
     for (const { kind } of KINDS) {

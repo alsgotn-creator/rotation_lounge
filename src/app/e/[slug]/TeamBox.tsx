@@ -51,7 +51,6 @@ export default function TeamBox({ slug }: { slug: string }) {
   const p = t.partner;
   return (
     <section className="tm">
-      <p className="tm-eb">MY PARTNER</p>
       <div className="tm-name">
         {name === null
           ? <><h2 className="tm-t">{t.name ? `팀 ${t.name}` : '팀 이름을 지어주세요'}</h2><button className="lnk" style={{ margin: 0 }} onClick={() => setName(t.name)}>{t.name ? '바꾸기' : '짓기'}</button></>
@@ -60,32 +59,31 @@ export default function TeamBox({ slug }: { slug: string }) {
               <button className="btn" disabled={busy || !name.trim()}>저장</button>
             </form>}
       </div>
+      <p className="tm-sub">당일 첫 테이블 <b>{t.firstTable}번</b>에 함께 앉아요</p>
       <div className="tm-card">
-        <Character shape={p.shape as Shape} color={p.color} acc={p.prop} size={54} />
-        <div>
-          <b>{ho(p.gender, p.number)} · 나의 파트너</b>
-          <span>{p.age}세 · {p.job} · {p.area} · {p.mbti}</span>
-          {p.keywords.length > 0 && <span className="tm-kw">{p.keywords.join(' · ')}</span>}
+        <div className="tm-who">
+          <Character shape={p.shape as Shape} color={p.color} acc={p.prop} size={48} />
+          <div>
+            <b>{ho(p.gender, p.number)}<small>파트너</small></b>
+            <span>{p.age}세 · {p.job} · {p.area} · {p.mbti}</span>
+          </div>
         </div>
+        <dl className="tm-dl">
+          <div><dt>이상형</dt><dd>{p.ideal || '아직 안 적었어요'}</dd></div>
+          <div><dt>매력</dt><dd>{p.charm || '아직 안 적었어요'}</dd></div>
+        </dl>
       </div>
-      <dl className="tm-dl">
-        <div><dt>파트너의 이상형</dt><dd>{p.ideal || '아직 안 적었어요'}</dd></div>
-        <div><dt>파트너의 매력</dt><dd>{p.charm || '아직 안 적었어요'}</dd></div>
-      </dl>
-      <p className="tm-first">당일 첫 테이블은 <b>{t.firstTable}번</b>이에요. 파트너와 함께 앉아요.</p>
 
-      <h3 className="tm-ct">둘만의 채팅</h3>
       <div className="tm-chat" aria-live="polite">
         {t.messages.length === 0 && <p className="empty" style={{ padding: '14px 0' }}>먼저 인사해보세요! 첫 미션은 팀 이름 짓기예요.</p>}
         {t.messages.map((m) => <p key={m.id} className={m.me ? 'me' : ''}>{m.body}</p>)}
         <div ref={end} />
       </div>
       <form className="tm-in" onSubmit={async (e) => { e.preventDefault(); if (msg.trim() && (await post({ type: 'msg', body: msg }))) setMsg(''); }}>
-        <input maxLength={300} placeholder="메시지 보내기" value={msg} onChange={(e) => { setMsg(e.target.value); setErr(''); }} />
+        <input maxLength={300} placeholder="메시지 · 연락처는 못 보내요" value={msg} onChange={(e) => { setMsg(e.target.value); setErr(''); }} />
         <button className="btn" disabled={busy || !msg.trim()}>보내기</button>
       </form>
       {err && <p role="alert" style={{ color: 'var(--err)', fontSize: 13, margin: '8px 0 0' }}>{err}</p>}
-      <p className="hint" style={{ marginTop: 8 }}>연락처는 보낼 수 없어요 · 모임에서 직접 만나요</p>
     </section>
   );
 }

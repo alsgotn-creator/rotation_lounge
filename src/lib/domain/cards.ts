@@ -46,26 +46,46 @@ export const CARDS: GameCard[] = [
 ];
 
 /**
- * 더블 라운지 대화 주제: 버튼 없이 만남(라운드)마다 한 문장. 같은 만남의 모든 테이블에 같은 주제가 뜬다.
- * n번째 만남 = n번째 주제 (테이블은 최대 12개라 한 모임에서 겹치지 않는다).
+ * 더블 라운지 대화 주제: 순한맛 · 매운맛, 한 문장씩 (좁은 칸 두 줄 안에 들어가게 짧게).
+ * 같은 만남이면 모든 테이블이 같은 주제(n번째 만남 = n번째)에서 시작하고, 화살표로 앞뒤를 넘긴다.
  */
-export const DOUBLE_TOPICS = [
-  '애인이 바람을 피웠을 때 그나마 나은 건? 신체적 바람 vs 정신적 바람',
-  '애인의 이성 친구와 단둘이 술자리, 괜찮다 vs 안 된다',
-  '데이트 비용은? 반반 vs 더 버는 사람이 더',
-  '헤어진 연인과 친구로 지내기, 가능하다 vs 불가능하다',
-  '애인의 폰 비밀번호, 알아야 한다 vs 몰라도 된다',
-  '결혼 전 동거, 해봐야 한다 vs 안 해도 된다',
-  '연애 사실, SNS에 공개 vs 비공개',
-  '애인의 과거 연애 이야기, 알고 싶다 vs 모르고 싶다',
-  '기념일 선물은? 서프라이즈 vs 원하는 걸 물어보기',
-  '연락 스타일은? 자주 짧게 vs 가끔 길게',
-  '싸웠을 때 나는? 바로 풀어야 한다 vs 시간이 필요하다',
-  '애인이 내 친구 깻잎을 떼어준다, 괜찮다 vs 안 된다',
-  '썸 타는 중에 다른 사람과 소개팅, 괜찮다 vs 안 된다',
-  '연인 사이 비밀, 하나쯤 있어도 된다 vs 없어야 한다',
-];
-export const doubleTopic = (round: number) => DOUBLE_TOPICS[(round - 1) % DOUBLE_TOPICS.length];
+export const DOUBLE_TOPICS = {
+  mild: [
+    '첫 데이트 장소는? 맛집 vs 전시',
+    '주말엔? 집에서 쉬기 vs 밖에 나가기',
+    '여행 스타일은? 계획파 vs 즉흥파',
+    '여행지는? 바다 vs 산',
+    '연락은? 자주 짧게 vs 가끔 길게',
+    '기념일 선물은? 서프라이즈 vs 물어보고 사기',
+    '싸우면? 바로 풀기 vs 시간 갖기',
+    '연애 사실, SNS에 공개 vs 비공개',
+    '고백은? 내가 먼저 vs 상대가 먼저',
+    '반려동물은? 강아지 vs 고양이',
+    '나는? 아침형 vs 저녁형',
+    '데이트 마무리는? 카페 vs 술집',
+  ],
+  spicy: [
+    '바람, 그나마 나은 건? 신체적 vs 정신적',
+    '애인이 이성 친구와 단둘이 술, 된다 vs 안 된다',
+    '데이트 비용은? 반반 vs 더 버는 사람이 더',
+    '전 연인과 친구로 지내기, 된다 vs 안 된다',
+    '애인 폰 비밀번호, 알아야 한다 vs 몰라도 된다',
+    '결혼 전 동거, 해봐야 한다 vs 안 해도 된다',
+    '애인의 과거 연애, 듣고 싶다 vs 모르고 싶다',
+    '애인이 내 친구 깻잎을 떼어준다, 된다 vs 안 된다',
+    '썸 타는 중 다른 소개팅, 된다 vs 안 된다',
+    '연인 사이 비밀, 있어도 된다 vs 없어야 한다',
+    '애인이 전 연인과 가끔 연락, 된다 vs 안 된다',
+    '사귀기 전 스킨십, 된다 vs 안 된다',
+  ],
+};
+export type TopicKind = keyof typeof DOUBLE_TOPICS;
+export const TOPIC_KINDS: [TopicKind, string][] = [['mild', '순한맛'], ['spicy', '매운맛']];
+/** n번째 만남에서 step칸 넘긴 주제 (앞뒤로 돌아간다) */
+export function doubleTopic(kind: TopicKind, round: number, step = 0) {
+  const l = DOUBLE_TOPICS[kind];
+  return l[(((round - 1 + step) % l.length) + l.length) % l.length];
+}
 
 export const cardById = (id: string) => CARDS.find((c) => c.id === id) ?? null;
 
