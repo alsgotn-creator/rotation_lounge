@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { db } from '../../../../lib/server/supabase';
 import { eventLayout } from '../../../../lib/server/signup';
 import { isHost } from '../../../../lib/server/auth';
-import { PRICE } from '../../../../lib/signup/data';
+import { DOUBLE_PRICE, PRICE } from '../../../../lib/signup/data';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const slug = randomBytes(6).toString('base64url').replace(/[-_]/g, 'x').slice(0, 8).toLowerCase();
     const { error } = await db().from('events').insert({
       slug, kind: 'double', title: '플러팅 더블 라운지', starts_at: startsAt.toISOString(), venue, birth_from: birthFrom, birth_to: birthTo,
-      capacity_per_gender: teams, table_count: Math.ceil(teams / 2), price: PRICE, round_duration_sec: 1200, max_picks: 2,
+      capacity_per_gender: teams, table_count: Math.ceil(teams / 2), price: DOUBLE_PRICE, round_duration_sec: 1200, max_picks: 2,
     });
     if (error) return fail('Supabase에서 0014_double.sql을 먼저 실행해주세요.', 500);
     return NextResponse.json({ ok: true, slug });
