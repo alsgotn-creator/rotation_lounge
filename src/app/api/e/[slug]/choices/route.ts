@@ -14,12 +14,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const p = me && (await participantOf(me.id));
   if (!p) return fail('입장 링크로 다시 들어와주세요.', 401);
 
-  const { view, opposite } = await computePlay(event.id, p.id);
+  const { view } = await computePlay(event.id, p.id);
   if (!view.choice) return fail('지금은 선택할 수 없어요.', 409);
   const b = await req.json().catch(() => ({}));
   const ids: string[] = Array.isArray(b.ids) ? [...new Set(b.ids.map(String))] as string[] : [];
   if (ids.length > view.choice.max) return fail(`최대 ${view.choice.max}명까지 고를 수 있어요.`);
-  const ok = new Set(opposite.map((o) => o.id));
+  const partner = view.team?.partner?.id;
+  if (partner && ids.includes(partner) && ids.length > 1) return fail('파트너를 고르면 다른 분은 고를 수 없어요.'); // 더블: 파트너 1명 또는 다른 이성 최대 2명
+  const ok = new Set(view.choice.candidates.map((o) => o.id));
   if (ids.some((id) => !ok.has(id))) return fail('고를 수 없는 사람이 있어요.');
   const brave = typeof b.brave === 'string' && ids.includes(b.brave) ? b.brave : null; // 용기 카드는 고른 사람 중 한 명에게만
 

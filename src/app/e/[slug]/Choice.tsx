@@ -20,8 +20,11 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
   const dirty = sel.length !== choice.picks.length || sel.some((id, i) => id !== choice.picks[i]) || fire !== (choice.brave ?? null);
   const saved = choice.done && !dirty;
 
+  const partner = view.double ? view.team?.partner?.id : undefined;
   const toggle = (id: string) => {
     if (sel.includes(id)) { if (fire === id) setFire(null); return setSel(sel.filter((x) => x !== id)); }
+    // 더블: 파트너 1명 또는 다른 이성 최대 2명. 한쪽을 고르면 다른 쪽은 풀린다
+    if (partner && (id === partner || sel.includes(partner))) { setMsg(id === partner ? '파트너를 고르면 다른 분은 고를 수 없어요' : ''); return setSel([id]); }
     if (sel.length >= choice.max) { setShake(true); setMsg(`최대 ${choice.max}명까지 고를 수 있어요`); setTimeout(() => setShake(false), 500); return; }
     setMsg(''); setSel([...sel, id]);
   };
@@ -40,7 +43,9 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
       <div className="lg-top"><span className="logo">플러팅<i>.</i>라운지</span></div>
       <header className="chc-head">
         <h1 className="q">마음이 간 분을<br />골라주세요</h1>
-        <p className="ds">최대 {choice.max}순위까지, 누른 순서대로 순위가 정해져요. 서로의 1·2순위가 겹치지 않아도 3순위끼리 서로 골랐다면 매칭해드려요.<br />아무도 고르지 않아도 괜찮아요.</p>
+        {partner
+          ? <p className="ds"><b>오늘의 파트너 1명</b>을 고르거나, <b>다른 이성 최대 2명</b>을 골라주세요. 서로 골랐다면 매칭해드려요.<br />아무도 고르지 않아도 괜찮아요.</p>
+          : <p className="ds">최대 {choice.max}순위까지, 누른 순서대로 순위가 정해져요. 서로의 1·2순위가 겹치지 않아도 3순위끼리 서로 골랐다면 매칭해드려요.<br />아무도 고르지 않아도 괜찮아요.</p>}
         <p className="ds" style={{ marginTop: 6 }}>캐릭터 왼쪽 위 <b>ⓘ</b>를 누르면 그분의 정보를 볼 수 있어요.</p>
         <button className="lnk" onClick={onPaper}>롤링페이퍼 다시 보기</button>
         <span className={`chc-count${shake ? ' shake' : ''}`} aria-live="polite">{sel.length} / {choice.max}</span>
@@ -51,23 +56,24 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
           return (
             <div key={c.id} className={`chc-cell${on ? ' on' : ''}`}>
               <button className="chc-pick" aria-pressed={on} aria-label={`${ho(c.gender, c.number)} ${on ? '선택 취소' : '선택'}`} onClick={() => toggle(c.id)}>
-                {on && <span className="chc-heart" aria-hidden="true">{sel.indexOf(c.id) + 1}순위</span>}
+                {on && <span className="chc-heart" aria-hidden="true">{partner ? '♥' : `${sel.indexOf(c.id) + 1}순위`}</span>}
+                {c.id === partner && <span className="chc-partner">파트너</span>}
                 <Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={72} delay={(c.number ?? 0) * 0.5} />
                 <b>{ho(c.gender, c.number)}</b>
                 <span>{c.keywords[0]}</span>
               </button>
-              {on && <button className={`chc-fire${fire === c.id ? ' on' : ''}`} aria-pressed={fire === c.id} onClick={() => setFire(fire === c.id ? null : c.id)}>{fire === c.id ? '🔥 카드를 줬어요' : '🔥 카드 주기'}</button>}
+              {on && !partner && <button className={`chc-fire${fire === c.id ? ' on' : ''}`} aria-pressed={fire === c.id} onClick={() => setFire(fire === c.id ? null : c.id)}>{fire === c.id ? '🔥 카드를 줬어요' : '🔥 카드 주기'}</button>}
               {met && <button className="chc-info" aria-label={`${ho(c.gender, c.number)} 정보 보기`} onClick={() => setInfo(c.id)}><Icon name="info" /></button>}
             </div>
           );
         })}
       </div>
-      <section className="chc-brave">
+      {!partner && <section className="chc-brave">
         <b>🔥 용기 카드 한 장</b>
         <p>고른 분 중 <em>딱 한 명</em>에게만 줄 수 있어요.<br />서로에게 카드를 줬다면, 오늘 끝나고 두 분만 따로 카페로 안내해드려요.</p>
         <small>카드가 엇갈리면 아무도 몰라요. 매칭은 그대로 문자로 알려드려요. 안 줘도 괜찮아요.</small>
         <span className="chc-brave-to">{fireP ? <>용기 카드는 <b>{ho(fireP!.gender, fireP!.number)}</b>에게 · 바꾸려면 다른 분의 🔥를 눌러요</> : sel.length ? '고른 분 아래 🔥 카드 주기를 눌러요' : '먼저 마음이 간 분을 골라주세요'}</span>
-      </section>
+      </section>}
       {msg && <p role="alert" className="chc-msg">{msg}</p>}
       <div className="ft">
         <button className="btn" disabled={busy || saved} onClick={save}>{busy ? '저장하는 중…' : saved ? '✓ 선택을 마쳤어요 · 바꾸려면 다시 눌러요' : '선택 완료'}</button>

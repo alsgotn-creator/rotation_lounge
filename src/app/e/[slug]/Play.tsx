@@ -11,7 +11,7 @@ import type { LoungeView } from '../../../lib/server/lounge';
 import type { PlayView } from '../../../lib/server/play';
 
 /** 등록을 마친 참가자의 메인 화면: 밀린 쪽지 → (최종선택이면) 받은 롤링페이퍼 → 최종선택 / 진행 중인 라운드 → 대기실 순서로 보여준다. */
-export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: string; lounge: LoungeView; when: string; loveType: number; onEdit: () => void }) {
+export default function Play({ slug, lounge, when, loveType, onEdit, double = false }: { slug: string; lounge: LoungeView; when: string; loveType: number; onEdit: () => void; double?: boolean }) {
   const [v, setV] = useState<PlayView | null>(null);
   const [offset, setOffset] = useState(0);
   const [paperOpen, setPaperOpen] = useState(true); // 최종선택에 들어오면 롤링페이퍼부터
@@ -45,5 +45,5 @@ export default function Play({ slug, lounge, when, loveType, onEdit }: { slug: s
   if (v?.phase === 'closing') return <Closing slug={slug} view={v} me={v.me} />;
   if (v?.phase === 'choice' && v.choice) return <Choice key="choice" slug={slug} view={v} onSaved={load} onPaper={() => setPaperOpen(true)} />;
   if (v?.round) return <Round key={v.round.no} slug={slug} view={v} offsetMs={offset} onRefresh={load} me={v.me} />;
-  return <Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} />;
+  return <Lounge slug={slug} initial={lounge} when={when} loveType={loveType} onEdit={onEdit} double={double} />;
 }

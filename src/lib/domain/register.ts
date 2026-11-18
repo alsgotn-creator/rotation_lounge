@@ -1,3 +1,5 @@
+import { IDEAL_MAX } from './double';
+
 /** 캐릭터(펜 선 일러스트). shape 칸에 캐릭터 id를 저장한다. 포인트 소품 색이 연애 컬러. */
 export const CHARS = { f: ['f1', 'f2', 'f3', 'f4', 'f5', 'f6'], m: ['m1', 'm2', 'm3', 'm4', 'm5', 'm6'] } as const;
 export const SHAPES = [...CHARS.f, ...CHARS.m] as const;
@@ -15,10 +17,11 @@ export const parseAccs = (v: string | null | undefined) => (v ?? '').split(',').
 export type RegistrationInput = {
   area: string; mbti: string; keywords: string[]; answers: number[];
   shape: string; prop?: string; consent: boolean;
+  ideal?: string; charm?: string; // 더블 라운지만
 };
 
 /** 사전 등록 입력 검사. 문제가 없으면 null, 있으면 사용자에게 보여줄 문장 */
-export function registrationError(r: RegistrationInput): string | null {
+export function registrationError(r: RegistrationInput, double = false): string | null {
   // 바깥(API)에서 들어온 JSON은 모양을 믿을 수 없다: 문자열 아닌 값에 .trim()을 부르면 500이 난다
   if (!r || typeof r.area !== 'string' || typeof r.mbti !== 'string' || !Array.isArray(r.keywords) || r.keywords.some((k) => typeof k !== 'string') || (r.prop != null && typeof r.prop !== 'string')) return '입력을 다시 확인해주세요.';
   if (!r.area.trim() || r.area.trim().length > 20) return '사는 곳을 적어주세요.';
@@ -29,6 +32,8 @@ export function registrationError(r: RegistrationInput): string | null {
   if (!SHAPES.includes(r.shape as Shape)) return '캐릭터를 골라주세요.';
   const acc = (r.prop ?? '').split(',').filter(Boolean);
   if (acc.length !== parseAccs(r.prop).length || new Set(acc).size !== acc.length || acc.filter((a) => EYEWEAR.includes(a as Acc)).length > 1) return '꾸미기를 다시 골라주세요.';
+  if (double) for (const [v, label] of [[r.ideal, '이상형'], [r.charm, '매력 포인트']] as const)
+    if (typeof v !== 'string' || !v.trim() || v.trim().length > IDEAL_MAX) return `${label}을 ${IDEAL_MAX}자 이내로 적어주세요.`;
   if (r.consent !== true) return '개인정보 수집에 동의해주세요.';
   return null;
 }

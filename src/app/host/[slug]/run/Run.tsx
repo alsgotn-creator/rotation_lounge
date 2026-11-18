@@ -11,8 +11,9 @@ import { notStarted, type Round } from '../../../../lib/domain/seating';
 import type { HostCmd, Moved, Person, Phase, ResetWhat } from '../../../../lib/server/run';
 
 type View = {
-  ev: { slug: string; phase: Phase; table_count: number; per_table: number; locked: boolean; round_duration_sec: number; max_picks: number };
+  ev: { slug: string; phase: Phase; table_count: number; per_table: number; locked: boolean; round_duration_sec: number; max_picks: number; kind: 'rotation' | 'double' };
   current: Round | null; people: Person[];
+  teams: { no: number; f: string; m: string; name: string; fit: number; similar: number; mbtiSame: number }[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
   extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; byGender: Record<'f' | 'm', { done: number; total: number }>; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
 };
@@ -80,12 +81,15 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const waitStart = !!open && notStarted(current!); // 자리 이동 중: 타이머가 멈춰 있다
   const seated = v.people.filter((p) => p.number != null && !p.excluded);
   const nf = seated.filter((p) => p.gender === 'f').length, nm = seated.filter((p) => p.gender === 'm').length;
+  const double = ev.kind === 'double';
+  const teamed = new Set(v.teams.flatMap((t) => [t.f, t.m]));
+  const pairTeams = () => (!v.teams.length || window.confirm('팀을 새로 짜요. 지금 팀 이름과 파트너 채팅이 모두 지워져요. 다시 짤까요?')) && send({ type: 'pairTeams' }).then((j) => j.ok && show('파트너 팀을 만들었어요'));
 
   return (
     <main>
       <div className="nb"><Link className="bk" aria-label="신청 관리" href={`/host/${slug}`}><Icon name="back" /></Link><div className="tt">진행</div></div>
       <div className="bd" style={{ paddingTop: 4, animation: 'none', paddingBottom: 60 }}>
-        <p className="ds" style={{ margin: 0, fontSize: 13 }}>{when} · 한 테이블 {ev.per_table}:{ev.per_table} · 착석 여 {nf} · 남 {nm}</p>
+        <p className="ds" style={{ margin: 0, fontSize: 13 }}>{when} · {double ? `더블 라운지 · ${v.teams.length}팀` : `한 테이블 ${ev.per_table}:${ev.per_table}`} · 착석 여 {nf} · 남 {nm}</p>
 
         <div className="phases" role="tablist" aria-label="단계">
           {PHASE_KO.map(([p, label]) => (
@@ -109,30 +113,43 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
             {waitStart
               ? <button className="btn" disabled={busy} onClick={() => send({ type: 'resume' })}>자리 이동 끝 · 대화 시작</button>
               : <button className="btn" disabled={busy || (current?.no ?? 0) >= ev.table_count} onClick={() => send({ type: 'nextRound' })}>
-              {!current ? '1라운드 자리 배정' : current.no >= ev.table_count ? '마지막 라운드예요' : '다음 라운드 → 남자 이동'}</button>}
+              {!current ? '1라운드 자리 배정' : current.no >= ev.table_count ? '마지막 라운드예요' : double ? '다음 라운드 → 옮기는 팀 이동' : '다음 라운드 → 남자 이동'}</button>}
           </div>
         </section>
 
-        <p className="eb" style={{ marginTop: 26 }}>{current ? `${current.no}라운드 테이블` : '1라운드 테이블 (같은 번호끼리)'}</p>
-        {!current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={compact}>번호 당기기 · 빈 번호 없애기</button>}
+        {double && <>
+          <p className="eb" style={{ marginTop: 26 }}>파트너 팀 ({v.teams.length})</p>
+          {!current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={pairTeams}>{v.teams.length ? '파트너 다시 매칭하기' : '파트너 매칭 · 가치관·MBTI 가장 안 맞는 남녀끼리'}</button>}
+          <div className="people">
+            {v.teams.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>사전 등록이 끝나면 모임 전날 눌러주세요. 그때부터 팀 채팅이 열려요.</p>}
+            {v.teams.map((t) => { const f = byId.get(t.f), m = byId.get(t.m); return (
+              <div key={t.no} className="person-row"><div><b>팀 {t.no}{t.name ? ` · ${t.name}` : ''} <em className="brave-tag" style={{ background: 'var(--surf2)', color: 'var(--mute)' }}>{t.no <= ev.table_count ? `${t.no}번 테이블에 앉는 팀` : '옮기는 팀'}</em></b>
+                <span>{f ? `${label(f)} ${f.name}` : '?'} · {m ? `${label(m)} ${m.name}` : '?'}</span>
+                <span>가치관 {t.similar}% 비슷 · MBTI {t.mbtiSame}/4 같음</span></div></div>); })}
+            {v.teams.length > 0 && seated.filter((p) => !teamed.has(p.id)).map((p) => <div key={p.id} className="person-row off"><div><b>팀 없음 · {label(p)} {p.name}</b><span>성비가 안 맞거나 매칭 뒤에 등록했어요. 다시 매칭하거나 빼주세요.</span></div></div>)}
+          </div>
+        </>}
+
+        <p className="eb" style={{ marginTop: 26 }}>{current ? `${current.no}라운드 테이블` : double ? '1라운드 테이블 (왼쪽 앉는 팀 · 오른쪽 옮기는 팀)' : '1라운드 테이블 (같은 번호끼리)'}</p>
+        {!current && !double && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={compact}>번호 당기기 · 빈 번호 없애기</button>}
         <FloorPlan pairs={v.pairs} faces={false} />
 
         <p className="eb" style={{ marginTop: 26 }}>설정</p>
         <div className="addf" style={{ paddingTop: 12 }}>
           <div className="kv" style={{ borderTop: 0 }}><span>라운드 시간</span>
             <div className="chips" style={{ margin: 0 }}>
-              {[12, 15].map((m) => <button key={m} style={ev.round_duration_sec === m * 60 ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => send({ type: 'settings', roundDurationSec: m * 60 })}>{m}분</button>)}
-              <input aria-label="직접 입력(분)" inputMode="numeric" placeholder={![720, 900].includes(ev.round_duration_sec) ? String(ev.round_duration_sec / 60) : '직접'} value={custom} onChange={(e) => setCustom(e.target.value.replace(/\D/g, ''))}
+              {(double ? [15, 20] : [12, 15]).map((m) => <button key={m} style={ev.round_duration_sec === m * 60 ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => send({ type: 'settings', roundDurationSec: m * 60 })}>{m}분</button>)}
+              <input aria-label="직접 입력(분)" inputMode="numeric" placeholder={![720, 900, 1200].includes(ev.round_duration_sec) ? String(ev.round_duration_sec / 60) : '직접'} value={custom} onChange={(e) => setCustom(e.target.value.replace(/\D/g, ''))}
                 onBlur={() => { if (custom) send({ type: 'settings', roundDurationSec: Number(custom) * 60 }); setCustom(''); }} className="mini-in" />
             </div></div>
-          <div className="kv"><span>최종 선택 인원</span>
+          {!double && <><div className="kv"><span>최종 선택 인원</span>
             <div className="chips" style={{ margin: 0 }}>{[2, 3].map((n) => <button key={n} style={ev.max_picks === n ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined} onClick={() => send({ type: 'settings', maxPicks: n })}>{n}명</button>)}</div></div>
           <div className="kv"><span>테이블 수</span>
             <div className="chips" style={{ margin: 0 }}>
               <button disabled={!!current || ev.table_count <= 2} onClick={() => send({ type: 'settings', tableCount: ev.table_count - 1 })} aria-label="테이블 하나 빼기">−</button>
               <b style={{ minWidth: 28, textAlign: 'center', alignSelf: 'center' }}>{ev.table_count}</b>
               <button disabled={!!current || ev.table_count >= 12} onClick={() => send({ type: 'settings', tableCount: ev.table_count + 1 })} aria-label="테이블 하나 더하기">+</button>
-            </div></div>
+            </div></div></>}
         </div>
 
         <p className="eb" style={{ marginTop: 26 }}>참가자 · 호 번호 고치기</p>

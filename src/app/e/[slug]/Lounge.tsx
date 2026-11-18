@@ -9,6 +9,7 @@ import { ho } from '../../../lib/domain/lounge';
 import { PALETTE, phrases, typeName } from '../../../lib/domain/loveType';
 import type { Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
+import TeamBox from './TeamBox';
 
 /** 누를 때마다 통통 / 흔들 / 찌그러짐을 돌아가며, 하트가 떠오른다. */
 function Poke({ children }: { children: React.ReactNode }) {
@@ -71,7 +72,7 @@ function Prep({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug: string; initial: LoungeView; when: string; loveType: number; onEdit: () => void }) {
+export default function Lounge({ slug, initial, when, loveType, onEdit, double = false }: { slug: string; initial: LoungeView; when: string; loveType: number; onEdit: () => void; double?: boolean }) {
   const [v, setV] = useState(initial);
   const me = v.cards.find((c) => c.me)!;
   const others = v.cards.filter((c) => !c.me);
@@ -115,7 +116,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
         {before && <button className="lnk" style={{ margin: 0 }} onClick={onEdit}>내 소개 수정</button>}
       </div>
       <header className="lg-head">
-        <p>ROTATION LOUNGE</p>
+        <p>{double ? 'DOUBLE LOUNGE' : 'ROTATION LOUNGE'}</p>
         <h1>오늘의 라운지{before && <em className="lg-soon">곧 시작합니다</em>}</h1>
         <span>{when} · 여 {v.counts.f} · 남 {v.counts.m}</span>
       </header>
@@ -140,6 +141,8 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
         </div>
       </section>
 
+      {double && <TeamBox slug={slug} />}
+
       <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
 
       <div className="ft">
@@ -151,7 +154,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit }: { slug
           </span>
           {typeOpen && <span className="lg-mine-why">{phrases(loveType).map((p) => <span key={p}>{p}</span>)}</span>}
         </button>
-        {me.number != null && before && (
+        {me.number != null && before && !double && (
           <div className="lg-seat"><b>{ho(me.gender, me.number)}</b><span>첫 대화는 <em>{me.number}번 테이블</em>에서 시작해요</span></div>
         )}
         {!before && <p className="ds" style={{ margin: 0, textAlign: 'center' }}>{me.number == null ? '호 번호가 아직 없어요 · 진행자에게 알려주세요' : '곧 호스트가 라운드를 시작해요'}</p>}

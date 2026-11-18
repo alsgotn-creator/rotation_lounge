@@ -60,6 +60,12 @@ export async function photoUrls(paths: string[]) {
   return (data ?? []).map((d) => d.signedUrl ?? '');
 }
 
+/** 모임 종류: 'rotation'(기본 1:1 로테이션) / 'double'(2:2 파트너). kind 칸이 아직 없으면(0014 전) 기본형 */
+export async function eventKind(eventId: string): Promise<'rotation' | 'double'> {
+  const { data, error } = await db().from('events').select('kind').eq('id', eventId).single();
+  return !error && data?.kind === 'double' ? 'double' : 'rotation';
+}
+
 /** 테이블 수와 한 테이블 인원. per_table 칸이 아직 없으면(마이그레이션 전) 1:1로 본다. */
 export async function eventLayout(eventId: string) {
   const a = await db().from('events').select('table_count,per_table').eq('id', eventId).single();

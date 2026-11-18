@@ -1,16 +1,25 @@
 // 인쇄물(밸런스게임 vol.1·2, 연애 토크 카드)의 카드 원문. "너는? 꼭 되물어주기" 안내는 넣지 않는다.
-export type CardKind = 'balance' | 'talk' | 'scenario';
+export type CardKind = 'balance' | 'talk' | 'scenario' | 'spicy' | 'mild';
 export type GameCard = { id: string; kind: CardKind; prompt: string; options: string[] };
 
 // 대화 중에는 타자 칠 여유가 없어서 모든 카드는 고르기만 한다.
 const b = (id: string, prompt: string, ...options: string[]): GameCard => ({ id, kind: 'balance', prompt, options });
 const t = (id: string, prompt: string, ...options: string[]): GameCard => ({ id, kind: 'talk', prompt, options });
 const s = (id: string, prompt: string, ...options: string[]): GameCard => ({ id, kind: 'scenario', prompt, options });
+// 더블 라운지 대화 주제: 고를 답 없이 주제만 띄운다
+const hot = (id: string, prompt: string): GameCard => ({ id, kind: 'spicy', prompt, options: [] });
+const mild = (id: string, prompt: string): GameCard => ({ id, kind: 'mild', prompt, options: [] });
 
 export const KINDS: { kind: CardKind; label: string; sub: string }[] = [
   { kind: 'balance', label: '밸런스 게임', sub: '둘 중 하나만 고른다면?' },
   { kind: 'talk', label: '연애토크', sub: '정답 없는 가치관 이야기' },
   { kind: 'scenario', label: '상황극', sub: '이 상황, 나라면?' },
+];
+
+/** 더블 라운지: 대화 시작할 때 고르는 주제 */
+export const TOPIC_KINDS: { kind: CardKind; label: string; sub: string }[] = [
+  { kind: 'spicy', label: '🌶️ 매운맛', sub: '의견이 갈리는 주제' },
+  { kind: 'mild', label: '🍀 순한맛', sub: '꿈과 경험 이야기' },
 ];
 
 export const CARDS: GameCard[] = [
@@ -42,6 +51,31 @@ export const CARDS: GameCard[] = [
   s('s2', '애인 폰에 이성의 "오늘 즐거웠어요" 메시지가 떴다. 나는?', '바로 물어본다', '모른 척 넘어간다', '나중에 넌지시 묻는다'),
   s('s3', '헤어진 전 애인이 "잘 지내?"라고 연락해 왔다. 나는?', '답장 안 한다', '짧게 답한다', '애인에게 바로 말한다'),
   s('s4', '내 생일에 애인이 친구와의 약속을 먼저 잡았다. 나는?', '서운하다고 말한다', '쿨하게 넘어간다', '나도 다른 약속을 잡는다'),
+
+  hot('h1', '애인이 내 친구 깻잎을 떼어줘도 괜찮다? 어디까지 괜찮아?'),
+  hot('h2', '데이트 비용, 반반 vs 더 버는 사람이 더'),
+  hot('h3', '헤어진 연인과 친구로 지낼 수 있다?'),
+  hot('h4', '결혼 전 동거, 해봐야 한다 vs 안 된다'),
+  hot('h5', '썸 타는 중에 다른 사람 소개팅, 괜찮다?'),
+  hot('h6', '애인의 폰 비밀번호, 서로 알아야 한다?'),
+  hot('h7', '애인의 이성 친구와 단둘이 술, 어디까지 OK?'),
+  hot('h8', '연봉 이야기는 몇 번째 데이트에 해도 될까?'),
+  hot('h9', '연애 사실, SNS에 공개 vs 비공개'),
+  hot('h10', '애인의 과거 연애 횟수, 알고 싶다 vs 모르고 싶다'),
+  hot('h11', '기념일 선물, 서프라이즈 vs 원하는 걸 물어보기'),
+  hot('h12', '첫 만남에 고백, 용기다 vs 성급하다'),
+  mild('n1', '어릴 때 꿈은 뭐였고, 지금 꿈은 뭐예요?'),
+  mild('n2', '지금까지 가장 기억에 남는 여행은?'),
+  mild('n3', '요즘 가장 빠져 있는 것은?'),
+  mild('n4', '돈과 시간이 무한하다면 제일 먼저 하고 싶은 것은?'),
+  mild('n5', '인생에서 가장 용기 냈던 순간은?'),
+  mild('n6', '올해 스스로 가장 잘했다고 생각하는 일은?'),
+  mild('n7', '10년 뒤 나는 어디서 뭘 하고 있을까요?'),
+  mild('n8', '최근에 가장 크게 웃었던 일은?'),
+  mild('n9', '나만의 스트레스 푸는 법은?'),
+  mild('n10', '버킷리스트 1순위는?'),
+  mild('n11', '인생 영화나 책 하나를 꼽는다면?'),
+  mild('n12', '가장 좋아하는 계절과 그 이유는?'),
 ];
 
 export const cardById = (id: string) => CARDS.find((c) => c.id === id) ?? null;

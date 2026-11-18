@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CARDS, drawCard, KINDS } from './cards';
+import { CARDS, drawCard, KINDS, TOPIC_KINDS } from './cards';
 
 describe('cards', () => {
   it('원문을 모두 옮겼고 되묻기 안내는 없다', () => {
@@ -9,10 +9,13 @@ describe('cards', () => {
   });
   it('모든 카드는 고르기만 한다: 밸런스는 2개, 나머지는 3~7개', () => {
     CARDS.filter((c) => c.kind === 'balance').forEach((c) => expect(c.options).toHaveLength(2));
-    CARDS.filter((c) => c.kind !== 'balance').forEach((c) => { expect(c.options.length).toBeGreaterThanOrEqual(3); expect(c.options.length).toBeLessThanOrEqual(7); });
+    CARDS.filter((c) => c.kind === 'talk' || c.kind === 'scenario').forEach((c) => { expect(c.options.length).toBeGreaterThanOrEqual(3); expect(c.options.length).toBeLessThanOrEqual(7); });
+  });
+  it('더블 라운지 주제는 고를 답 없이 주제만', () => {
+    CARDS.filter((c) => c.kind === 'spicy' || c.kind === 'mild').forEach((c) => expect(c.options).toHaveLength(0));
   });
   it('다시 뽑으면 같은 종류의 다른 카드', () => {
-    for (const { kind } of KINDS) {
+    for (const { kind } of [...KINDS, ...TOPIC_KINDS]) {
       const first = drawCard(kind);
       for (let i = 0; i < 30; i++) { const n = drawCard(kind, first.id); expect(n.kind).toBe(kind); expect(n.id).not.toBe(first.id); }
     }

@@ -4,6 +4,7 @@ import { pairs, type Round, type Seated } from '../domain/seating';
 import { eventLayout } from './signup';
 import { compactNumbers } from '../signup/rules';
 import { mutualPairs } from '../domain/matching';
+import { pairTeams, tablesFor, teamTable, type Team } from '../domain/double';
 
 export type Phase = 'before' | 'talk' | 'choice' | 'closing';
 export const PHASES: Phase[] = ['before', 'talk', 'choice', 'closing'];
@@ -14,15 +15,21 @@ const toRound = (r: RoundRow): Round => ({ no: r.no, startedAt: t(r.started_at)!
 
 export type Person = { id: string; gender: 'f' | 'm'; number: number | null; excluded: boolean; nickname: string; shape: string; prop: string; color: number; keywords: string[]; name: string };
 
+export type TeamRow = Team & { name: string; fit: number; similar: number; mbtiSame: number };
+
 export async function loadRun(eventId: string) {
   // 참가자 폰이 3초마다 부르는 길: 서로 독립인 조회는 한 번에 보낸다 (왕복 수가 곧 속도)
-  const [{ data: ev }, { data: rr }, { data: ps }, { perTable }, lk] = await Promise.all([
+  const [{ data: ev }, { data: rr }, { data: ps }, { perTable }, lk, kd, tm] = await Promise.all([
     db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks').eq('id', eventId).single(),
     db().from('rounds').select('no,started_at,paused_at,paused_total_ms,duration_sec,closed_at').eq('event_id', eventId).order('no'),
     db().from('participants').select('id,gender,number,excluded,nickname,shape,prop,love_type,keywords,applications(name)').eq('event_id', eventId).order('number', { nullsFirst: false }),
     eventLayout(eventId),
     db().from('events').select('locked').eq('id', eventId).single(), // locked 칸은 마이그레이션 0012 전에는 없을 수 있다 → 그때는 열린 것으로
+    db().from('events').select('kind').eq('id', eventId).single(), // kind·teams 는 0014 전에는 없다 → 기본형
+    db().from('teams').select('no,f_id,m_id,name,fit,similar,mbti_same').eq('event_id', eventId).order('no'),
   ]);
+  const kind: 'rotation' | 'double' = !kd.error && kd.data?.kind === 'double' ? 'double' : 'rotation';
+  const teams: TeamRow[] = kind === 'double' && !tm.error ? (tm.data ?? []).map((t) => ({ no: t.no, f: t.f_id, m: t.m_id, name: t.name, fit: t.fit, similar: t.similar, mbtiSame: t.mbti_same })) : [];
   const rounds = ((rr ?? []) as RoundRow[]).map(toRound);
   const people: Person[] = (ps ?? []).map((p: Record<string, unknown>) => ({
     id: p.id as string, gender: p.gender as 'f' | 'm', number: p.number as number | null, excluded: p.excluded as boolean,
@@ -31,13 +38,21 @@ export async function loadRun(eventId: string) {
   }));
   const seated: Seated[] = people.filter((p) => p.number != null && !p.excluded).map((p) => ({ id: p.id, gender: p.gender, number: p.number! }));
   const current = rounds.at(-1) ?? null;
-  return { ev: { ...ev!, per_table: perTable, locked: !lk.error && !!lk.data?.locked }, rounds, current, people, seated };
+  return { ev: { ...ev!, per_table: perTable, locked: !lk.error && !!lk.data?.locked, kind }, rounds, current, people, seated, teams };
 }
 
 /** 이번(또는 곧 시작할 1라운드) 테이블별 앉는 사람들 */
 export function tablePairs(run: Awaited<ReturnType<typeof loadRun>>) {
   const no = run.current?.no ?? 1;
   const byId = new Map(run.people.map((p) => [p.id, p]));
+  if (run.ev.kind === 'double') {
+    // 더블: 왼쪽 칸(f)에 앉아 있는 팀, 오른쪽 칸(m)에 옮겨 온 팀. 빠진 사람은 그리지 않는다
+    const T = run.ev.table_count, live = (ids: string[]) => ids.map((id) => byId.get(id)!).filter((p) => p && !p.excluded);
+    return Array.from({ length: T }, (_, i) => {
+      const at = run.teams.filter((t) => teamTable(t.no, no, T) === i + 1);
+      return { table: i + 1, f: live(at.filter((t) => t.no <= T).flatMap((t) => [t.f, t.m])), m: live(at.filter((t) => t.no > T).flatMap((t) => [t.f, t.m])) };
+    });
+  }
   return pairs(no, run.ev.table_count, run.seated, run.ev.per_table).map((x) => ({ table: x.table, f: x.f.map((p) => byId.get(p.id)!), m: x.m.map((p) => byId.get(p.id)!) }));
 }
 
@@ -48,6 +63,7 @@ export type HostCmd =
   | { type: 'setNumber'; participantId: string; number: number | null }
   | { type: 'exclude'; participantId: string; excluded: boolean }
   | { type: 'compact' }
+  | { type: 'pairTeams' }
   | { type: 'lock'; locked: boolean }
   | { type: 'hideNote'; noteId: string; hidden: boolean }
   | { type: 'reset'; what: ResetWhat };
@@ -152,6 +168,23 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       const tableCount = Math.max(2, Math.ceil(Math.max(k.f, k.m) / ev.per_table));
       await db().from('events').update({ table_count: tableCount }).eq('id', eventId);
       return { ok: true, moved, tableCount };
+    }
+    case 'pairTeams': {
+      // 더블 라운지: 사전 등록한 사람 중 가치관·MBTI가 가장 안 맞는 남녀끼리 팀. 다시 누르면 팀과 채팅이 새로 만들어진다.
+      if (ev.kind !== 'double') return no('더블 라운지에서만 쓸 수 있어요.');
+      if (current) return no('라운드가 시작된 뒤에는 팀을 바꿀 수 없어요.');
+      const live = people.filter((p) => !p.excluded).map((p) => p.id);
+      const { data: rows } = await db().from('participants').select('id,gender,answers,mbti').in('id', live.length ? live : ['00000000-0000-0000-0000-000000000000']);
+      const ps2 = (rows ?? []) as { id: string; gender: 'f' | 'm'; answers: number[]; mbti: string }[];
+      const made = pairTeams(ps2.filter((p) => p.gender === 'f'), ps2.filter((p) => p.gender === 'm'));
+      if (made.length < 2) return no('팀을 만들려면 남녀가 2명씩은 사전 등록해야 해요.');
+      // 팀 번호는 무작위 (앉아 있는 팀·옮기는 팀이 매칭 순서로 갈리지 않게)
+      const order = made.map((t) => ({ t, k: Math.random() })).sort((a, b) => a.k - b.k).map((x) => x.t);
+      await db().from('teams').delete().eq('event_id', eventId);
+      const { error } = await db().from('teams').insert(order.map((t, i) => ({ event_id: eventId, no: i + 1, f_id: t.f, m_id: t.m, fit: t.fit, similar: t.similar, mbti_same: t.mbtiSame })));
+      if (error) return no('팀을 저장하지 못했어요. Supabase에서 0014_double.sql을 먼저 실행해주세요.');
+      await db().from('events').update({ table_count: tablesFor(order.length) }).eq('id', eventId);
+      return { ok: true };
     }
     case 'lock': {
       // 모임이 끝나면 닫는다: 참가자 입장(링크·전화번호)만 막고 데이터는 그대로 둔다

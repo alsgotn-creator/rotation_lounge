@@ -13,7 +13,7 @@ export type Row = {
   photos: string[]; avoidHits: string[]; avoidedBy: string[];
   profile: { area: string; mbti: string; keywords: string[]; answers: number[]; loveType: number } | null; // 사전 등록 전이면 null
 };
-type Ev = { id: string; slug: string; applyOpen: boolean; capacity: number; tables: number; perTable: number; price: number };
+type Ev = { id: string; slug: string; applyOpen: boolean; capacity: number; tables: number; perTable: number; price: number; double?: boolean };
 
 const TABS: [string, string, AppStatus[]][] = [
   ['new', '새 신청', ['new']], ['ok', '확정', ['confirmed']], ['etc', '대기·취소', ['held', 'cancelled']],
@@ -130,6 +130,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
       <div className="bd" style={{ paddingTop: 4, animation: 'none' }}>
         <div className="evs"><div><b>{session.dateLabel} {session.time} · {session.place}</b><small>{session.birthFrom}~{session.birthTo}년생 · {event.capacity}:{event.capacity}</small></div>
           <button className="host" style={{ border: 0, cursor: 'pointer' }} onClick={toggleApply}>{event.applyOpen ? '신청 받는 중' : '신청 닫힘'}</button></div>
+        {event.double ? <p className="hint" style={{ marginTop: 8 }}>더블 라운지 · {event.capacity}팀 (남 {event.capacity} · 여 {event.capacity}) · 테이블 {event.tables}개</p> : <>
         <div className="kv" style={{ borderTop: 0, marginTop: 8, alignItems: 'center' }}><span>테이블 수</span>
           <div className="chips" style={{ margin: 0 }}>
             <button disabled={event.tables <= 2} onClick={() => setLayout({ tables: event.tables - 1 })} aria-label="테이블 줄이기">−</button>
@@ -142,6 +143,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
               style={event.perTable === n ? { background: 'var(--accbg)', color: 'var(--acc)' } : undefined}>{n}:{n}</button>)}
           </div></div>
         <p className="hint" style={{ marginTop: 2 }}>성별당 최대 {event.capacity}명 ({event.tables}개 x {event.perTable}명)</p>
+        </>}
         <div className="seat">
           {(['f', 'm'] as const).map((g) => {
             const v = filled(g);

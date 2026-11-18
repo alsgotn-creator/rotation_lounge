@@ -6,9 +6,10 @@ import { Character } from '../../../components/Character';
 import { api } from '../../../lib/api';
 import { QUESTIONS, PALETTE, loveType, phrases, typeName } from '../../../lib/domain/loveType';
 import { prepKey } from './Lounge';
+import { IDEAL_MAX } from '../../../lib/domain/double';
 import { ACCS, ACC_KO, CHARS, EYEWEAR, GLASSED, parseAccs, registrationError, type Acc, type Shape } from '../../../lib/domain/register';
 
-export type Initial = { area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: string } | null;
+export type Initial = { area: string; mbti: string; keywords: string[]; answers: number[]; shape: Shape; prop: string; ideal?: string; charm?: string } | null;
 export type Given = { name: string; number: number | null; gender: 'f' | 'm'; age: number; job: string };
 
 const MBTI_PAIRS: [string, string, string, string][] = [['E', '외향', 'I', '내향'], ['N', '직관', 'S', '감각'], ['F', '감정', 'T', '사고'], ['J', '계획', 'P', '즉흥']];
@@ -18,7 +19,7 @@ const Q0 = 2;                       // 질문이 시작되는 단계 (0 동의 �
 const PER = 5, PAGES = Math.ceil(QUESTIONS.length / PER); // 가치관 질문은 한 화면에 5개씩 (3쪽)
 const RESULT = Q0 + PAGES, CHAR = RESULT + 1, LAST = CHAR;
 
-export default function Register({ slug, given, initial, onCancel, devStep }: { slug: string; given: Given; initial: Initial; onCancel?: () => void; devStep?: number }) {
+export default function Register({ slug, given, initial, onCancel, devStep, double = false }: { slug: string; given: Given; initial: Initial; onCancel?: () => void; devStep?: number; double?: boolean }) {
   const router = useRouter();
   const [step, setStep] = useState(devStep ?? (initial ? 1 : 0));
   const [consent, setConsent] = useState(!!initial);
@@ -26,6 +27,8 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
   const [mbti, setMbti] = useState<string[]>(initial ? initial.mbti.split('') : ['', '', '', '']);
   const [keywords, setKeywords] = useState<string[]>(initial?.keywords ?? []);
   const [kw, setKw] = useState('');
+  const [ideal, setIdeal] = useState(initial?.ideal ?? '');
+  const [charm, setCharm] = useState(initial?.charm ?? '');
   const [answers, setAnswers] = useState<number[]>(initial?.answers ?? Array(QUESTIONS.length).fill(devStep && devStep > Q0 ? 4 : 0));
   const [shape, setShape] = useState<Shape>(initial?.shape ?? CHARS[given.gender][0]);
   const [accs, setAccs] = useState<Acc[]>(parseAccs(initial?.prop));
@@ -46,15 +49,15 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
   const isQ = page >= 0 && page < PAGES;
   const canNext = (() => {
     if (step === 0) return consent;
-    if (step === 1) return area.trim().length >= 1 && mbti.every(Boolean) && keywords.length >= 1;
+    if (step === 1) return area.trim().length >= 1 && mbti.every(Boolean) && keywords.length >= 1 && (!double || (!!ideal.trim() && !!charm.trim()));
     if (isQ) return answers.slice(page * PER, page * PER + PER).every((a) => a > 0);
     if (step === RESULT) return true;
     return step === CHAR;
   })();
 
   const submit = async () => {
-    const body = { area, mbti: mbti.join(''), keywords, answers, shape, prop: myAccs.join(','), consent };
-    const e = registrationError(body);
+    const body = { area, mbti: mbti.join(''), keywords, answers, shape, prop: myAccs.join(','), consent, ...(double && { ideal, charm }) };
+    const e = registrationError(body, double);
     if (e) return setErr(e);
     setBusy(true); setErr('');
     const j = await api(`/api/e/${slug}/register`, body);
@@ -123,7 +126,11 @@ export default function Register({ slug, given, initial, onCancel, devStep }: { 
             {keywords.length > 0 && <div className="kw">{keywords.map((k) => <span key={k}>{k}<button type="button" aria-label={`${k} 지우기`} onClick={() => setKeywords(keywords.filter((x) => x !== k))}><Icon name="x" /></button></span>)}</div>}
             {keywords.length < 2 && <div className="chips">{KW_EX.filter((k) => !keywords.includes(k)).map((k) => <button type="button" key={k} onClick={() => addKw(k)}>{k}</button>)}</div>}
           </div>
-          <div className="safe"><Icon name="lock" /><div>직업·사는 곳·MBTI는 <b>대화 5분 뒤</b>, 맞은편 상대에게만 보여요.</div></div>
+          {double && <>
+            <label className="fld"><span>내 이상형 · 파트너에게만 보여요</span><textarea maxLength={IDEAL_MAX} rows={2} placeholder="예: 웃음이 많고 대화가 잘 통하는 사람" value={ideal} onChange={(e) => setIdeal(e.target.value)} /></label>
+            <label className="fld"><span>나의 매력 포인트 · 파트너에게만 보여요</span><textarea maxLength={IDEAL_MAX} rows={2} placeholder="예: 리액션 장인, 맛집 지도 보유" value={charm} onChange={(e) => setCharm(e.target.value)} /></label>
+          </>}
+          <div className="safe"><Icon name="lock" /><div>직업·사는 곳·MBTI는 <b>대화 5분 뒤</b>, 같은 테이블 상대에게만 보여요.{double && ' 파트너에게는 미리 보여요.'}</div></div>
         </>}
 
         {isQ && <>

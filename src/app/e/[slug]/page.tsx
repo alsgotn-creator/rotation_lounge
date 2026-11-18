@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Icon } from '../../../components/Icon';
-import { getEvent } from '../../../lib/server/signup';
+import { eventKind, getEvent } from '../../../lib/server/signup';
+import { db } from '../../../lib/server/supabase';
 import { hasDb } from '../../../lib/server/supabase';
 import { loungeView } from '../../../lib/server/lounge';
 import { invitedFromCookie, isLocked, participantOf } from '../../../lib/server/invite';
@@ -43,12 +44,15 @@ export default async function Lounge({ params, searchParams }: { params: Promise
     </main>
   );
 
-  const [p, view] = await Promise.all([participantOf(me.id), loungeView(event.id, me.id)]);
+  const [p, view, kind] = await Promise.all([participantOf(me.id), loungeView(event.id, me.id), eventKind(event.id)]);
+  const double = kind === 'double';
+  // 이상형·매력 포인트는 더블 모임에만 있는 칸 (기본형 조회에 넣으면 0014 전에는 조회가 깨진다)
+  const extra = double && p ? (await db().from('participants').select('ideal,charm').eq('id', p.id).single()).data : null;
   const lounge = p ? view : null;
   const s = toSession(event, []);
   const given = { name: me.name, number: me.number, gender: me.gender, age: Math.min(new Date(event.starts_at).getUTCFullYear(), new Date().getUTCFullYear() + 1) - me.birth_year /* 시연 모임(9999년)에서 나이가 튀지 않게 */, job: me.job };
   return (
-    <Entry slug={slug} given={given} when={`${s.dateLabel} ${s.time}`} devStep={devStep} lounge={lounge}
-      me={p && { area: p.area, mbti: p.mbti, keywords: p.keywords, answers: p.answers, loveType: p.love_type, shape: p.shape as Shape, prop: p.prop }} />
+    <Entry slug={slug} given={given} when={`${s.dateLabel} ${s.time}`} devStep={devStep} lounge={lounge} double={double}
+      me={p && { area: p.area, mbti: p.mbti, keywords: p.keywords, answers: p.answers, loveType: p.love_type, shape: p.shape as Shape, prop: p.prop, ideal: extra?.ideal ?? '', charm: extra?.charm ?? '' }} />
   );
 }

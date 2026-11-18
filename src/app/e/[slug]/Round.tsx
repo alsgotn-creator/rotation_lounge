@@ -22,12 +22,12 @@ function Track({ round, offsetMs, me }: { round: NonNullable<PlayView['round']>;
 }
 
 /** 테이블에 마주 앉은 장면: 왼쪽은 나, 오른쪽은 이번 상대(들). 캐릭터 아랫단은 테이블이 가린다. */
-function Scene({ me, partners }: { me: PublicCard | null; partners: PublicCard[] }) {
+function Scene({ me, partners, mate }: { me: PublicCard | null; partners: PublicCard[]; mate?: PublicCard | null }) {
   if (!partners.length) return null;
   const small = partners.length > 1;
   return (
     <div className="scene" aria-hidden="true">
-      <div className="scene-l">{me && <Character shape={me.shape} color={me.color} acc={me.prop} size={150} />}</div>
+      <div className={`scene-l${mate ? ' many' : ''}`}>{me && <Character shape={me.shape} color={me.color} acc={me.prop} size={mate ? 84 : 150} />}{mate && <Character shape={mate.shape} color={mate.color} acc={mate.prop} size={84} delay={3} />}</div>
       <div className={`scene-r${small ? ' many' : ''}`}>
         {partners.map((p, i) => <Character key={p.id} shape={p.shape} color={p.color} acc={p.prop} size={small ? 84 : 110} delay={i + 1} flip />)}
       </div>
@@ -94,6 +94,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
   }, [view.met]);
 
   const chip = round.partners.length === 0 ? null
+    : view.double ? `${round.ordinal}번째 팀 · 상대 팀 ${round.oppositeCount}팀 중`
     : round.perTable === 1 ? `${round.ordinal}번째 이성 · ${round.oppositeCount}명 중`
     : `${round.ordinal}번째 테이블 · 이성 ${round.oppositeCount}명 중 ${round.partners.length}명`;
 
@@ -107,7 +108,9 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
       <Track round={round} offsetMs={offsetMs} me={me} />
       {notStarted(round.timer) && <p className="rnd-wait">자리를 옮겨 앉아주세요 · 진행자가 시작하면 시간이 흘러가요</p>}
 
-      <Scene me={me} partners={round.partners} />
+      {view.double && view.team && <p className="rnd-team">{view.team.name ? `팀 ${view.team.name}` : '우리 팀'} · 파트너와 함께 앉아요</p>}
+      {view.double && round.partners.length === 0 && <p className="rnd-wait">이번 라운드는 쉬는 시간이에요 · 파트너와 작전을 짜보세요</p>}
+      <Scene me={me} partners={round.partners} mate={view.double ? view.team?.partner : null} />
 
       <section className="pcs">
         {round.partners.map((p) => (
@@ -120,7 +123,7 @@ export default function Round({ slug, view, offsetMs, onRefresh, me }: { slug: s
         ))}
       </section>
 
-      {round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} />}
+      {round.partners.length > 0 && <GameSheet slug={slug} game={view.game} onChange={onRefresh} double={view.double} />}
       {round.partners.length > 0 && !hasProfile && (
         <div className="rnd-why">
           <p><span>신상정보를 바로 안 보여주는 이유는요, 조건과 정보를 모른 채,</span><span>그 사람 자체를 먼저 알아가길 바라는 컨셉이기 때문이에요.</span></p>

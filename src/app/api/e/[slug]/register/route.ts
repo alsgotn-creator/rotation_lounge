@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../../../lib/server/supabase';
 import { invitedFromCookie } from '../../../../../lib/server/invite';
-import { getEvent } from '../../../../../lib/server/signup';
+import { eventKind, getEvent } from '../../../../../lib/server/signup';
 import { registrationError, type RegistrationInput } from '../../../../../lib/domain/register';
 import { loveType } from '../../../../../lib/domain/loveType';
 
@@ -18,7 +18,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   if (ev?.phase !== 'before' && !slug.startsWith('demo-')) return fail('행사가 시작돼서 지금은 고칠 수 없어요.', 409); // 시연 모임은 진행 중에도 새로 등록할 수 있다
 
   const b = (await req.json().catch(() => ({}))) as RegistrationInput;
-  const err = registrationError(b);
+  const double = (await eventKind(event.id)) === 'double';
+  const err = registrationError(b, double);
   if (err) return fail(err);
 
   const now = new Date().toISOString();
@@ -29,6 +30,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     keywords: b.keywords.map((k) => k.trim()).filter(Boolean),
     answers: b.answers, love_type: loveType(b.answers), shape: b.shape, prop: b.prop || 'none',
     consent_at: now, updated_at: now,
+    ...(double && { ideal: b.ideal!.trim(), charm: b.charm!.trim() }),
   };
   const { error } = await db().from('participants').upsert(row, { onConflict: 'application_id' });
   if (error) return fail('저장하지 못했어요. 다시 시도해주세요.', 500);

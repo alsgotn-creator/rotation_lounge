@@ -19,8 +19,21 @@ export async function POST(req: Request) {
   if (startsAt.getTime() < Date.now()) return fail('지난 날짜예요.');
   if (!venue) return fail('장소를 적어주세요.');
   if (!(birthFrom >= 1950 && birthTo <= 2010 && birthFrom <= birthTo)) return fail('나이대를 확인해주세요.');
-  if (!(Number.isInteger(tables) && tables >= 2 && tables <= 12)) return fail('테이블은 2~12개예요.');
-  if (!(Number.isInteger(perTable) && perTable >= 1 && perTable <= 3)) return fail('한 테이블 인원은 1:1, 2:2, 3:3 중에서 골라주세요.');
+  if (b.kind !== 'double' && !(Number.isInteger(tables) && tables >= 2 && tables <= 12)) return fail('테이블은 2~12개예요.');
+  if (b.kind !== 'double' && !(Number.isInteger(perTable) && perTable >= 1 && perTable <= 3)) return fail('한 테이블 인원은 1:1, 2:2, 3:3 중에서 골라주세요.');
+
+  if (b.kind === 'double') {
+    // 더블 라운지: 팀 수 = 성별당 인원, 한 테이블에 2팀 → 테이블 ⌈팀/2⌉
+    const teams = Number(b.teams);
+    if (!(Number.isInteger(teams) && teams >= 2 && teams <= 24)) return fail('팀 수는 2~24예요.');
+    const slug = randomBytes(6).toString('base64url').replace(/[-_]/g, 'x').slice(0, 8).toLowerCase();
+    const { error } = await db().from('events').insert({
+      slug, kind: 'double', title: '플러팅 더블 라운지', starts_at: startsAt.toISOString(), venue, birth_from: birthFrom, birth_to: birthTo,
+      capacity_per_gender: teams, table_count: Math.ceil(teams / 2), price: PRICE, round_duration_sec: 1200, max_picks: 2,
+    });
+    if (error) return fail('Supabase에서 0014_double.sql을 먼저 실행해주세요.', 500);
+    return NextResponse.json({ ok: true, slug });
+  }
 
   const slug = randomBytes(6).toString('base64url').replace(/[-_]/g, 'x').slice(0, 8).toLowerCase();
   const capacity = tables * perTable; // 성별당 최대 인원
