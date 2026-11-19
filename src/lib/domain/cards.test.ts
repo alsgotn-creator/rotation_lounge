@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CARDS, doubleTopic, DOUBLE_TOPICS, drawCard, KINDS, parseTopicId, topicId } from './cards';
+import { CARDS, doubleTopic, DOUBLE_TOPICS, drawCard, KINDS, parseTopicId, roundCards, topicId } from './cards';
 
 describe('cards', () => {
   it('원문을 모두 옮겼고 되묻기 안내는 없다', () => {
@@ -30,10 +30,25 @@ describe('cards', () => {
     expect(parseTopicId(topicId({ kind: 'spicy', step: -3 }))).toEqual({ kind: 'spicy', step: -3 });
     for (const bad of [null, '', 'b1', 'toString:1', 'spicy:x']) expect(parseTopicId(bad)).toEqual({ kind: 'mild', step: 0 });
   });
-  it('다시 뽑으면 같은 종류의 다른 카드', () => {
-    for (const { kind } of KINDS) {
-      const first = drawCard(kind);
-      for (let i = 0; i < 30; i++) { const n = drawCard(kind, first.id); expect(n.kind).toBe(kind); expect(n.id).not.toBe(first.id); }
+  it('라운드가 최대 12번이어도 종류마다 라운드당 3장 이상', () => {
+    for (const { kind } of KINDS) expect(roundCards(kind, 1, 12).length).toBeGreaterThanOrEqual(3);
+  });
+  it('어느 라운드에서도 앞 라운드에 나온 카드는 안 나오고, 한 라운드 안에선 묶음을 다 돌기 전엔 안 겹친다', () => {
+    for (const total of [2, 5, 7, 8, 9, 12]) for (const { kind } of KINDS) {
+      const seen = new Set<string>();
+      for (let r = 1; r <= total; r++) {
+        const pool = roundCards(kind, r, total);
+        let c = drawCard(kind, r, total, null, () => 0.99);
+        const inRound = new Set<string>();
+        for (let i = 0; i < pool.length; i++) {
+          expect(c.kind).toBe(kind);
+          expect(seen.has(c.id)).toBe(false);
+          inRound.add(c.id);
+          c = drawCard(kind, r, total, c.id);
+        }
+        expect(inRound.size).toBe(pool.length);
+        inRound.forEach((id) => seen.add(id));
+      }
     }
   });
 });

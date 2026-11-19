@@ -30,7 +30,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
   if (b.type === 'draw') {
     if (!KINDS.some((k) => k.kind === b.kind)) return fail('알 수 없는 카드 종류예요.');
-    const card = drawCard(b.kind as CardKind, view.game?.cardId);
+    const card = drawCard(b.kind as CardKind, view.round.no, view.round.total, view.game?.cardId);
     const up = await db().from('game_plays').upsert({ ...key, card_id: card.id, drawn_by: p.id });
     if (up.error) return fail('카드를 뽑지 못했어요. 다시 시도해주세요.', 500);
     await db().from('game_answers').delete().match(key); // 새 카드면 이전 답은 지운다
