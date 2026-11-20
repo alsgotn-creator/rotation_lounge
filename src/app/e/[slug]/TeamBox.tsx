@@ -41,9 +41,8 @@ export function TeamCard({ team, onOpen, chatFrom }: { team: TeamView | undefine
   if (team === undefined) return null;
   if (team === null) return (
     <section className="tm">
-      <p className="tm-eb">MY PARTNER</p>
       <h2 className="tm-t">{chatFrom ? `${md(chatFrom)}에 파트너가 공개돼요` : '파트너는 모임 이틀 전 공개돼요'}</h2>
-      <p className="ds">오늘 내 편이 되어줄 이성 파트너가 한 명 정해져요. 공개되면 둘만의 채팅방이 열려요.</p>
+      <p className="ds">모임 당일 서로의 소개를 도와주고 이상형을 추천해줄 파트너가 정해져요. 공개되면 둘만의 채팅방이 열려요.</p>
     </section>
   );
   const p = team.partner;
@@ -56,10 +55,12 @@ export function TeamCard({ team, onOpen, chatFrom }: { team: TeamView | undefine
   );
 }
 
-/** 둘만의 채팅방 (전체 화면). 뒤로 가기 → 라운지 */
-export function TeamChat({ slug, team, reload, onBack }: { slug: string; team: NonNullable<TeamView>; reload: () => Promise<void>; onBack: () => void }) {
+/** 둘만의 채팅방. 기본은 전체 화면(뒤로 가기 → 라운지), mini 는 라운지 안의 작은 창(× 로 닫기) */
+export function TeamChat({ slug, team, reload, onBack, mini = false }: { slug: string; team: NonNullable<TeamView>; reload: () => Promise<void>; onBack: () => void; mini?: boolean }) {
   const [msg, setMsg] = useState('');
-  const [name, setName] = useState<string | null>(null); // 팀 이름 고치는 중일 때만 값이 있다
+  const [name, setName] = useState(team.name); // 팀 이름: 적으면 잠시 뒤 저절로 저장된다
+  const [nameSt, setNameSt] = useState<'' | 'saving' | 'saved'>('');
+  const editing = useRef(false);
   const [info, setInfo] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -82,7 +83,23 @@ export function TeamChat({ slug, team, reload, onBack }: { slug: string; team: N
     return () => { clearTimeout(off.current); sb.removeChannel(c); ch.current = null; };
   }, [team.channel, reload]);
 
-  useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [team.messages.length, typing]);
+  useEffect(() => { const m = end.current?.parentElement; if (m) m.scrollTop = m.scrollHeight; }, [team.messages.length, typing]);
+  // 파트너가 지은 이름도 바로 보이게 (내가 적는 중이 아닐 때만)
+  useEffect(() => { if (!editing.current) setName(team.name); }, [team.name]);
+  // 팀 이름은 적고 0.8초 멈추면 저절로 등록하고 파트너 화면에도 바로 알린다
+  useEffect(() => {
+    if (!editing.current) return;
+    const v = name.trim();
+    if (!v || v === team.name) { setNameSt(v ? 'saved' : ''); return; }
+    setNameSt('saving');
+    const id = setTimeout(async () => {
+      const j = await api(`/api/e/${slug}/team`, { type: 'name', name: v });
+      if (!j.ok) { setErr(j.message ?? '팀 이름을 저장하지 못했어요.'); setNameSt(''); return; }
+      ch.current?.send({ type: 'broadcast', event: 'msg', payload: {} });
+      editing.current = false; setNameSt('saved'); reload();
+    }, 800);
+    return () => clearTimeout(id);
+  }, [name, team.name, slug, reload]);
 
   const signalTyping = () => {
     const now = Date.now();
@@ -100,15 +117,23 @@ export function TeamChat({ slug, team, reload, onBack }: { slug: string; team: N
   };
 
   return (
-    <main className="tc">
+    <main className={mini ? 'tc tc-mini' : 'tc'}>
       <header className="tc-top">
-        <button type="button" className="tc-back" aria-label="라운지로" onClick={onBack}><Icon name="back" /></button>
+        {!mini && <button type="button" className="tc-back" aria-label="라운지로" onClick={onBack}><Icon name="back" /></button>}
         <button type="button" className="tc-who" onClick={() => setInfo(!info)} aria-expanded={info}>
-          <Character shape={p.shape as Shape} color={p.color} acc={p.prop} size={36} />
+          <Character shape={p.shape as Shape} color={p.color} acc={p.prop} size={mini ? 30 : 36} />
           <span><b>{ho(p.gender, p.number)}<small>파트너</small></b><small>{team.name ? `팀 ${team.name}` : '팀 이름을 지어주세요'} · 첫 테이블 {team.firstTable}번</small></span>
           <Icon name="down" />
         </button>
+        {mini && <button type="button" className="tc-back" aria-label="채팅 닫기" onClick={onBack}><Icon name="x" /></button>}
       </header>
+
+      {/* 팀 이름: 둘 중 누가 적어도 저절로 등록된다 */}
+      <label className="tc-name">
+        <span>팀 이름</span>
+        <input maxLength={15} placeholder="둘만의 팀 이름을 적어주세요" value={name} onChange={(e) => { editing.current = true; setName(e.target.value); setErr(''); }} />
+        <em aria-live="polite">{nameSt === 'saving' ? '저장 중…' : nameSt === 'saved' ? '✓ 등록됨' : ''}</em>
+      </label>
 
       {info && <div className="tc-info">
         <p className="tc-meta">{p.age}세 · {p.job} · {p.area} · {p.mbti}</p>
@@ -116,14 +141,6 @@ export function TeamChat({ slug, team, reload, onBack }: { slug: string; team: N
           <div><dt>이상형</dt><dd>{p.ideal || '아직 안 적었어요'}</dd></div>
           <div><dt>매력</dt><dd>{p.charm || '아직 안 적었어요'}</dd></div>
         </dl>
-        <div className="tm-name">
-          {name === null
-            ? <><span className="tc-meta">{team.name ? `팀 이름 · ${team.name}` : '아직 팀 이름이 없어요'}</span><button className="lnk" style={{ margin: 0 }} onClick={() => setName(team.name)}>{team.name ? '바꾸기' : '짓기'}</button></>
-            : <form onSubmit={async (e) => { e.preventDefault(); if (await post({ type: 'name', name })) setName(null); }}>
-                <input autoFocus maxLength={15} placeholder="둘만의 팀 이름" value={name} onChange={(e) => setName(e.target.value)} />
-                <button className="btn" disabled={busy || !name.trim()}>저장</button>
-              </form>}
-        </div>
       </div>}
 
       <div className="tc-msgs" aria-live="polite">

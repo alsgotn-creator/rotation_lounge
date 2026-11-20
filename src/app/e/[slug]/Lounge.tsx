@@ -113,7 +113,9 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
   // 채팅방은 화면 전체로 열고 기록(#chat)을 하나 쌓아서, 뒤로 가기 한 번 → 라운지(또는 대기 화면), 한 번 더 → 이전 화면(홈).
   const { team, reload, screen, chatFrom } = useTeam(slug, double);
   const showLounge = !double || !before || screen === 'lounge';
-  const [chat, setChat] = useState(false);
+  const [chat, setChat] = useState(false); // 라운지 전(채팅방 단계)의 전체 화면 채팅
+  const [mini, setMini] = useState(false); // 라운지 안의 작은 채팅창
+  const openMini = () => { setMini(true); setTimeout(() => document.getElementById('lg-chat')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60); };
   const seen = useRef<boolean | undefined>(undefined); // 처음 확인했을 때 팀이 있었나
   const was = useRef<string | undefined>(undefined); // 지난번 화면
   const openChat = useCallback(() => {
@@ -133,13 +135,13 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
     const first = seen.current === undefined, had = seen.current, prev = was.current;
     seen.current = !!team; was.current = screen;
     if (screen === 'chat' && team) { if (first || had === false || prev !== 'chat') openChat(); }
-    else if (screen === 'lounge' && prev === 'chat' && chat) closeChat();
+    else if (screen === 'lounge' && prev === 'chat' && chat) closeChat(); // 당일 호스트가 라운지를 열면 라운지로 (채팅은 라운지 안 작은 창으로)
     else if (first && location.hash === '#chat') { history.replaceState(null, '', location.pathname + location.search); setChat(false); }
   }, [double, team, screen, chat, openChat, closeChat]);
   // 새로고침했는데 주소에 #chat만 남아 있으면 라운지가 기본
   useEffect(() => { if (!double && location.hash === '#chat') history.replaceState(null, '', location.pathname + location.search); }, [double]);
 
-  if (double && chat && team) return <TeamChat slug={slug} team={team} reload={reload} onBack={closeChat} />;
+  if (double && chat && team && !showLounge) return <TeamChat slug={slug} team={team} reload={reload} onBack={closeChat} />;
 
   return (
     <main className="lounge">
@@ -158,7 +160,6 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
       {/* 더블 라운지 당일 전: 라운지 대신 파트너 카드(채팅방 입구)만 */}
       {!showLounge && <div className="lg-pre">
         <TeamCard team={team} onOpen={openChat} chatFrom={screen === 'wait' ? chatFrom : undefined} />
-        <p className="ds">모임 당일에 라운지가 열려요.</p>
       </div>}
 
       {/* 더블 라운지: 둘만의 채팅방을 가운데 두고 사람들이 빙 둘러앉는다. 나는 아래 가운데. 이상형 키워드는 그 아래. */}
@@ -166,7 +167,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
         <div className="lg-side t">{ring.t.map((c, i) => person(c, i >= ring.t.length / 2))}</div>
         <div className="lg-side l">{ring.l.map((c) => person(c))}</div>
         <div className="lg-mid">
-          {double ? <TeamCard team={team} onOpen={openChat} /> : before ? <IdealCloud lists={IDEAL} /> : null}
+          {double ? <TeamCard team={team} onOpen={() => (mini ? setMini(false) : openMini())} /> : before ? <IdealCloud lists={IDEAL} /> : null}
           {others.length === 0 && <p className="empty" style={{ padding: '16px 0' }}>다른 분들이 들어오는 중이에요</p>}
         </div>
         <div className="lg-side r">{ring.r.map((c) => person(c, true))}</div>
@@ -181,9 +182,10 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
         </div>
       </section>}
 
-      {showLounge && double && before && <div className="lg-idc"><IdealCloud lists={IDEAL} /></div>}
+      {/* 라운지 안에서 조그맣게 열리는 둘만의 채팅창 */}
+      {showLounge && double && mini && team && <div id="lg-chat" className="lg-chat"><TeamChat mini slug={slug} team={team} reload={reload} onBack={() => setMini(false)} /></div>}
 
-      <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
+      {showLounge && double && before && <div className="lg-idc"><IdealCloud lists={IDEAL} /></div>}
 
       <div className="ft">
         <button type="button" className={`lg-mine${typeOpen ? ' open' : ''}`} aria-expanded={typeOpen} onClick={() => setTypeOpen(!typeOpen)}>

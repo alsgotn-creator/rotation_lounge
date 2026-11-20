@@ -797,3 +797,15 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .cls-leave{display:block;width:calc(100% - 40px);margin:22px auto 40px}
 .cls .cls-rv{margin-bottom:0} /* 후기 · 호스트에게 하고 싶은 말이 이어진다 */
 .chc-cell.lock .chc-pick{opacity:.35}
+
+/* 팀 이름: 적으면 저절로 등록 · 라운지 안의 작은 채팅창 (2026-11-20) */
+.tc-name{flex:none;display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--sheet);border-bottom:1px solid var(--line)}
+.tc-name>span{flex:none;font-size:12px;font-weight:900;color:var(--mute)}
+.tc-name input{flex:1;min-width:0;height:34px;border:1.5px solid var(--line);border-radius:12px;padding:0 10px;font:inherit;font-size:16px;font-weight:700;background:var(--bg);outline:none}
+.tc-name em{flex:none;min-width:44px;font-style:normal;font-size:11.5px;font-weight:800;color:var(--acc);text-align:right}
+.lg-chat{margin:14px 12px 0}
+.tc.tc-mini{height:420px;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+.tc-mini .tc-top{padding:8px 8px 8px 12px}
+.tc-mini .tc-msgs{padding:12px}
+.tc-mini .tc-msgs .tc-empty{margin-top:12%}
+.tc-mini .tc-in{padding:8px 10px}
