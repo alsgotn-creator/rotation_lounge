@@ -773,3 +773,12 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .tc-in input{flex:1;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:22px;padding:0 16px;font:inherit;font-size:16px;font-weight:600;background:var(--bg);outline:none}
 .tc-in .btn{width:auto;flex:none;height:44px;padding:0 16px;border-radius:22px;font-size:14px}
 .tc-err{flex-basis:100%;margin:0;color:var(--err);font-size:12.5px;font-weight:600}
+
+/* 더블 라운지: 둘만의 채팅방 카드는 원 가운데, 이상형 키워드는 그 아래 (2026-11-20) */
+.lg-mid .tm{margin:0;width:100%;padding:12px 10px;text-align:center}
+.lg-mid .tm-open{flex-direction:column;gap:6px}
+.lg-mid .tm-open-tx{width:100%}
+.lg-mid .tm-open-tx b{font-size:14px}
+.lg-mid .tm-t{font-size:15px}
+.lg-mid .tm .ds{font-size:12px}
+.lg-idc{margin:16px 12px 0}

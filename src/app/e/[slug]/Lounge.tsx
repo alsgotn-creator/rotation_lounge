@@ -147,12 +147,12 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
         <span>{when} · 여 {v.counts.f} · 남 {v.counts.m}</span>
       </header>
 
-      {/* 이상형 박스를 가운데 두고 사람들이 빙 둘러앉는다. 나는 아래 가운데. */}
+      {/* 더블 라운지: 둘만의 채팅방을 가운데 두고 사람들이 빙 둘러앉는다. 나는 아래 가운데. 이상형 키워드는 그 아래. */}
       <section className="lg-ring">
         <div className="lg-side t">{ring.t.map((c, i) => person(c, i >= ring.t.length / 2))}</div>
         <div className="lg-side l">{ring.l.map((c) => person(c))}</div>
         <div className="lg-mid">
-          {before ? <IdealCloud lists={IDEAL} /> : null}
+          {double ? <TeamCard team={team} onOpen={openChat} /> : before ? <IdealCloud lists={IDEAL} /> : null}
           {others.length === 0 && <p className="empty" style={{ padding: '16px 0' }}>다른 분들이 들어오는 중이에요</p>}
         </div>
         <div className="lg-side r">{ring.r.map((c) => person(c, true))}</div>
@@ -167,7 +167,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
         </div>
       </section>
 
-      {double && <TeamCard team={team} onOpen={openChat} />}
+      {double && before && <div className="lg-idc"><IdealCloud lists={IDEAL} /></div>}
 
       <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
 
