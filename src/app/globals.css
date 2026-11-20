@@ -823,3 +823,14 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .cls-offer em{flex:none;font-style:normal;height:30px;padding:0 12px;border-radius:15px;background:var(--btn);color:var(--btntx);font-size:12.5px;font-weight:800;display:grid;place-items:center}
 .cls-offer.on{border-color:var(--text)}.cls-offer.on em{background:var(--surf2);color:var(--text)}
 .cls-offers>.ds{margin:4px 2px 0;font-size:12px;text-align:center}
+
+/* 더블 최종 선택: 파트너 추천 (받은 추천은 캐릭터 아래 작은 표시, 내 추천은 위 칸에서 고른다) */
+.chc-pick .chc-rec{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);max-width:none;padding:2px 8px;border-radius:9px;background:#f7ece6;border:1px solid #ecd6cc;color:#8a5a68;font-size:11px;font-weight:800;white-space:nowrap}
+.chc-recbox{margin:16px 16px 0;padding:14px 14px 12px;border-radius:20px;background:#fbf5f1;border:1px solid #f0e2db}
+.chc-recbox>b{font-size:14px;font-weight:900}
+.chc-recbox>p{margin:4px 0 0;font-size:12.5px;line-height:1.5;font-weight:600;color:var(--mute)}
+.chc-recbox>small{display:block;margin-top:8px;font-size:12px;font-weight:700;color:var(--err)}
+.chc-recrow{display:flex;gap:8px;margin-top:10px;overflow-x:auto}
+.chc-recrow button{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px;padding:8px 10px;border-radius:16px;border:2px solid transparent;background:var(--surf);color:inherit;font:inherit;cursor:pointer}
+.chc-recrow button.on{border-color:#8a5a68}
+.chc-recrow button b{font-size:12px;font-weight:900}

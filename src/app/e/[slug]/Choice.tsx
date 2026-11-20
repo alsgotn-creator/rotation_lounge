@@ -17,6 +17,19 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
   const [shake, setShake] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
+  const rec = choice.rec;
+  const [recSel, setRecSel] = useState<string[]>(rec?.mine ?? []);
+  const [recMsg, setRecMsg] = useState('');
+  // 파트너에게 추천: 누를 때마다 바로 저장 (파트너 화면엔 3초 안에 '파트너 추천'이 뜬다)
+  const toggleRec = async (id: string) => {
+    if (!rec) return;
+    const next = recSel.includes(id) ? recSel.filter((x) => x !== id) : [...recSel, id];
+    if (next.length > rec.max) return setRecMsg(`최대 ${rec.max}명까지 추천할 수 있어요`);
+    const prev = recSel;
+    setRecSel(next); setRecMsg('');
+    const j = await api(`/api/e/${slug}/recommend`, { ids: next });
+    if (!j.ok) { setRecSel(prev); setRecMsg(j.message ?? '다시 시도해주세요.'); }
+  };
   const dirty = sel.length !== choice.picks.length || sel.some((id, i) => id !== choice.picks[i]) || fire !== (choice.brave ?? null);
   const saved = choice.done && !dirty;
 
@@ -51,6 +64,19 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
         <button className="lnk" onClick={onPaper}>롤링페이퍼 다시 보기</button>
         <span className={`chc-count${shake ? ' shake' : ''}`} aria-live="polite">{sel.length} / {choice.max}</span>
       </header>
+      {rec && rec.options.length > 0 && <section className="chc-recbox">
+        <b>파트너에게 추천하기</b>
+        <p>채팅에서 들은 파트너의 이상형에 맞는 분을 골라주세요 (최대 {rec.max}명). 파트너 화면에 &lsquo;파트너 추천&rsquo;으로 살짝 보여요.</p>
+        <div className="chc-recrow">
+          {rec.options.map((o) => (
+            <button key={o.id} className={recSel.includes(o.id) ? 'on' : ''} aria-pressed={recSel.includes(o.id)} onClick={() => toggleRec(o.id)}>
+              <Character shape={o.shape as Shape} color={o.color} acc={o.prop} size={44} delay={(o.number ?? 0) * 0.5} />
+              <b>{ho(o.gender, o.number)}</b>
+            </button>
+          ))}
+        </div>
+        {recMsg && <small role="alert">{recMsg}</small>}
+      </section>}
       <div className="chc-grid">
         {choice.candidates.map((c) => {
           const on = sel.includes(c.id), met = !!view.met[c.id];
@@ -59,6 +85,7 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
               <button className="chc-pick" aria-pressed={on} aria-label={`${ho(c.gender, c.number)} ${on ? '선택 취소' : '선택'}`} onClick={() => toggle(c.id)}>
                 {on && <span className="chc-heart" aria-hidden="true">{partner ? '♥' : `${sel.indexOf(c.id) + 1}순위`}</span>}
                 {c.id === partner && <span className="chc-partner">파트너</span>}
+                {rec?.to.includes(c.id) && <span className="chc-rec">파트너 추천</span>}
                 <Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={72} delay={(c.number ?? 0) * 0.5} />
                 <b>{ho(c.gender, c.number)}</b>
                 <span>{c.keywords[0]}</span>

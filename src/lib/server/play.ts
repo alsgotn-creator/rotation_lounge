@@ -17,13 +17,16 @@ export type PlayView = {
   round: null | { no: number; total: number; timer: Round; perTable: number; partners: PublicCard[]; ordinal: number; oppositeCount: number };
   met: Record<string, Profile>;            // 5분 이상 함께 앉았던 사람만 (최종선택 때는 같이 앉았던 사람 모두). 한 번 공개되면 계속 보인다.
   pending: null | { round: number; to: PublicCard };
-  choice: null | { max: number; picks: string[]; brave: string | null; done: boolean; candidates: PublicCard[] };
+  choice: null | { max: number; picks: string[]; brave: string | null; done: boolean; candidates: PublicCard[]; rec: null | Rec };
   paper: null | { notes: { id: string; body: string; font: string; from: { gender: 'f' | 'm'; number: number | null } }[] };   // 최종선택 단계에만. 보낸 사람은 '여3호'처럼 호가 보인다
   double: boolean;                         // 더블 라운지(2:2 파트너)
   team: null | { no: number; name: string; partner: PublicCard | null; reveal: null | { similar: number; mbtiSame: number } }; // reveal: 마무리 단계에서만 (파트너 매칭 기준 공개)
   topic: null | TopicState;                // 더블: 이 테이블이 보고 있는 대화 주제 (누가 넘기면 테이블 전체가 같이)
   game: null | { cardId: string; kind: string; prompt: string; options: string[]; mine: string | null; answered: number; total: number; answers: null | { gender: 'f' | 'm'; number: number; me: boolean; text: string }[] };
 };
+
+/** 더블 최종 선택의 파트너 추천. to: 파트너가 나에게 추천한 사람, mine: 내가 파트너에게 추천한 사람, options: 내가 추천할 수 있는 사람(같이 앉았던 상대 팀의 나와 같은 성별) */
+export type Rec = { max: number; to: string[]; mine: string[]; options: PublicCard[] };
 
 const card = (p: Person): PublicCard => ({ id: p.id, gender: p.gender, number: p.number, shape: p.shape, prop: p.prop, color: p.color, keywords: p.keywords, me: false });
 
@@ -60,7 +63,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
   const paperQ = (cols: string) => db().from('notes').select(cols).eq('event_id', eventId).eq('to_id', meId).eq('hidden', false).not('body', 'is', null).order('created_at');
 
   // 아래 조회는 서로 독립이다 → 한 번에 보낸다 (3초마다 14대가 부르는 길). 표·칸이 아직 없으면(마이그레이션 전) 각자 error 로 돌아와 건너뛴다.
-  const [play, ans, profiles, answerRows, written, cq0, doneRow, paper0] = await Promise.all([
+  const [play, ans, profiles, answerRows, written, cq0, doneRow, paper0, recQ] = await Promise.all([
     key ? db().from('game_plays').select('card_id').match(key).maybeSingle() : null,
     key ? db().from('game_answers').select('participant_id,answer').match(key) : null,
     pids.length ? db().from('participants').select('id,age,job,area,mbti,love_type').in('id', pids) : null,
@@ -69,6 +72,7 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     choosing ? db().from('choices').select('to_id,rank,brave').eq('event_id', eventId).eq('from_id', meId).order('rank') : null,
     choosing ? db().from('participants').select('choice_done_at').eq('id', meId).single() : null,
     choosing ? paperQ('id,body,from_id,font') : null,
+    choosing && mateId ? db().from('recommends').select('from_id,to_id').eq('event_id', eventId).in('from_id', [meId, mateId]) : null,
   ]);
 
   // 선택형 페어 게임: 이 테이블의 카드와 답. 테이블 사람이 모두 답해야 서로의 답이 보인다.
@@ -107,7 +111,17 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     const cq = cq0?.error ? await db().from('choices').select('to_id').eq('event_id', eventId).eq('from_id', meId) : cq0!; // rank 칸이 없을 때
     const picks = (cq.data ?? []).map((c) => c.to_id as string); // 순위 순서
     const brave = ((cq.data ?? []) as { to_id: string; brave?: boolean }[]).find((c) => c.brave)?.to_id ?? null;
-    choice = { max: double ? 2 : ev.max_picks, picks, brave, done: doneRow && !doneRow.error ? !!doneRow.data?.choice_done_at : picks.length > 0, candidates: opposite.filter((p) => !double || ids.includes(p.id) || (myTeam && (p.id === myTeam.f || p.id === myTeam.m))).sort((a, b) => a.number! - b.number!).map(card) }; // 더블: 파트너 + 같은 테이블에 앉았던 이성만
+    const candidates = opposite.filter((p) => !double || ids.includes(p.id) || (myTeam && (p.id === myTeam.f || p.id === myTeam.m))).sort((a, b) => a.number! - b.number!).map(card); // 더블: 파트너 + 같은 테이블에 앉았던 이성만
+    // 파트너 추천: recommends 표가 없으면(0018 전) 칸을 아예 안 보인다
+    const recRows = recQ && !recQ.error ? (recQ.data ?? []) as { from_id: string; to_id: string }[] : null;
+    const myGender = byId.get(meId)?.gender;
+    const rec: Rec | null = recRows && mateId ? {
+      max: 2,
+      to: recRows.filter((r) => r.from_id === mateId && candidates.some((c) => c.id === r.to_id)).map((r) => r.to_id),
+      mine: recRows.filter((r) => r.from_id === meId).map((r) => r.to_id),
+      options: ids.map((id) => byId.get(id)).filter((p) => !!p && p.id !== meId && p.gender === myGender && p.number != null).sort((a, b) => a!.number! - b!.number!).map((p) => card(p!)),
+    } : null;
+    choice = { max: double ? 2 : ev.max_picks, picks, brave, done: doneRow && !doneRow.error ? !!doneRow.data?.choice_done_at : picks.length > 0, candidates, rec };
   }
 
   // 받은 쪽지는 최종선택 단계에서 (고르기 전에) 읽는다. 매칭 결과는 앱에 보여주지 않고 진행자가 따로 연락한다.
