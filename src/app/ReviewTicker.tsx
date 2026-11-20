@@ -19,7 +19,7 @@ export default function ReviewTicker({ reviews }: { reviews: Review[] }) {
       <span key={i} className="lp-tick-in">
         <Stars value={r.rating} size={11} />
         <q>{r.body}</q>
-        <small>{r.age}세 · {r.gender === 'f' ? '여성' : '남성'}</small>
+        <small>{r.age}세 · {r.gender === 'f' ? '여성' : '남성'}{r.sample && <i className="lp-sample">예시</i>}</small>
       </span>
     </Link>
   );

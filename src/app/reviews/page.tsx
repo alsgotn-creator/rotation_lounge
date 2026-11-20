@@ -16,7 +16,7 @@ export default async function ReviewsPage() {
       <section className="lp-sec">
         {reviews.length === 0
           ? <div className="lp-card static"><div className="lp-tx"><strong>후기를 준비하고 있어요</strong><span>행사가 끝나면 참가자들의 이야기가 여기 모여요.</span></div></div>
-          : <div className="lp-rvs">{reviews.map((r, i) => <div className="lp-rv" key={i}><Stars value={r.rating} /><p>“{r.body}”</p><small>{r.age}세 · {r.gender === 'f' ? '여성' : '남성'}</small></div>)}</div>}
+          : <div className="lp-rvs">{reviews.map((r, i) => <div className="lp-rv" key={i}><Stars value={r.rating} /><p>“{r.body}”</p><small>{r.age}세 · {r.gender === 'f' ? '여성' : '남성'}{r.sample && <i className="lp-sample">예시</i>}</small></div>)}</div>}
       </section>
       <TabBar />
     </main>

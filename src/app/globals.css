@@ -739,3 +739,4 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .lp-rv small{display:block;margin-top:10px;font-size:12px;font-weight:700;color:var(--mute)}
 .lp-qa{padding:4px 18px;border-radius:24px;background:#fbfbfd;border:1px solid #ececf1}
 .lp-qa details:last-child{border-bottom:0}
+.lp-sample{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;background:#efeff2;color:var(--mute);font-style:normal;font-size:10px;font-weight:800;vertical-align:1px}
