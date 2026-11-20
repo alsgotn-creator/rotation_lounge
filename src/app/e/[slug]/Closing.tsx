@@ -11,10 +11,11 @@ const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape=
 /** 마무리: 결과는 호스트가 열어줄 때까지 기다리고, 열리면 서로 고른 사람만 보여준다. 롤링페이퍼는 언제든 볼 수 있다. */
 function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   const [text, setText] = useState('');
+  const [rating, setRating] = useState(5);
   const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
   const send = async () => {
     setSt('busy');
-    const r = await api(`/api/e/${slug}/review`, { body: text });
+    const r = await api(`/api/e/${slug}/review`, { body: text, rating });
     setSt(r.ok ? 'done' : 'err');
     if (r.ok) onDone();
   };
@@ -22,6 +23,12 @@ function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {
     <section className="cls-rv">
       <h3>오늘 모임 어땠나요?</h3>
       <p className="ds">이름 없이 성별·나이만 보여요. 한 번 남기면 고쳐 쓸 수 있어요.</p>
+      <div className="stars-pick" role="radiogroup" aria-label="별점">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" role="radio" aria-checked={rating === n} aria-label={`${n}점`} className={n <= rating ? 'on' : undefined} onClick={() => { setRating(n); setSt('idle'); }}>★</button>
+        ))}
+        <b>{rating.toFixed(1)}</b>
+      </div>
       <textarea value={text} maxLength={120} rows={3} placeholder="한 줄 후기를 남겨주세요 (120자)" onChange={(e) => { setText(e.target.value); setSt('idle'); }} />
       <button className="btn" disabled={!text.trim() || st === 'busy'} onClick={send}>{st === 'done' ? '남겼어요 · 고쳐 쓰기' : '후기 남기기'}</button>
       {st === 'err' && <p className="preview">저장하지 못했어요. 다시 시도해주세요.</p>}

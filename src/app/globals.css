@@ -659,3 +659,83 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .cls-secret-n div{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.12)}
 .cls-secret-n small{display:block;font-size:12px;opacity:.7}
 .cls-secret-n b{font-size:24px;font-weight:900}
+
+/* ---------- 첫 화면 (2026-11-20 개편: 상단 바 · 호 위 일러스트 · 카드 목록 · 떠 있는 탭 바) ---------- */
+/* 첫 화면 한 장에 그림 → 일정 → 1 신청 | 2 입장 까지 들어오게 높이를 아낀다 */
+.lp{--blush:#f7ece6;--blush2:#fbf5f1;--rose:#8a5a68;position:relative;min-height:100svh;background:var(--sheet);padding-bottom:110px;overflow-x:clip}
+.lp:before{content:"";position:absolute;inset:0 0 auto;height:330px;background:linear-gradient(180deg,var(--blush),var(--blush2))}
+.lp-top{position:relative;z-index:6;display:flex;align-items:flex-start;gap:10px;padding:14px 20px 0;animation:up .6s .05s both}
+.lp-brand{flex:1;padding-top:11px;font-size:17px;font-weight:800;letter-spacing:-.04em}
+.lp-brand i{font-style:normal;color:var(--rose)}
+.lp-topr{position:relative;display:flex;flex-direction:column;align-items:flex-end}
+.lp-host{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 15px;border-radius:15px;background:rgba(255,255,255,.75);box-shadow:var(--shadow);font-size:14px;font-weight:800}
+.lp-host small{font-size:9px;font-weight:900;letter-spacing:.12em;color:var(--rose)}
+/* 후기 한 줄: 흐름을 밀지 않게 HOST 칩 아래에 떠 있다 */
+.lp-tick{position:absolute;right:0;top:50px;width:min(230px,58vw);padding:8px 11px;border-radius:13px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:var(--shadow);font-size:12px;line-height:1.4;overflow:hidden}
+.lp-tick-in{display:block;animation:tickIn .45s cubic-bezier(.2,.8,.2,1) both}
+.lp-tick q{display:block;margin-top:3px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;quotes:"“" "”"}
+.lp-tick small{display:block;margin-top:2px;font-size:10.5px;color:var(--mute);font-weight:600}
+@keyframes tickIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.stars{display:inline-flex;align-items:center;gap:5px;line-height:1}
+.stars-bg{position:relative;display:inline-block;color:#e6dcd8;letter-spacing:1px}
+.stars-fg{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#f2a93b}
+.stars b{font-weight:900;color:var(--text)}
+.stars-pick{display:flex;align-items:center;gap:2px;margin:12px 0 4px}
+.stars-pick button{border:0;background:none;padding:2px;font-size:30px;line-height:1;color:#e6dcd8;cursor:pointer}
+.stars-pick button.on{color:#f2a93b}
+.stars-pick b{margin-left:8px;font-size:18px;font-weight:900}
+.lp-hero{position:relative;height:290px;margin-top:-6px} /* z-index 없음: 그림이 바깥 배경색과 곱하기(multiply)로 섞이게 */
+.lp-hero:after{content:"";position:absolute;left:-30%;right:-30%;bottom:-1px;height:104px;z-index:3;background:var(--sheet);border-radius:50% 50% 0 0/100% 100% 0 0}
+.lp-ring{position:absolute;left:50%;top:-24px;width:330px;height:330px;margin-left:-165px;border-radius:50%;border:26px solid rgba(138,90,104,.07)}
+.lp-eyebrow{position:absolute;left:0;right:0;top:-8px;z-index:5;text-align:center;font-size:11px;font-weight:900;letter-spacing:.24em;color:rgba(138,90,104,.7)}
+.lp-art{position:absolute;left:50%;bottom:6px;width:262px;margin-left:-131px;z-index:4;mix-blend-mode:multiply;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent),linear-gradient(180deg,transparent,#000 14%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent),linear-gradient(180deg,transparent,#000 14%);mask-composite:intersect;animation:enter 1.4s cubic-bezier(.2,.7,.2,1) both} /* 흰 그림 바탕이 배경색에 녹는다 */
+.lp-art img{display:block;width:100%;height:auto}
+.lp-art video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+@media (prefers-reduced-motion:reduce){.lp-art video{display:none}}
+.lp-head{position:relative;z-index:5;text-align:center;margin-top:-4px;padding:0 20px}
+.lp-head h1{margin:0;font-size:30px;font-weight:900;letter-spacing:-.05em;line-height:1.15;animation:up .7s .25s both}
+.lp-head p{margin:6px 0 0;font-size:15px;font-weight:600;color:var(--mute);letter-spacing:-.02em;animation:up .7s .35s both}
+.lp-list{position:relative;z-index:3;display:flex;flex-direction:column;gap:10px;padding:16px 20px 0;animation:up .6s .45s both}
+.lp-card{display:flex;align-items:center;gap:14px;padding:14px 16px 14px 14px;border-radius:22px;background:#fbfbfd;border:1px solid #ececf1;box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 24px -18px rgba(0,0,0,.18);transition:transform .12s}
+a.lp-card:active,.lp-apply:active{transform:scale(.985)}
+.lp-card>.ic{color:var(--rose);width:22px;height:22px}
+.lp-ico{width:50px;height:50px;border-radius:16px;background:var(--blush);display:grid;place-items:center;flex:none;color:var(--rose)}
+.lp-ico.date{display:flex;flex-direction:column;justify-content:center;line-height:1.05}
+.lp-ico.date small{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.lp-ico.date b{font-size:19px;font-weight:900;color:var(--text);letter-spacing:-.03em}
+.lp-tx{flex:1;min-width:0}
+.lp-tx strong{display:block;font-size:16px;font-weight:800;letter-spacing:-.03em}
+.lp-tx span{display:block;margin-top:3px;font-size:13.5px;font-weight:600;color:var(--mute)}
+.lp-tx em{font-style:normal;color:var(--rose);font-weight:800}
+.lp-sec{padding:34px 20px 0}
+.lp-steps{display:grid;grid-template-columns:minmax(100px,31%) 1fr;gap:10px;align-items:stretch;padding-top:20px}
+.lp-steps .price{margin:0;border-radius:22px;background:#fbfbfd;border:1px solid #ececf1;padding:18px 13px 12px}
+.lp-steps .price .fld{margin-top:8px!important}
+.lp-steps .price .btn{height:46px;font-size:15px;margin-top:12px!important}
+.lp-apply{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:18px 13px 12px;border-radius:22px;background:var(--blush);border:1px solid #efdfd8;transition:transform .12s}
+.lp-apply .lp-ico{width:40px;height:40px;border-radius:13px;background:#fff;margin-bottom:6px}
+.lp-apply strong{font-size:15.5px;font-weight:800;letter-spacing:-.03em}
+.lp-apply>span:not(.stepno):not(.lp-ico){font-size:12.5px;font-weight:600;color:var(--mute);line-height:1.45}
+.lp-apply>.ic{margin-top:auto;align-self:flex-end;color:var(--rose)}
+.lp-biz{border-top:0}
+.lp-tab{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));translate:-50% 0;width:calc(100% - 24px);max-width:456px;z-index:20;animation:up .6s .6s both}
+.lp-pill{display:flex;gap:2px;padding:5px;border-radius:28px;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 2px 6px rgba(0,0,0,.05),0 14px 30px -14px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.04)}
+.lp-pill a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 6px;border-radius:23px;font-size:12px;font-weight:700;color:var(--text)}
+.lp-pill a .ic{width:20px;height:20px}
+.lp-pill a.on{background:#efeff2;color:var(--rose)}
+/* 후기 · FAQ · 문의하기 페이지 */
+.lp-page:before{height:260px}
+.lp-ph{position:relative;z-index:1;padding:56px 24px 6px}
+.lp-ph p{margin:0;font-size:11px;font-weight:900;letter-spacing:.22em;color:var(--rose)}
+.lp-ph h1{margin:8px 0 0;font-size:30px;font-weight:900;letter-spacing:-.05em}
+.lp-ph span{display:block;margin-top:8px;font-size:15px;font-weight:600;color:var(--mute)}
+.lp-avg{display:flex;align-items:center;gap:10px;margin-top:14px}
+.lp-avg small{font-size:13px;font-weight:700;color:var(--mute)}
+.lp-page .lp-sec{position:relative;z-index:1;padding:28px 20px 0}
+.lp-page .lp-list{padding:28px 20px 0}
+.lp-rvs{display:flex;flex-direction:column;gap:12px}
+.lp-rv{padding:18px;border-radius:22px;background:#fbfbfd;border:1px solid #ececf1;box-shadow:0 10px 24px -18px rgba(0,0,0,.18)}
+.lp-rv p{margin:10px 0 0;font-size:15px;font-weight:600;line-height:1.6}
+.lp-rv small{display:block;margin-top:10px;font-size:12px;font-weight:700;color:var(--mute)}
+.lp-qa{padding:4px 18px;border-radius:24px;background:#fbfbfd;border:1px solid #ececf1}
+.lp-qa details:last-child{border-bottom:0}
