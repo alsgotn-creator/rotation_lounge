@@ -2,11 +2,31 @@ import { Character } from './Character';
 import { seatColumns } from '../lib/domain/lounge';
 import type { Shape } from '../lib/domain/register';
 
-type P = { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; nickname?: string };
+type P = { id?: string; gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; nickname?: string };
+export type FpTeam = { no: number; f: string; m: string; name: string };
 export type TablePair = { table: number; f: P[]; m: P[] };
 
-function Side({ list, label, faces }: { list: P[]; label: string; faces: boolean }) {
+function Side({ list, label, faces, teams }: { list: P[]; label: string; faces: boolean; teams?: FpTeam[] }) {
   if (!list.length) return <div className="fp-side"><div className="fp-seat empty" aria-label={`${label} 빈자리`}><span>빈자리</span></div></div>;
+  if (teams) {
+    // 더블 라운지: 같은 팀(여·남 파트너)끼리 한 상자로 묶는다
+    const groups: { t: FpTeam | undefined; ps: P[] }[] = [];
+    for (const p of list) {
+      const t = teams.find((x) => x.f === p.id || x.m === p.id);
+      const g = t && groups.find((x) => x.t === t);
+      if (g) g.ps.push(p); else groups.push({ t, ps: [p] });
+    }
+    return (
+      <div className="fp-side">
+        {groups.map(({ t, ps }, i) => (
+          <div className="fp-team" key={t?.no ?? `x${i}`}>
+            <b className="fp-tn">{t ? `${t.no}팀` : '팀 없음'}{t?.name ? <small>{t.name}</small> : null}</b>
+            {ps.map((p) => <span key={`${p.gender}${p.number}`} className={`fp-tp ${p.gender}`}>{p.gender === 'f' ? '여' : '남'}{p.number}호</span>)}
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="fp-side">
       {list.map((p) => (
@@ -26,12 +46,12 @@ const ROOM: Record<number, Record<number, [number, number]>> = {
 };
 
 /** 직사각형 배치: 오른쪽 열 1..⌈T/2⌉ 위→아래, 왼쪽 열 아래→위 (번호순이 시계 방향). 7·8테이블은 ROOM. 한 테이블에 여자 g명 · 남자 g명 */
-export function FloorPlan({ pairs, faces = true }: { pairs: TablePair[]; faces?: boolean }) {
+export function FloorPlan({ pairs, faces = true, teams }: { pairs: TablePair[]; faces?: boolean; teams?: FpTeam[] }) {
   const table = (n: number, style?: React.CSSProperties) => (
     <div className="fp-t" key={n} style={style}>
       <b className="fp-no">{n}</b>
-      <Side list={pairs[n - 1].f} label="여" faces={faces} />
-      <Side list={pairs[n - 1].m} label="남" faces={faces} />
+      <Side list={pairs[n - 1].f} label={teams ? '앉는 팀' : '여'} faces={faces} teams={teams} />
+      <Side list={pairs[n - 1].m} label={teams ? '옮기는 팀' : '남'} faces={faces} teams={teams} />
     </div>
   );
   const room = ROOM[pairs.length];

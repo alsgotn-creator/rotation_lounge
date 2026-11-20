@@ -136,7 +136,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
 
         <p className="eb" style={{ marginTop: 26 }}>{current ? `${current.no}라운드 테이블` : double ? '1라운드 테이블 (왼쪽 앉는 팀 · 오른쪽 옮기는 팀)' : '1라운드 테이블 (같은 번호끼리)'}</p>
         {!current && !double && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={compact}>번호 당기기 · 빈 번호 없애기</button>}
-        <FloorPlan pairs={v.pairs} faces={false} />
+        <FloorPlan pairs={v.pairs} faces={false} teams={double ? v.teams : undefined} />
 
         <p className="eb" style={{ marginTop: 26 }}>설정</p>
         <div className="addf" style={{ paddingTop: 12 }}>

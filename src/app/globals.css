@@ -782,3 +782,10 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .lg-mid .tm-t{font-size:15px}
 .lg-mid .tm .ds{font-size:12px}
 .lg-idc{margin:16px 12px 0}
+
+/* 관리자 진행 · 더블 라운지 테이블: 파트너 팀끼리 한 상자 (2026-11-20) */
+.fp-team{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px 7px;border-radius:12px;background:var(--surf);border:1.5px solid var(--line)}
+.fp-tn{font-size:11.5px;font-weight:900;text-align:center;line-height:1.2}
+.fp-tn small{display:block;font-size:10.5px;font-weight:700;color:var(--mute);max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-tp{font-size:12px;font-weight:800}
+.fp-tp.f{color:#b8284f}.fp-tp.m{color:#2f4fb0}
