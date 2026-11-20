@@ -130,15 +130,8 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
       <h2 className="q" style={{ textAlign: 'center' }}>오늘 만나서<br />반가웠어요</h2>
       <p className="ds" style={{ textAlign: 'center' }}>서로 마음이 닿은 분들께는<br />1시간 이내로 따로 연락드릴게요.</p>
 
-      {view.team?.reveal && (
-        <section className="cls-secret">
-          <p className="tm-eb">PARTNER SECRET</p>
-          <h3>사실 두 분은…</h3>
-          <p>오늘 참가자 중 <b>가치관과 MBTI가 가장 다른</b> 짝이었어요.</p>
-          <div className="cls-secret-n"><div><small>가치관 일치율</small><b>{view.team.reveal.similar}%</b></div><div><small>MBTI 같은 글자</small><b>{view.team.reveal.mbtiSame} / 4</b></div></div>
-          <p className="ds">정반대라서 서로의 이상형을 더 잘 찾아줄 수 있었을까요?</p>
-        </section>
-      )}
+      {/* 오늘 뒷풀이가 맨 먼저 */}
+      <AfterParty s={signups} onDone={bye} />
 
       <ReviewBox slug={slug} onDone={bye} />
 
@@ -151,8 +144,7 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
         </section>
       )}
 
-      {/* 리뷰 → 뒷풀이 안내 → 신청 버튼 3개 */}
-      <AfterParty s={signups} onDone={bye} />
+      {/* 리뷰 → 신청 버튼 3개 */}
       <Offers s={signups} />
 
       <button type="button" className="btn sub cls-leave" onClick={leave}>나가기</button>
