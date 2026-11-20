@@ -744,7 +744,32 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .lp-ses em{font-style:normal;font-weight:800;color:var(--rose)}.lp-ses em.off{color:var(--dim)}
 .lp-ses li.none{padding:8px 0;font-size:12.5px;font-weight:600;color:var(--mute)}
 .lp-steps .tel010 b{display:flex;align-items:center;height:42px;line-height:1}.lp-steps .fld .tel010 input{line-height:42px}
-/* 더블 라운지: 파트너가 정해지면 위에 떠 있는 '채팅하기' (채팅 칸이 보이면 숨는다) */
-.tm{scroll-margin-top:16px}
-.tm-jump{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));translate:-50% 0;z-index:30;display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border:0;border-radius:21px;background:var(--btn);color:var(--btntx);font:inherit;font-size:14px;font-weight:800;box-shadow:0 10px 26px -10px rgba(0,0,0,.45);cursor:pointer;animation:up .4s both;white-space:nowrap}
-.tm-jump b{display:grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#fff;color:var(--btn);font-size:11px}
+/* 더블 라운지: 라운지 속 '채팅' 카드 + 전체 화면 둘만의 채팅방 */
+.tm-open{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);border:0;font:inherit;color:inherit;cursor:pointer}
+.tm-open-tx{flex:1;min-width:0}
+.tm-open-tx b{display:block;font-size:15px;font-weight:900}
+.tm-open-tx small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm-open em{flex:none;font-style:normal;height:34px;padding:0 14px;border-radius:17px;background:var(--btn);color:var(--btntx);font-size:13px;font-weight:800;display:grid;place-items:center}
+.tc{display:flex;flex-direction:column;height:100svh;background:var(--bg)}
+.tc-top{flex:none;display:flex;align-items:center;gap:4px;padding:10px 12px;background:var(--sheet);border-bottom:1px solid var(--line)}
+.tc-back{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:12px;background:none;color:var(--text);cursor:pointer}
+.tc-who{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;padding:0}
+.tc-who>span{flex:1;min-width:0}
+.tc-who b{display:block;font-size:15px;font-weight:900}.tc-who b small{margin-left:5px;font-size:11px;font-weight:800;color:var(--dim)}
+.tc-who>span>small{display:block;font-size:12px;font-weight:600;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-who>.ic{width:18px;height:18px;color:var(--dim);transition:transform .2s}.tc-who[aria-expanded=true]>.ic{transform:rotate(180deg)}
+.tc-info{flex:none;padding:10px 16px 12px;background:var(--sheet);border-bottom:1px solid var(--line)}
+.tc-meta{margin:0;font-size:12.5px;font-weight:700;color:var(--mute)}
+.tc-info .tm-name{margin-top:8px}
+.tc-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:16px 14px}
+.tc-msgs p{margin:0;align-self:flex-start;max-width:78%;padding:9px 13px;border-radius:18px 18px 18px 5px;background:var(--sheet);font-size:14.5px;line-height:1.45;font-weight:600;word-break:break-word;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.tc-msgs p.me{align-self:flex-end;border-radius:18px 18px 5px 18px;background:var(--btn);color:var(--btntx)}
+.tc-msgs .tc-empty{align-self:center;max-width:none;background:none;box-shadow:none;text-align:center;color:var(--dim);font-size:13.5px;margin-top:30%}
+.tc-typing{display:flex!important;gap:4px;align-items:center;padding:12px 14px!important}
+.tc-typing i{width:7px;height:7px;border-radius:50%;background:var(--dim);animation:tdot 1.2s infinite ease-in-out}
+.tc-typing i:nth-child(2){animation-delay:.15s}.tc-typing i:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,60%,100%{opacity:.35;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.tc-in{flex:none;display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--sheet);border-top:1px solid var(--line)}
+.tc-in input{flex:1;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:22px;padding:0 16px;font:inherit;font-size:16px;font-weight:600;background:var(--bg);outline:none}
+.tc-in .btn{width:auto;flex:none;height:44px;padding:0 16px;border-radius:22px;font-size:14px}
+.tc-err{flex-basis:100%;margin:0;color:var(--err);font-size:12.5px;font-weight:600}

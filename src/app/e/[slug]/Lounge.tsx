@@ -9,7 +9,7 @@ import { ho } from '../../../lib/domain/lounge';
 import { PALETTE, phrases, typeName } from '../../../lib/domain/loveType';
 import type { Shape } from '../../../lib/domain/register';
 import type { LoungeView } from '../../../lib/server/lounge';
-import TeamBox from './TeamBox';
+import { TeamCard, TeamChat, useTeam } from './TeamBox';
 
 /** 누를 때마다 통통 / 흔들 / 찌그러짐을 돌아가며, 하트가 떠오른다. */
 function Poke({ children }: { children: React.ReactNode }) {
@@ -109,6 +109,32 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
   useEffect(() => { try { if (!localStorage.getItem(prepKey(slug))) setPrep(true); } catch { setPrep(true); } }, [slug]);
   const closePrep = () => { setPrep(false); try { localStorage.setItem(prepKey(slug), '1'); } catch {} };
 
+  // 더블 라운지: 파트너가 정해지면 둘만의 채팅방이 화면 전체로 열린다.
+  // 열 때 기록(#chat)을 하나 쌓아서, 뒤로 가기 한 번 → 라운지, 한 번 더 → 이전 화면(홈).
+  const { team, reload } = useTeam(slug, double);
+  const [chat, setChat] = useState(false);
+  const seen = useRef<boolean | undefined>(undefined); // 처음 확인했을 때 팀이 있었나
+  const openChat = useCallback(() => {
+    if (location.hash !== '#chat') history.pushState({ chat: 1 }, '', '#chat');
+    setChat(true); scrollTo(0, 0);
+  }, []);
+  const closeChat = () => (location.hash === '#chat' ? history.back() : setChat(false));
+  useEffect(() => {
+    const onPop = () => setChat(location.hash === '#chat');
+    addEventListener('popstate', onPop);
+    return () => removeEventListener('popstate', onPop);
+  }, []);
+  // 들어왔을 때 이미 파트너가 있거나, 보고 있는 동안 파트너가 정해지면 채팅방으로
+  useEffect(() => {
+    if (!double || team === undefined) return;
+    if (seen.current === undefined || (seen.current === false && team)) { if (team) openChat(); }
+    seen.current = !!team;
+  }, [double, team, openChat]);
+  // 새로고침했는데 주소에 #chat만 남아 있으면 라운지가 기본
+  useEffect(() => { if (!double && location.hash === '#chat') history.replaceState(null, '', location.pathname + location.search); }, [double]);
+
+  if (double && chat && team) return <TeamChat slug={slug} team={team} reload={reload} onBack={closeChat} />;
+
   return (
     <main className="lounge">
       <div className="lg-top">
@@ -141,7 +167,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
         </div>
       </section>
 
-      {double && <TeamBox slug={slug} />}
+      {double && <TeamCard team={team} onOpen={openChat} />}
 
       <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
 

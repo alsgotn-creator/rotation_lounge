@@ -3,15 +3,20 @@ import { db } from '../../../../../lib/server/supabase';
 import { getEvent } from '../../../../../lib/server/signup';
 import { invitedFromCookie, participantOf } from '../../../../../lib/server/invite';
 import { teamTable } from '../../../../../lib/domain/double';
+import { createHmac } from 'node:crypto';
 
 export const dynamic = 'force-dynamic';
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
 export type TeamView = null | {
   no: number; name: string; firstTable: number;
+  /** 둘만의 실시간 채널 이름(입력 중 표시 · 새 메시지 알림). 추측할 수 없게 서버 비밀로 만든다 */
+  channel: string;
   partner: { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; keywords: string[]; age: number; job: string; area: string; mbti: string; ideal: string; charm: string };
   messages: { id: string; me: boolean; body: string; at: string }[];
 };
+
+const teamChannel = (eventId: string, no: number) => 'tm-' + createHmac('sha256', process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').update(`team:${eventId}:${no}`).digest('base64url').slice(0, 24);
 
 /** 더블 라운지: 내 팀(파트너 정보 · 팀 이름 · 둘만의 채팅). 파트너가 누구와 왜 묶였는지(매칭 기준)는 담지 않는다. */
 async function load(slug: string) {
@@ -37,7 +42,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   ]);
   const o = ps?.[0];
   const team: TeamView = o ? {
-    no: t.no, name: t.name, firstTable: teamTable(t.no, 1, ev?.table_count ?? 1),
+    no: t.no, name: t.name, channel: teamChannel(event.id, t.no), firstTable: teamTable(t.no, 1, ev?.table_count ?? 1),
     partner: { gender: o.gender, number: o.number, shape: o.shape, prop: o.prop, color: o.love_type, keywords: o.keywords, age: o.age, job: o.job, area: o.area, mbti: o.mbti, ideal: o.ideal ?? '', charm: o.charm ?? '' },
     messages: (msgs ?? []).map((m) => ({ id: m.id, me: m.from_id === p.id, body: m.body, at: m.created_at })),
   } : null;
