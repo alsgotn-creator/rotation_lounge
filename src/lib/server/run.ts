@@ -4,7 +4,7 @@ import { pairs, type Round, type Seated } from '../domain/seating';
 import { eventLayout } from './signup';
 import { compactNumbers } from '../signup/rules';
 import { mutualPairs } from '../domain/matching';
-import { pairTeams, randomTeams, tablesFor, teamTable, type Team } from '../domain/double';
+import { pairTeams, PRE_STAGES, randomTeams, tablesFor, teamTable, type PreStage, type Team } from '../domain/double';
 
 export type Phase = 'before' | 'talk' | 'choice' | 'closing';
 export const PHASES: Phase[] = ['before', 'talk', 'choice', 'closing'];
@@ -19,7 +19,7 @@ export type TeamRow = Team & { name: string; fit: number; similar: number; mbtiS
 
 export async function loadRun(eventId: string) {
   // 참가자 폰이 3초마다 부르는 길: 서로 독립인 조회는 한 번에 보낸다 (왕복 수가 곧 속도)
-  const [{ data: ev }, { data: rr }, { data: ps }, { perTable }, lk, kd, tm] = await Promise.all([
+  const [{ data: ev }, { data: rr }, { data: ps }, { perTable }, lk, kd, tm, st] = await Promise.all([
     db().from('events').select('id,slug,starts_at,venue,phase,table_count,round_duration_sec,max_picks').eq('id', eventId).single(),
     db().from('rounds').select('no,started_at,paused_at,paused_total_ms,duration_sec,closed_at').eq('event_id', eventId).order('no'),
     db().from('participants').select('id,gender,number,excluded,nickname,shape,prop,love_type,keywords,applications(name)').eq('event_id', eventId).order('number', { nullsFirst: false }),
@@ -27,7 +27,9 @@ export async function loadRun(eventId: string) {
     db().from('events').select('locked').eq('id', eventId).single(), // locked 칸은 마이그레이션 0012 전에는 없을 수 있다 → 그때는 열린 것으로
     db().from('events').select('kind').eq('id', eventId).single(), // kind·teams 는 0014 전에는 없다 → 기본형
     db().from('teams').select('no,f_id,m_id,name,fit,similar_pct,mbti_same').eq('event_id', eventId).order('no'),
+    db().from('events').select('pre_stage').eq('id', eventId).single(), // 0016 전에는 없다 → auto
   ]);
+  const preStage: PreStage = !st.error && PRE_STAGES.includes(st.data?.pre_stage) ? st.data!.pre_stage : 'auto';
   const kind: 'rotation' | 'double' = !kd.error && kd.data?.kind === 'double' ? 'double' : 'rotation';
   const teams: TeamRow[] = kind === 'double' && !tm.error ? (tm.data ?? []).map((t) => ({ no: t.no, f: t.f_id, m: t.m_id, name: t.name, fit: t.fit, similar: t.similar_pct, mbtiSame: t.mbti_same })) : [];
   const rounds = ((rr ?? []) as RoundRow[]).map(toRound);
@@ -38,7 +40,7 @@ export async function loadRun(eventId: string) {
   }));
   const seated: Seated[] = people.filter((p) => p.number != null && !p.excluded).map((p) => ({ id: p.id, gender: p.gender, number: p.number! }));
   const current = rounds.at(-1) ?? null;
-  return { ev: { ...ev!, per_table: perTable, locked: !lk.error && !!lk.data?.locked, kind }, rounds, current, people, seated, teams };
+  return { ev: { ...ev!, per_table: perTable, locked: !lk.error && !!lk.data?.locked, kind, pre_stage: preStage }, rounds, current, people, seated, teams };
 }
 
 /** 이번(또는 곧 시작할 1라운드) 테이블별 앉는 사람들 */
@@ -65,6 +67,7 @@ export type HostCmd =
   | { type: 'compact' }
   | { type: 'pairTeams'; mode?: 'opposite' | 'random' }
   | { type: 'lock'; locked: boolean }
+  | { type: 'stage'; stage: PreStage }
   | { type: 'hideNote'; noteId: string; hidden: boolean }
   | { type: 'reset'; what: ResetWhat };
 
@@ -102,6 +105,11 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       if (error) return no('라운드를 시작하지 못했어요. 다시 눌러주세요.');
       if (ev.phase !== 'talk') await db().from('events').update({ phase: 'talk' }).eq('id', eventId);
       return { ok: true };
+    }
+    case 'stage': {
+      if (!PRE_STAGES.includes(cmd.stage)) return no('알 수 없는 화면이에요.');
+      const { error } = await db().from('events').update({ pre_stage: cmd.stage }).eq('id', eventId);
+      return error ? no('저장하지 못했어요. Supabase에서 0016 SQL을 먼저 실행해주세요.') : { ok: true };
     }
     case 'endRound':
       if (!open) return no('진행 중인 라운드가 없어요.');
@@ -203,7 +211,7 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       if (all || w === 'rounds') { await del('game_answers'); await del('game_plays'); await del('rounds'); }
       if (all || w === 'rounds' || w === 'notes') await del('notes');
       if (all || w === 'choices') { await del('choices'); await db().from('participants').update({ choice_done_at: null }).eq('event_id', eventId); }
-      if (all || w === 'closing') { await del('reviews'); await del('wine_signups'); }
+      if (all || w === 'closing') { await del('reviews'); await del('wine_signups'); await del('host_feedback'); }
       const patch: Record<string, unknown> = {};
       if (all || w === 'rounds') patch.phase = 'before';
       if (Object.keys(patch).length) await db().from('events').update(patch).eq('id', eventId);
@@ -220,12 +228,13 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
 
 /** 호스트만 보는 최종 선택 현황·매칭 커플·쪽지 (참가자 응답에는 절대 넣지 않는다). 표가 아직 없으면 빈 값. */
 export async function loadHostExtras(eventId: string, people: Person[]) {
-  const [ch0, nt, dn, ap, wn] = await Promise.all([
+  const [ch0, nt, dn, ap, wn, fb] = await Promise.all([
     db().from('choices').select('from_id,to_id,rank,brave').eq('event_id', eventId).order('rank'),
     db().from('notes').select('id,round,from_id,to_id,body,hidden').eq('event_id', eventId).order('created_at'),
     db().from('participants').select('id,choice_done_at').eq('event_id', eventId),
     db().from('participants').select('id,age,job,application_id,applications(name,phone,email)').eq('event_id', eventId),
     db().from('wine_signups').select('application_id').eq('event_id', eventId), // 표가 없으면 빈 값
+    db().from('host_feedback').select('application_id,body,created_at').eq('event_id', eventId).order('created_at'), // 0016 전에는 없다
   ]);
   const ch = ch0.error ? await db().from('choices').select('from_id,to_id').eq('event_id', eventId) : ch0; // rank 칸이 없을 때
   type Ap = { id: string; age: number; job: string; application_id: string; applications: { name: string; phone: string; email: string } | null };
@@ -237,6 +246,12 @@ export async function loadHostExtras(eventId: string, people: Person[]) {
     const pp = people.find((x) => x.id === a.id);
     if (wineIds.has(a.application_id) && pp) wine.push({ gender: pp.gender, number: pp.number, name: a.applications?.name ?? '', age: a.age, job: a.job, phone: a.applications?.phone ?? '', email: a.applications?.email ?? '' });
   }
+  // 호스트에게 하고 싶은 말 (모임 피드백 · 요청사항)
+  const aps = ((ap.error ? [] : ap.data) ?? []) as unknown as Ap[];
+  const feedback = (fb.error ? [] : (fb.data ?? [])).flatMap((f) => {
+    const a = aps.find((x) => x.application_id === f.application_id), pp = a && people.find((x) => x.id === a.id);
+    return pp ? [{ gender: pp.gender, number: pp.number, name: a!.applications?.name ?? '', body: f.body as string }] : [];
+  });
   const choices = ch.error ? [] : (ch.data ?? []).map((c) => ({ fromId: c.from_id as string, toId: c.to_id as string, brave: !!(c as { brave?: boolean }).brave }));
   const active = people.filter((p) => !p.excluded && p.number != null);
   const picks = active.map((p) => ({ id: p.id, to: choices.filter((c) => c.fromId === p.id).map((c) => c.toId) }));
@@ -245,7 +260,7 @@ export async function loadHostExtras(eventId: string, people: Person[]) {
   const count = (g: 'f' | 'm') => { const gs = active.filter((p) => p.gender === g); return { done: gs.filter((p) => doneIds.has(p.id)).length, total: gs.length }; };
   const byGender = { f: count('f'), m: count('m') };
   return {
-    picks, matches: mutualPairs(choices), brave: mutualPairs(choices.filter((c) => c.brave)), done: byGender.f.done + byGender.m.done, total: active.length, byGender, contacts, wine,
+    picks, matches: mutualPairs(choices), brave: mutualPairs(choices.filter((c) => c.brave)), done: byGender.f.done + byGender.m.done, total: active.length, byGender, contacts, wine, feedback,
     notes: nt.error ? [] : (nt.data ?? []).filter((n) => n.body != null).map((n) => ({ id: n.id as string, round: n.round as number, fromId: n.from_id as string, toId: n.to_id as string, body: n.body as string, hidden: !!n.hidden })),
   };
 }

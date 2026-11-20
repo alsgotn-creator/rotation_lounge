@@ -109,30 +109,33 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
   useEffect(() => { try { if (!localStorage.getItem(prepKey(slug))) setPrep(true); } catch { setPrep(true); } }, [slug]);
   const closePrep = () => { setPrep(false); try { localStorage.setItem(prepKey(slug), '1'); } catch {} };
 
-  // 더블 라운지: 파트너가 정해지면 둘만의 채팅방이 화면 전체로 열린다.
-  // 열 때 기록(#chat)을 하나 쌓아서, 뒤로 가기 한 번 → 라운지, 한 번 더 → 이전 화면(홈).
-  const { team, reload } = useTeam(slug, double);
+  // 더블 라운지 시작 전: 모임 이틀 전부터 둘만의 채팅방이 열리고(라운지는 아직 안 보임), 당일 호스트가 '라운지'를 누르면 라운지가 보인다.
+  // 채팅방은 화면 전체로 열고 기록(#chat)을 하나 쌓아서, 뒤로 가기 한 번 → 라운지(또는 대기 화면), 한 번 더 → 이전 화면(홈).
+  const { team, reload, screen, chatFrom } = useTeam(slug, double);
+  const showLounge = !double || !before || screen === 'lounge';
   const [chat, setChat] = useState(false);
   const seen = useRef<boolean | undefined>(undefined); // 처음 확인했을 때 팀이 있었나
+  const was = useRef<string | undefined>(undefined); // 지난번 화면
   const openChat = useCallback(() => {
     if (location.hash !== '#chat') history.pushState({ chat: 1 }, '', '#chat');
     setChat(true); scrollTo(0, 0);
   }, []);
-  const closeChat = () => (location.hash === '#chat' ? history.back() : setChat(false));
+  const closeChat = useCallback(() => (location.hash === '#chat' ? history.back() : setChat(false)), []);
   useEffect(() => {
     const onPop = () => setChat(location.hash === '#chat');
     addEventListener('popstate', onPop);
     return () => removeEventListener('popstate', onPop);
   }, []);
-  // 시작 전에만: 들어왔을 때 이미 파트너가 있거나, 보고 있는 동안 파트너가 정해지면 채팅방으로.
-  // 대화가 시작된 뒤(라운드가 끝나 라운지로 돌아올 때)는 라운지가 먼저 뜨고, 채팅은 가운데 카드로 연다.
+  // 채팅방이 열린 동안: 들어왔을 때, 파트너가 막 정해졌을 때, 채팅방이 막 열렸을 때 채팅방으로.
+  // 호스트가 라운지를 열면(당일) 라운지로. 대화가 시작된 뒤에는 라운지가 먼저 뜨고, 채팅은 가운데 카드로 연다.
   useEffect(() => {
-    if (!double || team === undefined) return;
-    const first = seen.current === undefined;
-    if (team && before && (first || seen.current === false)) openChat();
+    if (!double || team === undefined || screen === undefined) return;
+    const first = seen.current === undefined, had = seen.current, prev = was.current;
+    seen.current = !!team; was.current = screen;
+    if (screen === 'chat' && team) { if (first || had === false || prev !== 'chat') openChat(); }
+    else if (screen === 'lounge' && prev === 'chat' && chat) closeChat();
     else if (first && location.hash === '#chat') { history.replaceState(null, '', location.pathname + location.search); setChat(false); }
-    seen.current = !!team;
-  }, [double, team, openChat, before]);
+  }, [double, team, screen, chat, openChat, closeChat]);
   // 새로고침했는데 주소에 #chat만 남아 있으면 라운지가 기본
   useEffect(() => { if (!double && location.hash === '#chat') history.replaceState(null, '', location.pathname + location.search); }, [double]);
 
@@ -146,12 +149,20 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
       </div>
       <header className="lg-head">
         <p>{double ? 'DOUBLE LOUNGE' : 'ROTATION LOUNGE'}</p>
-        <h1>오늘의 라운지{before && <em className="lg-soon">곧 시작합니다</em>}</h1>
+        {showLounge
+          ? <h1>오늘의 라운지{before && <em className="lg-soon">곧 시작합니다</em>}</h1>
+          : <h1>나의 파트너</h1>}
         <span>{when} · 여 {v.counts.f} · 남 {v.counts.m}</span>
       </header>
 
+      {/* 더블 라운지 당일 전: 라운지 대신 파트너 카드(채팅방 입구)만 */}
+      {!showLounge && <div className="lg-pre">
+        <TeamCard team={team} onOpen={openChat} chatFrom={screen === 'wait' ? chatFrom : undefined} />
+        <p className="ds">모임 당일에 라운지가 열려요.</p>
+      </div>}
+
       {/* 더블 라운지: 둘만의 채팅방을 가운데 두고 사람들이 빙 둘러앉는다. 나는 아래 가운데. 이상형 키워드는 그 아래. */}
-      <section className="lg-ring">
+      {showLounge && <section className="lg-ring">
         <div className="lg-side t">{ring.t.map((c, i) => person(c, i >= ring.t.length / 2))}</div>
         <div className="lg-side l">{ring.l.map((c) => person(c))}</div>
         <div className="lg-mid">
@@ -168,9 +179,9 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
           </div>
           {ring.b.slice(1).map((c) => person(c, true))}
         </div>
-      </section>
+      </section>}
 
-      {double && before && <div className="lg-idc"><IdealCloud lists={IDEAL} /></div>}
+      {showLounge && double && before && <div className="lg-idc"><IdealCloud lists={IDEAL} /></div>}
 
       <button className="lnk" onClick={() => setPrep(true)}>준비사항 다시 보기</button>
 

@@ -21,10 +21,11 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
   const saved = choice.done && !dirty;
 
   const partner = view.double ? view.team?.partner?.id : undefined;
+  const locked = (id: string) => !!partner && !sel.includes(id) && (id === partner ? sel.length > 0 : sel.includes(partner));
   const toggle = (id: string) => {
     if (sel.includes(id)) { if (fire === id) setFire(null); return setSel(sel.filter((x) => x !== id)); }
-    // 더블: 파트너 1명 또는 다른 이성 최대 2명. 한쪽을 고르면 다른 쪽은 풀린다
-    if (partner && (id === partner || sel.includes(partner))) { setMsg(id === partner ? '파트너를 고르면 다른 분은 고를 수 없어요' : ''); return setSel([id]); }
+    // 더블: 파트너 1명 또는 다른 이성 최대 2명. 파트너 + 다른 이성은 안 된다 (한쪽을 고르면 다른 쪽은 잠긴다)
+    if (locked(id)) { setShake(true); setTimeout(() => setShake(false), 500); return setMsg(id === partner ? '다른 분을 골라서 파트너는 고를 수 없어요. 파트너를 고르려면 먼저 선택을 취소해주세요' : '파트너를 골라서 다른 분은 고를 수 없어요. 다른 분을 고르려면 파트너 선택을 취소해주세요'); }
     if (sel.length >= choice.max) { setShake(true); setMsg(`최대 ${choice.max}명까지 고를 수 있어요`); setTimeout(() => setShake(false), 500); return; }
     setMsg(''); setSel([...sel, id]);
   };
@@ -44,7 +45,7 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
       <header className="chc-head">
         <h1 className="q">마음이 간 분을<br />골라주세요</h1>
         {partner
-          ? <p className="ds"><b>오늘의 파트너 1명</b>을 고르거나, <b>다른 이성 최대 2명</b>을 골라주세요. 서로 골랐다면 매칭해드려요.<br />아무도 고르지 않아도 괜찮아요.</p>
+          ? <p className="ds"><b>오늘의 파트너 1명</b>을 고르거나, <b>다른 이성 최대 2명</b>을 골라주세요. 파트너와 다른 이성을 함께 고를 수는 없어요. 서로 골랐다면 매칭해드려요.<br />아무도 고르지 않아도 괜찮아요.</p>
           : <p className="ds">최대 {choice.max}순위까지, 누른 순서대로 순위가 정해져요. 서로의 1·2순위가 겹치지 않아도 3순위끼리 서로 골랐다면 매칭해드려요.<br />아무도 고르지 않아도 괜찮아요.</p>}
         <p className="ds" style={{ marginTop: 6 }}>캐릭터 왼쪽 위 <b>ⓘ</b>를 누르면 그분의 정보를 볼 수 있어요.</p>
         <button className="lnk" onClick={onPaper}>롤링페이퍼 다시 보기</button>
@@ -54,7 +55,7 @@ export default function Choice({ slug, view, onSaved, onPaper }: { slug: string;
         {choice.candidates.map((c) => {
           const on = sel.includes(c.id), met = !!view.met[c.id];
           return (
-            <div key={c.id} className={`chc-cell${on ? ' on' : ''}`}>
+            <div key={c.id} className={`chc-cell${on ? ' on' : ''}${locked(c.id) ? ' lock' : ''}`}>
               <button className="chc-pick" aria-pressed={on} aria-label={`${ho(c.gender, c.number)} ${on ? '선택 취소' : '선택'}`} onClick={() => toggle(c.id)}>
                 {on && <span className="chc-heart" aria-hidden="true">{partner ? '♥' : `${sel.indexOf(c.id) + 1}순위`}</span>}
                 {c.id === partner && <span className="chc-partner">파트너</span>}

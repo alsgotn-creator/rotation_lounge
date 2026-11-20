@@ -8,14 +8,15 @@ import { RoundTimer } from '../../../../components/RoundTimer';
 import { api } from '../../../../lib/api';
 import { ho } from '../../../../lib/domain/lounge';
 import { notStarted, type Round } from '../../../../lib/domain/seating';
+import { chatOpensAt, preScreen, type PreStage } from '../../../../lib/domain/double';
 import type { HostCmd, Moved, Person, Phase, ResetWhat } from '../../../../lib/server/run';
 
 type View = {
-  ev: { slug: string; phase: Phase; table_count: number; per_table: number; locked: boolean; round_duration_sec: number; max_picks: number; kind: 'rotation' | 'double' };
+  ev: { slug: string; phase: Phase; table_count: number; per_table: number; locked: boolean; round_duration_sec: number; max_picks: number; kind: 'rotation' | 'double'; pre_stage: PreStage; starts_at: string };
   current: Round | null; people: Person[];
   teams: { no: number; f: string; m: string; name: string; fit: number; similar: number; mbtiSame: number }[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
-  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; done: number; total: number; byGender: Record<'f' | 'm', { done: number; total: number }>; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
+  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; feedback?: { gender: 'f' | 'm'; number: number | null; name: string; body: string }[]; done: number; total: number; byGender: Record<'f' | 'm', { done: number; total: number }>; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
 };
 const PHASE_KO: [Phase, string][] = [['before', '시작 전'], ['talk', '대화'], ['choice', '최종 선택'], ['closing', '마무리']];
 
@@ -94,6 +95,20 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         {/* 더블 라운지: 시작 전에 사전 등록한 남녀를 무작위로 짝지어 팀 채팅을 미리 열어준다 */}
         {double && !current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginTop: 14 }} disabled={busy} onClick={() => pairTeams('random')}>
           {v.teams.length ? '사전 랜덤 매칭 다시 하기' : '사전 랜덤 상대 매칭'}</button>}
+
+        {/* 더블 라운지 시작 전 참가자 화면: 이틀 전부터 채팅방 → 당일 호스트가 라운지를 연다 */}
+        {double && ev.phase === 'before' && (() => {
+          const d = new Date(chatOpensAt(ev.starts_at) + 9 * 3600e3), from = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+          const now = preScreen('before', ev.pre_stage, ev.starts_at);
+          const opts: [PreStage, string][] = [['auto', `자동 · ${from}부터 채팅`], ['chat', '채팅방 지금 열기'], ['lounge', '라운지 열기 (당일)']];
+          return <div className="run-stage">
+            <p className="eb" style={{ margin: '18px 0 6px' }}>참가자 화면 · 지금 <b>{now === 'lounge' ? '라운지' : now === 'chat' ? '파트너 채팅방' : '채팅방 열리기 전'}</b></p>
+            <div className="phases" role="radiogroup" aria-label="참가자 화면" style={{ marginTop: 0 }}>
+              {opts.map(([k, label]) => <button key={k} role="radio" aria-checked={ev.pre_stage === k} className={ev.pre_stage === k ? 'on' : ''} disabled={busy}
+                onClick={() => ev.pre_stage !== k && send({ type: 'stage', stage: k }).then((j) => j.ok && show(k === 'lounge' ? '참가자 화면에 라운지가 열렸어요' : k === 'chat' ? '파트너 채팅방을 열었어요' : '채팅방이 모임 이틀 전에 열려요'))}>{label}</button>)}
+            </div>
+          </div>;
+        })()}
 
         <div className="phases" role="tablist" aria-label="단계">
           {PHASE_KO.map(([p, label]) => (
@@ -216,10 +231,18 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         </>}
 
         {v.extras.wine.length > 0 && <>
-          <p className="eb run-eb" style={{ marginTop: 26 }}>연말 와인모임 문자 안내 신청 ({v.extras.wine.length})<ResetBtn what="closing" msg="와인모임 신청과 후기를 모두 지워요." /></p>
+          <p className="eb run-eb" style={{ marginTop: 26 }}>연말 와인모임 문자 안내 신청 ({v.extras.wine.length})<ResetBtn what="closing" msg="와인모임 신청과 후기, 호스트에게 남긴 말을 모두 지워요." /></p>
           <div className="people">
             {v.extras.wine.map((w) => (
               <div key={w.email + w.phone} className="person-row"><div><b>{w.gender === 'f' ? '여' : '남'}{w.number}호 {w.name} · {w.age}세 · {w.job}</b><span>{w.phone}</span></div></div>))}
+          </div>
+        </>}
+
+        {!!v.extras.feedback?.length && <>
+          <p className="eb" style={{ marginTop: 26 }}>호스트에게 하고 싶은 말 ({v.extras.feedback.length})</p>
+          <div className="people">
+            {v.extras.feedback.map((f, i) => (
+              <div key={i} className="person-row" style={{ alignItems: 'flex-start' }}><div><b style={{ fontSize: 12, color: 'var(--mute)' }}>{f.gender === 'f' ? '여' : '남'}{f.number}호 {f.name}</b><span style={{ display: 'block', fontSize: 14, color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{f.body}</span></div></div>))}
           </div>
         </>}
 

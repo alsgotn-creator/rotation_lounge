@@ -6,7 +6,7 @@ import { Icon } from '../../../components/Icon';
 import { api } from '../../../lib/api';
 import { ho } from '../../../lib/domain/lounge';
 import type { Shape } from '../../../lib/domain/register';
-import type { TeamView } from '../../api/e/[slug]/team/route';
+import type { TeamScreen, TeamView } from '../../api/e/[slug]/team/route';
 
 // 브라우저용 Supabase: 데이터는 읽지 않고, 둘만의 채널로 '입력 중'·'새 메시지' 신호만 주고받는다
 let rt: ReturnType<typeof createClient> | null = null;
@@ -20,9 +20,10 @@ const realtime = () => {
 /** 내 팀 상태. undefined = 아직 모름, null = 파트너가 아직 없음. 3초마다(채팅 중엔 신호가 오면 바로) 새로 읽는다 */
 export function useTeam(slug: string, enabled = true) {
   const [t, setT] = useState<TeamView | undefined>(undefined);
+  const [scr, setScr] = useState<TeamScreen | null>(null); // 시작 전 화면 (채팅방 열리기 전 · 채팅방 · 라운지)
   const load = useCallback(async () => {
-    const j = await api<{ team: TeamView }>(`/api/e/${slug}/team`);
-    if (j.ok) setT(j.team ?? null);
+    const j = await api<{ team: TeamView } & TeamScreen>(`/api/e/${slug}/team`);
+    if (j.ok) { setT(j.team ?? null); if (j.screen) setScr({ screen: j.screen, chatFrom: j.chatFrom ?? 0 }); }
   }, [slug]);
   useEffect(() => {
     if (!enabled) return; // 더블 라운지가 아니면 팀이 없다
@@ -30,16 +31,18 @@ export function useTeam(slug: string, enabled = true) {
     const i = setInterval(() => document.visibilityState === 'visible' && load(), 3000);
     return () => clearInterval(i);
   }, [load, enabled]);
-  return { team: t, reload: load };
+  return { team: t, reload: load, screen: scr?.screen, chatFrom: scr?.chatFrom };
 }
 
 /** 라운지 안의 작은 카드: 파트너가 정해지면 '채팅방 열기' */
-export function TeamCard({ team, onOpen }: { team: TeamView | undefined; onOpen: () => void }) {
+const md = (ms: number) => { const k = new Date(ms + 9 * 3600e3); return `${k.getUTCMonth() + 1}월 ${k.getUTCDate()}일`; };
+
+export function TeamCard({ team, onOpen, chatFrom }: { team: TeamView | undefined; onOpen: () => void; chatFrom?: number }) {
   if (team === undefined) return null;
   if (team === null) return (
     <section className="tm">
       <p className="tm-eb">MY PARTNER</p>
-      <h2 className="tm-t">파트너는 모임 전날 공개돼요</h2>
+      <h2 className="tm-t">{chatFrom ? `${md(chatFrom)}에 파트너가 공개돼요` : '파트너는 모임 이틀 전 공개돼요'}</h2>
       <p className="ds">오늘 내 편이 되어줄 이성 파트너가 한 명 정해져요. 공개되면 둘만의 채팅방이 열려요.</p>
     </section>
   );

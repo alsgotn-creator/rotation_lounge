@@ -75,3 +75,21 @@ export function randomTeams(fs: P[], ms: P[], rand: () => number = Math.random):
 
 /** 이상형 · 매력 포인트 (사전 등록, 파트너에게만 보인다) */
 export const IDEAL_MAX = 60;
+
+/** 시작 전 참가자 화면 설정 (호스트가 고른다). auto = 이틀 전부터 채팅방, chat = 지금 채팅방, lounge = 당일 라운지 */
+export type PreStage = 'auto' | 'chat' | 'lounge';
+export const PRE_STAGES: PreStage[] = ['auto', 'chat', 'lounge'];
+
+const KST = 9 * 3600e3;
+/** 파트너 채팅방이 열리는 시각: 모임 날짜(한국 시간) 이틀 전 0시 */
+export function chatOpensAt(startsAt: string | number) {
+  const k = new Date(new Date(startsAt).getTime() + KST);
+  return Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate() - 2) - KST;
+}
+
+/** 지금 더블 라운지 참가자 화면: wait = 채팅방 열리기 전, chat = 채팅방만, lounge = 라운지(채팅방은 카드로) */
+export function preScreen(phase: string, stage: PreStage, startsAt: string | number, now = Date.now()): 'wait' | 'chat' | 'lounge' {
+  if (phase !== 'before' || stage === 'lounge') return 'lounge';
+  if (stage === 'chat' || now >= chatOpensAt(startsAt)) return 'chat';
+  return 'wait';
+}

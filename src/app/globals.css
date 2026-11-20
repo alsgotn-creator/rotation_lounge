@@ -789,3 +789,11 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .fp-tn small{display:block;font-size:10.5px;font-weight:700;color:var(--mute);max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fp-tp{font-size:12px;font-weight:800}
 .fp-tp.f{color:#b8284f}.fp-tp.m{color:#2f4fb0}
+
+/* 더블 라운지 당일 전: 파트너 카드(채팅방 입구)만 (2026-11-20) */
+.lg-pre{margin:18px 0 6px;text-align:center}
+.lg-pre .tm{margin:0 12px}
+.lg-pre>.ds{margin:12px 0 0;font-size:13px}
+.cls-leave{display:block;width:calc(100% - 40px);margin:22px auto 40px}
+.cls .cls-rv{margin-bottom:0} /* 후기 · 호스트에게 하고 싶은 말이 이어진다 */
+.chc-cell.lock .chc-pick{opacity:.35}

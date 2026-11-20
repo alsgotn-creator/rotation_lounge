@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '../../../../../lib/server/supabase';
 import { getEvent } from '../../../../../lib/server/signup';
 import { invitedFromCookie, participantOf } from '../../../../../lib/server/invite';
-import { teamTable } from '../../../../../lib/domain/double';
+import { preScreen, chatOpensAt, PRE_STAGES, teamTable, type PreStage } from '../../../../../lib/domain/double';
 import { createHmac } from 'node:crypto';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +18,9 @@ export type TeamView = null | {
 
 const teamChannel = (eventId: string, no: number) => 'tm-' + createHmac('sha256', process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').update(`team:${eventId}:${no}`).digest('base64url').slice(0, 24);
 
+/** 시작 전 화면: wait = 채팅방 열리기 전, chat = 채팅방, lounge = 라운지. chatFrom = 채팅방이 저절로 열리는 시각 */
+export type TeamScreen = { screen: 'wait' | 'chat' | 'lounge'; chatFrom: number };
+
 /** 더블 라운지: 내 팀(파트너 정보 · 팀 이름 · 둘만의 채팅). 파트너가 누구와 왜 묶였는지(매칭 기준)는 담지 않는다. */
 async function load(slug: string) {
   const event = await getEvent({ slug });
@@ -25,15 +28,22 @@ async function load(slug: string) {
   const me = await invitedFromCookie(event.id);
   const p = me && (await participantOf(me.id));
   if (!p) return null;
-  const { data: t } = await db().from('teams').select('no,f_id,m_id,name').eq('event_id', event.id).or(`f_id.eq.${p.id},m_id.eq.${p.id}`).maybeSingle();
-  return { event, p, t: t as { no: number; f_id: string; m_id: string; name: string } | null };
+  const [{ data: t }, { data: ev }, st] = await Promise.all([
+    db().from('teams').select('no,f_id,m_id,name').eq('event_id', event.id).or(`f_id.eq.${p.id},m_id.eq.${p.id}`).maybeSingle(),
+    db().from('events').select('phase,starts_at').eq('id', event.id).single(),
+    db().from('events').select('pre_stage').eq('id', event.id).single(), // 0016 전에는 없다 → auto
+  ]);
+  const stage: PreStage = !st.error && PRE_STAGES.includes(st.data?.pre_stage) ? st.data!.pre_stage : 'auto';
+  const scr: TeamScreen = { screen: preScreen(ev?.phase ?? 'before', stage, ev?.starts_at ?? event.starts_at), chatFrom: chatOpensAt(ev?.starts_at ?? event.starts_at) };
+  // 채팅방이 열리기 전(모임 이틀 전까지)에는 파트너도 채팅도 보이지 않는다
+  return { event, p, scr, t: scr.screen === 'wait' ? null : (t as { no: number; f_id: string; m_id: string; name: string } | null) };
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const x = await load((await params).slug);
   if (!x) return fail('입장 링크로 다시 들어와주세요.', 401);
-  const { event, p, t } = x;
-  if (!t) return NextResponse.json({ ok: true, team: null }, { headers: { 'cache-control': 'no-store' } });
+  const { event, p, t, scr } = x;
+  if (!t) return NextResponse.json({ ok: true, team: null, ...scr }, { headers: { 'cache-control': 'no-store' } });
   const partnerId = t.f_id === p.id ? t.m_id : t.f_id;
   const [{ data: ps }, { data: msgs }, { data: ev }] = await Promise.all([
     db().from('participants').select('id,gender,number,shape,prop,love_type,keywords,age,job,area,mbti,ideal,charm').eq('id', partnerId),
@@ -46,7 +56,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
     partner: { gender: o.gender, number: o.number, shape: o.shape, prop: o.prop, color: o.love_type, keywords: o.keywords, age: o.age, job: o.job, area: o.area, mbti: o.mbti, ideal: o.ideal ?? '', charm: o.charm ?? '' },
     messages: (msgs ?? []).map((m) => ({ id: m.id, me: m.from_id === p.id, body: m.body, at: m.created_at })),
   } : null;
-  return NextResponse.json({ ok: true, team }, { headers: { 'cache-control': 'no-store' } });
+  return NextResponse.json({ ok: true, team, ...scr }, { headers: { 'cache-control': 'no-store' } });
 }
 
 // {type:'msg', body} 채팅 보내기 / {type:'name', name} 팀 이름 정하기 (둘 다 누구나, 마지막에 정한 이름이 남는다)
@@ -54,7 +64,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const x = await load((await params).slug);
   if (!x) return fail('입장 링크로 다시 들어와주세요.', 401);
   const { event, p, t } = x;
-  if (!t) return fail('아직 파트너가 정해지지 않았어요.', 409);
+  if (!t) return fail(x.scr.screen === 'wait' ? '채팅방은 모임 이틀 전에 열려요.' : '아직 파트너가 정해지지 않았어요.', 409);
   const b = await req.json().catch(() => ({}));
   if (b.type === 'msg') {
     const body = String(b.body ?? '').trim();

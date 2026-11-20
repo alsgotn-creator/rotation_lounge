@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fit, mbtiSame, otherTeam, pairTeams, randomTeams, tablesFor, teamTable, type Team } from './double';
+import { chatOpensAt, preScreen, fit, mbtiSame, otherTeam, pairTeams, randomTeams, tablesFor, teamTable, type Team } from './double';
 
 const A = (v: number) => Array(15).fill(v);
 
@@ -54,4 +54,14 @@ describe('double lounge', () => {
     expect(new Set(made.map((t) => t.f)).size).toBe(2);
     expect(made.map((t) => t.m).sort()).toEqual(['m1', 'm2']);
   });
+});
+
+it('채팅방은 모임 이틀 전 0시(한국 시간)부터, 당일 라운지는 호스트가 연다', () => {
+  const starts = '2026-12-06T10:00:00+09:00';
+  expect(new Date(chatOpensAt(starts)).toISOString()).toBe('2026-12-03T15:00:00.000Z'); // 12/4 0시 KST
+  expect(preScreen('before', 'auto', starts, Date.parse('2026-12-03T23:59:00+09:00'))).toBe('wait');
+  expect(preScreen('before', 'auto', starts, Date.parse('2026-12-04T00:00:00+09:00'))).toBe('chat');
+  expect(preScreen('before', 'chat', starts, Date.parse('2026-11-20T12:00:00+09:00'))).toBe('chat');
+  expect(preScreen('before', 'lounge', starts, Date.parse('2026-11-20T12:00:00+09:00'))).toBe('lounge');
+  expect(preScreen('talk', 'auto', starts, Date.parse('2026-11-20T12:00:00+09:00'))).toBe('lounge');
 });

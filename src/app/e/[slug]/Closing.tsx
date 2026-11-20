@@ -36,6 +36,32 @@ function ReviewBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   );
 }
 
+/** 호스트에게 하고 싶은 말: 모임 피드백 · 요청사항. 호스트만 본다 */
+function FeedbackBox({ slug }: { slug: string }) {
+  const [text, setText] = useState('');
+  const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
+  const send = async () => {
+    setSt('busy');
+    const r = await api(`/api/e/${slug}/feedback`, { body: text });
+    setSt(r.ok ? 'done' : 'err');
+  };
+  return (
+    <section className="cls-rv">
+      <h3>호스트에게 하고 싶은 말</h3>
+      <p className="ds">모임 피드백이나 요청사항을 남겨주세요. 호스트만 읽어요.</p>
+      <textarea value={text} maxLength={300} rows={3} placeholder="예: 라운드 시간이 조금 짧았어요 / 다음엔 이런 게임도 해주세요 (300자)" onChange={(e) => { setText(e.target.value); setSt('idle'); }} />
+      <button className="btn" disabled={!text.trim() || st === 'busy'} onClick={send}>{st === 'done' ? '전달했어요 · 고쳐 쓰기' : '호스트에게 보내기'}</button>
+      {st === 'err' && <p className="preview">보내지 못했어요. 다시 시도해주세요.</p>}
+    </section>
+  );
+}
+
+/** 나가기: 창을 닫는다. 브라우저가 닫기를 막으면(문자·카톡 링크로 연 탭) 첫 화면으로 보내고 기록을 남기지 않는다 */
+const leave = () => {
+  window.close();
+  setTimeout(() => location.replace('/'), 150);
+};
+
 function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
   const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
   const join = async () => {
@@ -87,9 +113,9 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
         </section>
       )}
 
-      <WineBox slug={slug} onDone={bye} />
-
       <ReviewBox slug={slug} onDone={bye} />
+
+      <FeedbackBox slug={slug} />
 
       {thanks && (
         <section id="cls-bye" className="cls-bye">
@@ -97,6 +123,11 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
           {me && <Face c={me} size={130} />}
         </section>
       )}
+
+      {/* 연말 와인모임 안내는 맨 아래 */}
+      <WineBox slug={slug} onDone={bye} />
+
+      <button type="button" className="btn sub cls-leave" onClick={leave}>나가기</button>
     </main>
   );
 }
