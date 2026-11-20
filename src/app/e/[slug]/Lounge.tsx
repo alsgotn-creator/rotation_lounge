@@ -4,7 +4,7 @@ import { Character } from '../../../components/Character';
 import { Icon } from '../../../components/Icon';
 import { IdealCloud } from '../../../components/IdealCloud';
 import { api } from '../../../lib/api';
-import { IDEAL } from '../../../lib/domain/ideal';
+import { IDEAL, IDEAL_SAMPLE } from '../../../lib/domain/ideal';
 import { ho } from '../../../lib/domain/lounge';
 import { PALETTE, phrases, typeName } from '../../../lib/domain/loveType';
 import type { Shape } from '../../../lib/domain/register';
@@ -167,7 +167,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
         <div className="lg-side t">{ring.t.map((c, i) => person(c, i >= ring.t.length / 2))}</div>
         <div className="lg-side l">{ring.l.map((c) => person(c))}</div>
         <div className="lg-mid">
-          {double ? <TeamCard team={team} onOpen={() => (mini ? setMini(false) : openMini())} /> : before ? <IdealCloud lists={IDEAL} /> : null}
+          {double ? <TeamCard team={team} onOpen={() => (mini ? setMini(false) : openMini())} /> : before ? <IdealCloud lists={IDEAL} sample={IDEAL_SAMPLE} /> : null}
           {others.length === 0 && <p className="empty" style={{ padding: '16px 0' }}>다른 분들이 들어오는 중이에요</p>}
         </div>
         <div className="lg-side r">{ring.r.map((c) => person(c, true))}</div>
@@ -185,7 +185,7 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
       {/* 라운지 안에서 조그맣게 열리는 둘만의 채팅창 */}
       {showLounge && double && mini && team && <div id="lg-chat" className="lg-chat"><TeamChat mini slug={slug} team={team} reload={reload} onBack={() => setMini(false)} /></div>}
 
-      {showLounge && double && before && <div className="lg-idc"><IdealCloud lists={IDEAL} /></div>}
+      {showLounge && double && before && <div className="lg-idc"><IdealCloud lists={IDEAL} sample={IDEAL_SAMPLE} /></div>}
 
       <div className="ft">
         <button type="button" className={`lg-mine${typeOpen ? ' open' : ''}`} aria-expanded={typeOpen} onClick={() => setTypeOpen(!typeOpen)}>

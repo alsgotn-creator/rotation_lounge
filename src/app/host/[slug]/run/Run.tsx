@@ -8,6 +8,7 @@ import { RoundTimer } from '../../../../components/RoundTimer';
 import { api } from '../../../../lib/api';
 import { ho } from '../../../../lib/domain/lounge';
 import { notStarted, type Round } from '../../../../lib/domain/seating';
+import { CLOSING_KINDS, CLOSING_LABEL, type ClosingKind } from '../../../../lib/domain/closing';
 import { chatOpensAt, preScreen, type PreStage } from '../../../../lib/domain/double';
 import type { HostCmd, Moved, Person, Phase, ResetWhat } from '../../../../lib/server/run';
 
@@ -16,7 +17,7 @@ type View = {
   current: Round | null; people: Person[];
   teams: { no: number; f: string; m: string; name: string; fit: number; similar: number; mbtiSame: number }[];
   pairs: { table: number; f: Person[]; m: Person[] }[];
-  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; feedback?: { gender: 'f' | 'm'; number: number | null; name: string; body: string }[]; done: number; total: number; byGender: Record<'f' | 'm', { done: number; total: number }>; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
+  extras: { picks: { id: string; to: string[] }[]; matches: [string, string][]; brave?: [string, string][]; contacts: Record<string, { email: string; phone: string }>; wine: { gender: 'f' | 'm'; number: number | null; name: string; age: number; job: string; phone: string; email: string }[]; feedback?: { gender: 'f' | 'm'; number: number | null; name: string; body: string }[]; signups?: { kind: ClosingKind; gender: 'f' | 'm'; number: number | null; name: string; phone: string }[]; done: number; total: number; byGender: Record<'f' | 'm', { done: number; total: number }>; notes: { id: string; round: number; fromId: string; toId: string; body: string; hidden: boolean }[] };
 };
 const PHASE_KO: [Phase, string][] = [['before', '시작 전'], ['talk', '대화'], ['choice', '최종 선택'], ['closing', '마무리']];
 
@@ -237,6 +238,21 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
               <div key={w.email + w.phone} className="person-row"><div><b>{w.gender === 'f' ? '여' : '남'}{w.number}호 {w.name} · {w.age}세 · {w.job}</b><span>{w.phone}</span></div></div>))}
           </div>
         </>}
+
+        {/* 마무리 신청: 종류별로 이름 · 연락처 */}
+        {CLOSING_KINDS.map((k) => {
+          const list = (v.extras.signups ?? []).filter((x) => x.kind === k);
+          if (!list.length) return null;
+          const nf = list.filter((x) => x.gender === 'f').length;
+          return <div key={k}>
+            <p className="eb" style={{ marginTop: 26 }}>{CLOSING_LABEL[k]} · {list.length}명 (여 {nf} · 남 {list.length - nf})</p>
+            <div className="people">
+              {list.map((x) => (
+                <div key={x.phone + x.name} className="person-row"><div><b>{x.gender === 'f' ? '여' : '남'}{x.number}호 {x.name}</b><span>{x.phone}</span></div>
+                  <button className="lnk" style={{ margin: 0 }} onClick={() => copy(x.phone, '번호를 복사했어요')}>번호</button></div>))}
+            </div>
+          </div>;
+        })}
 
         {!!v.extras.feedback?.length && <>
           <p className="eb" style={{ marginTop: 26 }}>호스트에게 하고 싶은 말 ({v.extras.feedback.length})</p>

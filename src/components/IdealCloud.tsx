@@ -6,7 +6,7 @@ const h = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 
 const LABEL = { f: '여자분들이 적은', m: '남자분들이 적은' } as const;
 
 /** 여자분·남자분이 적은 이상형을 한 박스 안에서 성별로 나눠 칩으로 띄운다. 많이 적힌 건 크고 진하게, 나머지도 크기를 조금씩 흔든다. 숫자·작성자는 보여주지 않는다. */
-export function IdealCloud({ lists }: { lists: Record<'f' | 'm', string[][]> }) {
+export function IdealCloud({ lists, sample = false }: { lists: Record<'f' | 'm', string[][]>; sample?: boolean }) {
   const groups = (['f', 'm'] as const).map((g) => {
     const ws = cloud(lists[g]);
     const mx = ws[0]?.count ?? 0;
@@ -15,7 +15,7 @@ export function IdealCloud({ lists }: { lists: Record<'f' | 'm', string[][]> }) 
   if (!groups.length) return null;
   return (
     <section className="idc">
-      <h2 className="idc-t">우리가 적은 이상형</h2>
+      <h2 className="idc-t">우리가 적은 이상형{sample && <em className="lp-sample" style={{ marginLeft: 6 }}>예시</em>}</h2>
       <div className="idc-card">
         {groups.map(({ g, words }) => (
           <div key={g} className={`idc-g ${g}`}>

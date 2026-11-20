@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Character } from '../../../components/Character';
 import { api } from '../../../lib/api';
 import type { PublicCard } from '../../../lib/domain/lounge';
 import type { Shape } from '../../../lib/domain/register';
 import type { PlayView } from '../../../lib/server/play';
+import type { ClosingKind } from '../../../lib/domain/closing';
 
 const Face = ({ c, size }: { c: PublicCard; size: number }) => <Character shape={c.shape as Shape} color={c.color} acc={c.prop} size={size} delay={(c.number ?? 0) * 0.6} />;
 
@@ -62,39 +63,65 @@ const leave = () => {
   setTimeout(() => location.replace('/'), 150);
 };
 
-function WineBox({ slug, onDone }: { slug: string; onDone: () => void }) {
-  const [st, setSt] = useState<'idle' | 'busy' | 'done' | 'err'>('idle');
-  const join = async () => {
-    setSt('busy');
-    const r = await api(`/api/e/${slug}/wine`, {});
-    setSt(r.ok ? 'done' : 'err');
-    if (r.ok) onDone();
+/** 마무리 신청(뒷풀이 · 모임 한 번 더 · 1:1 로테이션 · 나는솔로 토론회): 누르면 신청, 한 번 더 누르면 취소 */
+function useSignups(slug: string) {
+  const [on, setOn] = useState<ClosingKind[]>([]);
+  const [busy, setBusy] = useState<ClosingKind | null>(null);
+  const [err, setErr] = useState('');
+  useEffect(() => { api<{ kinds: ClosingKind[] }>(`/api/e/${slug}/closing-signup`).then((j) => j.ok && setOn(j.kinds ?? [])); }, [slug]);
+  const toggle = async (k: ClosingKind) => {
+    const next = !on.includes(k);
+    setBusy(k); setErr('');
+    const r = await api(`/api/e/${slug}/closing-signup`, { kind: k, on: next });
+    setBusy(null);
+    if (!r.ok) return setErr(r.message ?? '저장하지 못했어요. 다시 시도해주세요.');
+    setOn(next ? [...on, k] : on.filter((x) => x !== k));
+    return next;
   };
+  return { on, busy, err, toggle };
+}
+
+function AfterParty({ s, onDone }: { s: ReturnType<typeof useSignups>; onDone: () => void }) {
+  const joined = s.on.includes('afterparty');
   return (
-    <div className="wine-orbit"><section className="cls-wine">
-      <i className="wine-snow" aria-hidden="true" />
-      <p className="wine-eyebrow">Christmas Invitation</p>
-      <h3>연말 와인 무제한 모임</h3>
-      <p className="cls-price"><s>70,000원</s> <b>58,000원</b> <em>17% 할인</em></p>
-      <p className="ds">지인과 함께 오면 각각 30% 할인 (49,000원)<br />문토 리뷰를 남겨주시면 40% 할인 (42,000원)</p>
-      <ul className="cls-wine-list">
-        <li>12월 18일 진행 예정</li>
-        <li>한 테이블 3:3 · 총 4테이블</li>
-        <li>관상게임 · 익명게임 · 포송한 한해 마무리 콘텐츠</li>
-        <li>인원이 모이지 않으면 진행되지 않아요</li>
+    <section className="cls-ap">
+      <p className="cls-ap-eb">AFTER PARTY</p>
+      <h3>오늘 뒷풀이 모임</h3>
+      <ul>
+        <li>남녀 3명 이상 모이면 진행돼요</li>
+        <li>장소는 호스트가 <b>문토</b>로 전달드려요</li>
       </ul>
-      <p className="ds" style={{ margin: '0 0 14px', textAlign: 'center', fontWeight: 800 }}>옷깃만 믿고 오세요 😊</p>
-      <button className="btn cls-wine-btn" disabled={st === 'busy' || st === 'done'} onClick={join}>
-        {st === 'done' ? '✓ 문자로 안내해드릴게요' : <>와인 모임 관심있어요!<small>문자로 안내받기</small></>}
+      <button className={`btn${joined ? ' sub' : ''}`} disabled={s.busy === 'afterparty'} onClick={async () => { if (await s.toggle('afterparty')) onDone(); }}>
+        {joined ? '✓ 뒷풀이 참여 신청했어요 · 취소하려면 눌러요' : '뒷풀이 참여할게요'}
       </button>
-      {st === 'done' && <p className="preview">호스트에게 이름과 연락처가 전달됐어요.</p>}
-      {st === 'err' && <p className="preview">신청하지 못했어요. 다시 시도해주세요.</p>}
-    </section></div>
+    </section>
+  );
+}
+
+const OFFERS: [ClosingKind, string][] = [
+  ['again', '모임 한 번 더 참여할게요! (20% 할인)'],
+  ['rotation', '1:1 로테이션으로 신청할게요! (20% 할인)'],
+  ['solo', '나는솔로 토론회 참여하기'],
+];
+
+function Offers({ s }: { s: ReturnType<typeof useSignups> }) {
+  return (
+    <section className="cls-offers">
+      {OFFERS.map(([k, label]) => {
+        const on = s.on.includes(k);
+        return <button key={k} type="button" className={`cls-offer${on ? ' on' : ''}`} aria-pressed={on} disabled={s.busy === k} onClick={() => s.toggle(k)}>
+          <span>{label}</span><em>{on ? '✓ 신청함' : '신청'}</em>
+        </button>;
+      })}
+      <p className="ds">신청하시면 호스트가 따로 연락드려요. 한 번 더 누르면 취소돼요.</p>
+      {s.err && <p className="preview">{s.err}</p>}
+    </section>
   );
 }
 
 export default function Closing({ view, me, slug }: { view: PlayView; me: PublicCard | null; slug: string }) {
-  const [thanks, setThanks] = useState(false); // 후기나 와인모임 신청을 하면 캐릭터가 인사하며 마무리
+  const signups = useSignups(slug);
+  const [thanks, setThanks] = useState(false); // 후기나 뒷풀이 신청을 하면 캐릭터가 인사하며 마무리
   const bye = () => { setThanks(true); setTimeout(() => document.getElementById('cls-bye')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50); };
 
   return (
@@ -124,8 +151,9 @@ export default function Closing({ view, me, slug }: { view: PlayView; me: Public
         </section>
       )}
 
-      {/* 연말 와인모임 안내는 맨 아래 */}
-      <WineBox slug={slug} onDone={bye} />
+      {/* 리뷰 → 뒷풀이 안내 → 신청 버튼 3개 */}
+      <AfterParty s={signups} onDone={bye} />
+      <Offers s={signups} />
 
       <button type="button" className="btn sub cls-leave" onClick={leave}>나가기</button>
     </main>
