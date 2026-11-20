@@ -9,6 +9,11 @@ export default function ContactPage() {
     <main className="lp lp-page">
       <header className="lp-ph"><p>CONTACT</p><h1>문의하기</h1><span>신청, 입금, 일정 변경 무엇이든 편하게 물어봐주세요.</span></header>
       <section className="lp-list">
+        <a className="lp-card" href={`sms:${BUSINESS.phone.replace(/-/g, '')}`}>
+          <span className="lp-ico"><Icon name="chat" /></span>
+          <div className="lp-tx"><strong>{BUSINESS.phone}</strong><span>업무용 번호 · 문자만 가능해요</span></div>
+          <Icon name="next" />
+        </a>
         <a className="lp-card" href={`mailto:${BUSINESS.email}`}>
           <span className="lp-ico"><Icon name="mail" /></span>
           <div className="lp-tx"><strong>이메일로 문의</strong><span>{BUSINESS.email}</span></div>

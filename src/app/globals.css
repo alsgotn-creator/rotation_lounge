@@ -665,10 +665,10 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .lp{--blush:#f7ece6;--blush2:#fbf5f1;--rose:#8a5a68;position:relative;min-height:100svh;background:var(--sheet);padding-bottom:110px;overflow-x:clip}
 .lp:before{content:"";position:absolute;inset:0 0 auto;height:330px;background:linear-gradient(180deg,var(--blush),var(--blush2))}
 .lp-top{position:relative;z-index:6;display:flex;align-items:flex-start;gap:10px;padding:14px 20px 0;animation:up .6s .05s both}
-.lp-brand{flex:1;padding-top:11px;font-size:17px;font-weight:800;letter-spacing:-.04em}
+.lp-brand{flex:1;padding-top:8px;font-size:17px;font-weight:800;letter-spacing:-.04em}
 .lp-brand i{font-style:normal;color:var(--rose)}
-.lp-host{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 15px;border-radius:15px;background:rgba(255,255,255,.75);box-shadow:var(--shadow);font-size:14px;font-weight:800}
-.lp-host small{font-size:9px;font-weight:900;letter-spacing:.12em;color:var(--rose)}
+.lp-host{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 11px;border-radius:11px;background:rgba(255,255,255,.75);box-shadow:var(--shadow);font-size:12.5px;font-weight:800}
+.lp-host small{font-size:8px;font-weight:900;letter-spacing:.12em;color:var(--rose)}
 .stars{display:inline-flex;align-items:center;gap:5px;line-height:1}
 .stars-bg{position:relative;display:inline-block;color:#e6dcd8;letter-spacing:1px}
 .stars-fg{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#f2a93b}
@@ -725,8 +725,8 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .lp-qa details:last-child{border-bottom:0}
 .lp-sample{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;background:#efeff2;color:var(--mute);font-style:normal;font-size:10px;font-weight:800;vertical-align:1px}
 /* 우상단 후기 보기 아이콘 */
-.lp-rvbtn{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:15px;background:rgba(255,255,255,.75);box-shadow:var(--shadow);color:var(--rose)}
-.lp-rvbtn .ic{width:20px;height:20px}
+.lp-topr{display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding-top:4px}
+.lp-rvbtn{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:9px;background:rgba(255,255,255,.6);font-size:11.5px;font-weight:800;color:var(--rose)}
 /* 1 신청 | 2 입장: 같은 너비 · 같은 높이, 버튼은 둘 다 맨 아래 */
 .lp-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:stretch;padding-top:22px}
 .lp-steps>*{position:relative;min-width:0;display:flex;flex-direction:column;margin:0;border-radius:22px;padding:18px 12px 12px;background:#fbfbfd;border:1px solid #ececf1}

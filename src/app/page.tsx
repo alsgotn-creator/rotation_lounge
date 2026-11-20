@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Icon } from '../components/Icon';
 import TabBar from '../components/TabBar';
 import EnterCard from './EnterCard';
 import { HOST_NAME, BUSINESS } from '../lib/signup/data';
@@ -15,8 +14,10 @@ export default async function Landing() {
       {/* 상단: 이름 · HOST · 후기 보기 아이콘 */}
       <header className="lp-top">
         <span className="lp-brand">플러팅<i>.</i>라운지</span>
-        <span className="lp-host"><small>HOST</small>{HOST_NAME}</span>
-        <Link className="lp-rvbtn" href="/reviews" aria-label="후기 보기" title="후기 보기"><Icon name="heart" /></Link>
+        <div className="lp-topr">
+          <span className="lp-host"><small>HOST</small>{HOST_NAME}</span>
+          <Link className="lp-rvbtn" href="/reviews">후기보기</Link>
+        </div>
       </header>
 
       {/* 그림: 둥근 호(arc) 위에 일러스트, 아래는 흰 언덕 */}

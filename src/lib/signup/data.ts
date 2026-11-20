@@ -11,7 +11,7 @@ export const DOUBLE_PRICE = 32000; // 플러팅 더블 라운지 참가비
 // 계좌는 잠시 비워둠(공개 안 함). 다시 보여주려면 값을 채울 것
 export const ACCOUNT = { bank: '', number: '', holder: '' };
 export const HOST_NAME = '옷깃';
-export const BUSINESS = { email: 'alsgotn@naver.com' };
+export const BUSINESS = { email: 'alsgotn@naver.com', phone: '010-4289-2398' }; // phone: 업무용, 문자만
 
 export const won = (n: number) => n.toLocaleString('ko-KR') + '원';
 export const yy = (y: number) => String(y).slice(2);
