@@ -27,6 +27,8 @@ export function checkHostPassword(pw: string) {
 export const hostCookie = () => ({ name: HOST_COOKIE, value: hostValue(), httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 12 });
 
 export async function isHost() {
+  // 이 PC에서 npm run dev 로 띄운 로컬 서버에서만 비밀번호 없이 열린다. 배포 사이트(production)는 그대로 잠겨 있다.
+  if (process.env.NODE_ENV === 'development') return true;
   if (!process.env.HOST_PASSWORD) return false;
   const v = (await cookies()).get(HOST_COOKIE)?.value ?? '';
   const a = Buffer.from(v), b = Buffer.from(hostValue());
