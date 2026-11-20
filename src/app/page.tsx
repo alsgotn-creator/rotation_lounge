@@ -2,26 +2,21 @@ import Link from 'next/link';
 import { Icon } from '../components/Icon';
 import TabBar from '../components/TabBar';
 import EnterCard from './EnterCard';
-import ReviewTicker from './ReviewTicker';
-import { yy, HOST_NAME, BUSINESS } from '../lib/signup/data';
+import { HOST_NAME, BUSINESS } from '../lib/signup/data';
 import { listSessions } from '../lib/server/signup';
-import { latestReviews } from '../lib/server/reviews';
 
 export const revalidate = 60; // 남은 자리는 1분마다 새로
 
-/** 첫 화면 = '일정' 탭: 그림 · 모임 목록 · 신청/입장 */
+/** 첫 화면 = '일정' 탭: 그림 · 1 신청(진행 중인 일정) | 2 입장 */
 export default async function Landing() {
-  const [sessions, reviews] = await Promise.all([listSessions(), latestReviews()]);
-  const open = sessions.filter((s) => !s.closed); // 신청 받는 모임 전부 (시연 모임도 자리가 남으면 보인다)
+  const sessions = await listSessions(); // 앞으로의 신청 받는 모임 (자리가 다 차면 '마감')
   return (
     <main className="lp">
-      {/* 상단: 이름 · HOST, 그 아래 최근 후기 한 줄 */}
+      {/* 상단: 이름 · HOST · 후기 보기 아이콘 */}
       <header className="lp-top">
         <span className="lp-brand">플러팅<i>.</i>라운지</span>
-        <div className="lp-topr">
-          <span className="lp-host"><small>HOST</small>{HOST_NAME}</span>
-          <ReviewTicker reviews={reviews} />
-        </div>
+        <span className="lp-host"><small>HOST</small>{HOST_NAME}</span>
+        <Link className="lp-rvbtn" href="/reviews" aria-label="후기 보기" title="후기 보기"><Icon name="heart" /></Link>
       </header>
 
       {/* 그림: 둥근 호(arc) 위에 일러스트, 아래는 흰 언덕 */}
@@ -40,30 +35,20 @@ export default async function Landing() {
         <p>다양한 사람들과 나누는 기분좋은 설렘</p>
       </div>
 
-      <section id="sessions" className="lp-list">
-        {open.length === 0
-          ? <div className="lp-card static"><span className="lp-ico"><Icon name="calendar" /></span><div className="lp-tx"><strong>다음 모임을 준비하고 있어요</strong><span>일정이 열리면 여기에 보여요</span></div></div>
-          : open.map((s) => (
-            <Link key={s.id} className="lp-card" href={`/apply?s=${s.id}`}>
-              <span className="lp-ico date"><small>{s.mon}</small><b>{s.day}</b><small>{s.dow}</small></span>
-              <div className="lp-tx">
-                <strong>{s.time} · {s.place} {s.double ? '더블 라운지' : '라운지'}</strong>
-                <span>{yy(s.birthFrom)}~{yy(s.birthTo)}년생 · <em>여 {s.seatsF} · 남 {s.seatsM}자리</em></span>
-              </div>
-              <Icon name="next" />
-            </Link>
-          ))}
-      </section>
-
-      {/* 1 신청하기 | 2 입장하기 */}
+      {/* 1 신청하기 | 2 입장하기 (같은 크기) */}
       <section id="enter" className="lp-sec lp-steps">
-        <Link className="lp-apply" href="/apply">
+        <div className="lp-apply">
           <span className="stepno"><b>1</b>신청하기</span>
-          <span className="lp-ico"><Icon name="pen" /></span>
-          <strong>처음이세요?</strong>
-          <span>모임 고르고<br />신청하기</span>
-          <Icon name="next" />
-        </Link>
+          <b className="lp-step-t">진행 중인 일정</b>
+          <ul className="lp-ses">
+            {sessions.length === 0 && <li className="none">다음 모임을 준비하고 있어요</li>}
+            {sessions.map((s) => {
+              const label = <><strong>{s.dateLabel} {s.time}</strong><span>{s.place} {s.double ? '더블 라운지' : '라운지'} · {s.closed ? <em className="off">마감</em> : <em>여 {s.seatsF} · 남 {s.seatsM}</em>}</span></>;
+              return <li key={s.id}>{s.closed ? <div>{label}</div> : <Link href={`/apply?s=${s.id}`}>{label}</Link>}</li>;
+            })}
+          </ul>
+          <Link className="btn" href="/apply">신청하기</Link>
+        </div>
         <EnterCard />
       </section>
 

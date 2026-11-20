@@ -667,15 +667,8 @@ h2.q{margin:0;font-size:26px;line-height:1.38;font-weight:800;letter-spacing:-.0
 .lp-top{position:relative;z-index:6;display:flex;align-items:flex-start;gap:10px;padding:14px 20px 0;animation:up .6s .05s both}
 .lp-brand{flex:1;padding-top:11px;font-size:17px;font-weight:800;letter-spacing:-.04em}
 .lp-brand i{font-style:normal;color:var(--rose)}
-.lp-topr{position:relative;display:flex;flex-direction:column;align-items:flex-end}
 .lp-host{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 15px;border-radius:15px;background:rgba(255,255,255,.75);box-shadow:var(--shadow);font-size:14px;font-weight:800}
 .lp-host small{font-size:9px;font-weight:900;letter-spacing:.12em;color:var(--rose)}
-/* 후기 한 줄: 흐름을 밀지 않게 HOST 칩 아래에 떠 있다 */
-.lp-tick{position:absolute;right:0;top:50px;width:min(230px,58vw);padding:8px 11px;border-radius:13px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:var(--shadow);font-size:12px;line-height:1.4;overflow:hidden}
-.lp-tick-in{display:block;animation:tickIn .45s cubic-bezier(.2,.8,.2,1) both}
-.lp-tick q{display:block;margin-top:3px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;quotes:"“" "”"}
-.lp-tick small{display:block;margin-top:2px;font-size:10.5px;color:var(--mute);font-weight:600}
-@keyframes tickIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 .stars{display:inline-flex;align-items:center;gap:5px;line-height:1}
 .stars-bg{position:relative;display:inline-block;color:#e6dcd8;letter-spacing:1px}
 .stars-fg{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#f2a93b}
@@ -708,15 +701,6 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .lp-tx span{display:block;margin-top:3px;font-size:13.5px;font-weight:600;color:var(--mute)}
 .lp-tx em{font-style:normal;color:var(--rose);font-weight:800}
 .lp-sec{padding:34px 20px 0}
-.lp-steps{display:grid;grid-template-columns:minmax(100px,31%) 1fr;gap:10px;align-items:stretch;padding-top:20px}
-.lp-steps .price{margin:0;border-radius:22px;background:#fbfbfd;border:1px solid #ececf1;padding:18px 13px 12px}
-.lp-steps .price .fld{margin-top:8px!important}
-.lp-steps .price .btn{height:46px;font-size:15px;margin-top:12px!important}
-.lp-apply{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:18px 13px 12px;border-radius:22px;background:var(--blush);border:1px solid #efdfd8;transition:transform .12s}
-.lp-apply .lp-ico{width:40px;height:40px;border-radius:13px;background:#fff;margin-bottom:6px}
-.lp-apply strong{font-size:15.5px;font-weight:800;letter-spacing:-.03em}
-.lp-apply>span:not(.stepno):not(.lp-ico){font-size:12.5px;font-weight:600;color:var(--mute);line-height:1.45}
-.lp-apply>.ic{margin-top:auto;align-self:flex-end;color:var(--rose)}
 .lp-biz{border-top:0}
 .lp-tab{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));translate:-50% 0;width:calc(100% - 24px);max-width:456px;z-index:20;animation:up .6s .6s both}
 .lp-pill{display:flex;gap:2px;padding:5px;border-radius:28px;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 2px 6px rgba(0,0,0,.05),0 14px 30px -14px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.04)}
@@ -740,3 +724,23 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .lp-qa{padding:4px 18px;border-radius:24px;background:#fbfbfd;border:1px solid #ececf1}
 .lp-qa details:last-child{border-bottom:0}
 .lp-sample{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;background:#efeff2;color:var(--mute);font-style:normal;font-size:10px;font-weight:800;vertical-align:1px}
+/* 우상단 후기 보기 아이콘 */
+.lp-rvbtn{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:15px;background:rgba(255,255,255,.75);box-shadow:var(--shadow);color:var(--rose)}
+.lp-rvbtn .ic{width:20px;height:20px}
+/* 1 신청 | 2 입장: 같은 너비 · 같은 높이, 버튼은 둘 다 맨 아래 */
+.lp-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:stretch;padding-top:22px}
+.lp-steps>*{position:relative;min-width:0;display:flex;flex-direction:column;margin:0;border-radius:22px;padding:18px 12px 12px;background:#fbfbfd;border:1px solid #ececf1}
+.lp-steps .btn{height:46px;font-size:15px;margin-top:auto!important}
+.lp-steps .price>b,.lp-step-t{display:block;font-size:15px;font-weight:800;letter-spacing:-.03em}
+.lp-steps .price .fld{margin:8px 0 12px!important}
+.lp-steps .fld>span{font-size:12px}
+.lp-steps .tel010{gap:6px}.lp-steps .tel010 b,.lp-steps .fld .tel010 input{font-size:18px;height:42px}
+.lp-apply{background:var(--blush)!important;border-color:#efdfd8!important}
+.lp-ses{list-style:none;margin:8px 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
+.lp-ses li>*{display:block;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.75)}
+.lp-ses li>a:active{transform:scale(.98)}
+.lp-ses strong{display:block;font-size:12.5px;font-weight:800;letter-spacing:-.02em}
+.lp-ses span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--mute)}
+.lp-ses em{font-style:normal;font-weight:800;color:var(--rose)}.lp-ses em.off{color:var(--dim)}
+.lp-ses li.none{padding:8px 0;font-size:12.5px;font-weight:600;color:var(--mute)}
+.lp-steps .tel010 b{display:flex;align-items:center;height:42px;line-height:1}.lp-steps .fld .tel010 input{line-height:42px}
