@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fit, mbtiSame, otherTeam, pairTeams, tablesFor, teamTable, type Team } from './double';
+import { fit, mbtiSame, otherTeam, pairTeams, randomTeams, tablesFor, teamTable, type Team } from './double';
 
 const A = (v: number) => Array(15).fill(v);
 
@@ -44,5 +44,14 @@ describe('double lounge', () => {
       for (const t of teams.filter((t) => t.no > T)) expect(met.get(t.no)!.size).toBe(T);
       if (n % 2) expect(otherTeam('f1', 1, teams, T).length + otherTeam('f2', 1, teams, T).length).toBeGreaterThan(0);
     }
+  });
+
+  it('random pre-matching pairs everyone once, extras stay out', () => {
+    const p = (id: string) => ({ id, answers: Array(15).fill(3), mbti: 'ENFP' });
+    let s = 7; const rand = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+    const made = randomTeams(['f1', 'f2', 'f3'].map(p), ['m1', 'm2'].map(p), rand);
+    expect(made).toHaveLength(2);
+    expect(new Set(made.map((t) => t.f)).size).toBe(2);
+    expect(made.map((t) => t.m).sort()).toEqual(['m1', 'm2']);
   });
 });

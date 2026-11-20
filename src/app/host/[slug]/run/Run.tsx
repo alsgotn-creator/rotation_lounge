@@ -83,13 +83,17 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const nf = seated.filter((p) => p.gender === 'f').length, nm = seated.filter((p) => p.gender === 'm').length;
   const double = ev.kind === 'double';
   const teamed = new Set(v.teams.flatMap((t) => [t.f, t.m]));
-  const pairTeams = () => (!v.teams.length || window.confirm('팀을 새로 짜요. 지금 팀 이름과 파트너 채팅이 모두 지워져요. 다시 짤까요?')) && send({ type: 'pairTeams' }).then((j) => j.ok && show('파트너 팀을 만들었어요'));
+  const pairTeams = (mode: 'opposite' | 'random' = 'opposite') => (!v.teams.length || window.confirm('팀을 새로 짜요. 지금 팀 이름과 파트너 채팅이 모두 지워져요. 다시 짤까요?')) && send({ type: 'pairTeams', mode }).then((j) => j.ok && show(mode === 'random' ? '랜덤으로 파트너 팀을 만들었어요' : '파트너 팀을 만들었어요'));
 
   return (
     <main>
       <div className="nb"><Link className="bk" aria-label="신청 관리" href={`/host/${slug}`}><Icon name="back" /></Link><div className="tt">진행</div></div>
       <div className="bd" style={{ paddingTop: 4, animation: 'none', paddingBottom: 60 }}>
         <p className="ds" style={{ margin: 0, fontSize: 13 }}>{when} · {double ? `더블 라운지 · ${v.teams.length}팀` : `한 테이블 ${ev.per_table}:${ev.per_table}`} · 착석 여 {nf} · 남 {nm}</p>
+
+        {/* 더블 라운지: 시작 전에 사전 등록한 남녀를 무작위로 짝지어 팀 채팅을 미리 열어준다 */}
+        {double && !current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginTop: 14 }} disabled={busy} onClick={() => pairTeams('random')}>
+          {v.teams.length ? '사전 랜덤 매칭 다시 하기' : '사전 랜덤 상대 매칭'}</button>}
 
         <div className="phases" role="tablist" aria-label="단계">
           {PHASE_KO.map(([p, label]) => (
@@ -119,7 +123,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
 
         {double && <>
           <p className="eb" style={{ marginTop: 26 }}>파트너 팀 ({v.teams.length})</p>
-          {!current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={pairTeams}>{v.teams.length ? '파트너 다시 매칭하기' : '파트너 매칭 · 가치관·MBTI 가장 안 맞는 남녀끼리'}</button>}
+          {!current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={() => pairTeams()}>{v.teams.length ? '파트너 다시 매칭하기' : '파트너 매칭 · 가치관·MBTI 가장 안 맞는 남녀끼리'}</button>}
           <div className="people">
             {v.teams.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>사전 등록이 끝나면 모임 전날 눌러주세요. 그때부터 팀 채팅이 열려요.</p>}
             {v.teams.map((t) => { const f = byId.get(t.f), m = byId.get(t.m); return (

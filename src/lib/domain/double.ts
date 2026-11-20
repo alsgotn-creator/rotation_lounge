@@ -63,5 +63,15 @@ export function pairTeams(fs: P[], ms: P[]): { f: string; m: string; fit: number
   }).sort((a, b) => a.fit - b.fit);
 }
 
+/** 사전 랜덤 매칭: 성향과 상관없이 남녀를 무작위로 짝짓는다. 남는 사람(성비가 다를 때)은 팀이 없다. */
+export function randomTeams(fs: P[], ms: P[], rand: () => number = Math.random): { f: string; m: string; fit: number; similar: number; mbtiSame: number }[] {
+  const shuffle = <T,>(a: T[]) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+  const F = shuffle(fs), M = shuffle(ms);
+  return F.slice(0, Math.min(F.length, M.length)).map((f, i) => {
+    const m = M[i];
+    return { f: f.id, m: m.id, fit: fit(f, m), similar: similarity(f.answers, m.answers), mbtiSame: mbtiSame(f.mbti, m.mbti) };
+  });
+}
+
 /** 이상형 · 매력 포인트 (사전 등록, 파트너에게만 보인다) */
 export const IDEAL_MAX = 60;

@@ -4,7 +4,7 @@ import { pairs, type Round, type Seated } from '../domain/seating';
 import { eventLayout } from './signup';
 import { compactNumbers } from '../signup/rules';
 import { mutualPairs } from '../domain/matching';
-import { pairTeams, tablesFor, teamTable, type Team } from '../domain/double';
+import { pairTeams, randomTeams, tablesFor, teamTable, type Team } from '../domain/double';
 
 export type Phase = 'before' | 'talk' | 'choice' | 'closing';
 export const PHASES: Phase[] = ['before', 'talk', 'choice', 'closing'];
@@ -63,7 +63,7 @@ export type HostCmd =
   | { type: 'setNumber'; participantId: string; number: number | null }
   | { type: 'exclude'; participantId: string; excluded: boolean }
   | { type: 'compact' }
-  | { type: 'pairTeams' }
+  | { type: 'pairTeams'; mode?: 'opposite' | 'random' }
   | { type: 'lock'; locked: boolean }
   | { type: 'hideNote'; noteId: string; hidden: boolean }
   | { type: 'reset'; what: ResetWhat };
@@ -177,7 +177,8 @@ export async function runHostCmd(eventId: string, cmd: HostCmd, now = Date.now()
       const live = people.filter((p) => !p.excluded).map((p) => p.id);
       const { data: rows } = await db().from('participants').select('id,gender,answers,mbti').in('id', live.length ? live : ['00000000-0000-0000-0000-000000000000']);
       const ps2 = (rows ?? []) as { id: string; gender: 'f' | 'm'; answers: number[]; mbti: string }[];
-      const made = pairTeams(ps2.filter((p) => p.gender === 'f'), ps2.filter((p) => p.gender === 'm'));
+      // mode 'random': 사전 랜덤 매칭 (성향 무시). 기본은 가치관·MBTI 가장 안 맞는 짝
+      const made = (cmd.mode === 'random' ? randomTeams : pairTeams)(ps2.filter((p) => p.gender === 'f'), ps2.filter((p) => p.gender === 'm'));
       if (made.length < 2) return no('팀을 만들려면 남녀가 2명씩은 사전 등록해야 해요.');
       // 팀 번호는 무작위 (앉아 있는 팀·옮기는 팀이 매칭 순서로 갈리지 않게)
       const order = made.map((t) => ({ t, k: Math.random() })).sort((a, b) => a.k - b.k).map((x) => x.t);
