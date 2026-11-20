@@ -131,7 +131,7 @@ export function TeamChat({ slug, team, reload, onBack, mini = false }: { slug: s
       {/* 팀 이름: 둘 중 누가 적어도 저절로 등록된다 */}
       <label className="tc-name">
         <span>팀 이름</span>
-        <input maxLength={15} placeholder="얘기를 나눈 뒤 팀 이름을 지정해주세요." value={name} onChange={(e) => { editing.current = true; setName(e.target.value); setErr(''); }} />
+        <input maxLength={15} placeholder="얘기를 나눈 뒤 팀 이름을 지정해주세요 (과일, 컬러 이름 등)" value={name} onChange={(e) => { editing.current = true; setName(e.target.value); setErr(''); }} />
         <em aria-live="polite">{nameSt === 'saving' ? '저장 중…' : nameSt === 'saved' ? '✓ 등록됨' : ''}</em>
       </label>
 
