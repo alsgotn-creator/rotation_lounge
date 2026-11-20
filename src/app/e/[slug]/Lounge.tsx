@@ -124,12 +124,15 @@ export default function Lounge({ slug, initial, when, loveType, onEdit, double =
     addEventListener('popstate', onPop);
     return () => removeEventListener('popstate', onPop);
   }, []);
-  // 들어왔을 때 이미 파트너가 있거나, 보고 있는 동안 파트너가 정해지면 채팅방으로
+  // 시작 전에만: 들어왔을 때 이미 파트너가 있거나, 보고 있는 동안 파트너가 정해지면 채팅방으로.
+  // 대화가 시작된 뒤(라운드가 끝나 라운지로 돌아올 때)는 라운지가 먼저 뜨고, 채팅은 가운데 카드로 연다.
   useEffect(() => {
     if (!double || team === undefined) return;
-    if (seen.current === undefined || (seen.current === false && team)) { if (team) openChat(); }
+    const first = seen.current === undefined;
+    if (team && before && (first || seen.current === false)) openChat();
+    else if (first && location.hash === '#chat') { history.replaceState(null, '', location.pathname + location.search); setChat(false); }
     seen.current = !!team;
-  }, [double, team, openChat]);
+  }, [double, team, openChat, before]);
   // 새로고침했는데 주소에 #chat만 남아 있으면 라운지가 기본
   useEffect(() => { if (!double && location.hash === '#chat') history.replaceState(null, '', location.pathname + location.search); }, [double]);
 
