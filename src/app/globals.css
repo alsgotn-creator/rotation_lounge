@@ -744,3 +744,7 @@ a.lp-card:active,.lp-apply:active{transform:scale(.985)}
 .lp-ses em{font-style:normal;font-weight:800;color:var(--rose)}.lp-ses em.off{color:var(--dim)}
 .lp-ses li.none{padding:8px 0;font-size:12.5px;font-weight:600;color:var(--mute)}
 .lp-steps .tel010 b{display:flex;align-items:center;height:42px;line-height:1}.lp-steps .fld .tel010 input{line-height:42px}
+/* 더블 라운지: 파트너가 정해지면 위에 떠 있는 '채팅하기' (채팅 칸이 보이면 숨는다) */
+.tm{scroll-margin-top:16px}
+.tm-jump{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));translate:-50% 0;z-index:30;display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border:0;border-radius:21px;background:var(--btn);color:var(--btntx);font:inherit;font-size:14px;font-weight:800;box-shadow:0 10px 26px -10px rgba(0,0,0,.45);cursor:pointer;animation:up .4s both;white-space:nowrap}
+.tm-jump b{display:grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#fff;color:var(--btn);font-size:11px}

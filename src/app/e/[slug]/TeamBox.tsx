@@ -15,6 +15,9 @@ export default function TeamBox({ slug }: { slug: string }) {
   const [busy, setBusy] = useState(false);
   const end = useRef<HTMLDivElement>(null);
   const count = useRef(0);
+  const box = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(false);
+  const prev = useRef<TeamView | undefined>(undefined);
 
   const load = useCallback(async () => {
     const j = await api<{ team: TeamView }>(`/api/e/${slug}/team`);
@@ -31,6 +34,19 @@ export default function TeamBox({ slug }: { slug: string }) {
     if (n > count.current && count.current > 0) end.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     count.current = n;
   }, [t?.messages.length]);
+  // 채팅 칸이 화면에 보이는지 (보이면 위쪽 '채팅하기' 버튼을 숨긴다)
+  useEffect(() => {
+    if (!box.current) return;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.25 });
+    io.observe(box.current);
+    return () => io.disconnect();
+  }, [t === null, t === undefined]);
+  // 보고 있는 동안 파트너가 정해지면(호스트가 매칭을 누르면) 채팅 칸으로 바로 옮겨준다
+  useEffect(() => {
+    if (prev.current === null && t) setTimeout(() => go(), 50);
+    prev.current = t;
+  }, [t]);
+  const go = () => { box.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => box.current?.querySelector<HTMLInputElement>('.tm-in input')?.focus({ preventScroll: true }), 500); };
 
   const post = async (body: object) => {
     setBusy(true); setErr('');
@@ -42,7 +58,7 @@ export default function TeamBox({ slug }: { slug: string }) {
 
   if (t === undefined) return null;
   if (t === null) return (
-    <section className="tm">
+    <section className="tm" ref={box}>
       <p className="tm-eb">MY PARTNER</p>
       <h2 className="tm-t">파트너는 모임 전날 공개돼요</h2>
       <p className="ds">오늘 내 편이 되어줄 이성 파트너가 한 명 정해져요. 공개되면 여기서 둘만의 채팅을 할 수 있어요.</p>
@@ -50,7 +66,8 @@ export default function TeamBox({ slug }: { slug: string }) {
   );
   const p = t.partner;
   return (
-    <section className="tm">
+    <section className="tm" id="team" ref={box}>
+      {!inView && <button type="button" className="tm-jump" onClick={go}>파트너가 정해졌어요 · 채팅하기{t.messages.length > 0 && <b>{t.messages.length}</b>}</button>}
       <div className="tm-name">
         {name === null
           ? <><h2 className="tm-t">{t.name ? `팀 ${t.name}` : '팀 이름을 지어주세요'}</h2><button className="lnk" style={{ margin: 0 }} onClick={() => setName(t.name)}>{t.name ? '바꾸기' : '짓기'}</button></>
