@@ -96,8 +96,9 @@ export async function computePlay(eventId: string, meId: string, now = Date.now(
     }
   }
 
-  // 롤링페이퍼 밀린 것
-  const pendingAll: Pending[] = me && written && !written.error ? pendingNotes(me, rounds, T, g, seated, new Set((written.data ?? []).map((n) => `${n.round}:${n.to_id}`)), now, ev.phase, at) : [];
+  // 롤링페이퍼 밀린 것. 더블 라운지는 상대 팀의 이성 한 명에게만 쓴다 (2026-11-20, 같은 성별에게는 안 씀)
+  const noteTo = double ? (r: number) => at(r).filter((s) => s.gender !== me?.gender) : at;
+  const pendingAll: Pending[] = me && written && !written.error ? pendingNotes(me, rounds, T, g, seated, new Set((written.data ?? []).map((n) => `${n.round}:${n.to_id}`)), now, ev.phase, noteTo) : [];
   const first = pendingAll[0];
 
   // 최종 선택

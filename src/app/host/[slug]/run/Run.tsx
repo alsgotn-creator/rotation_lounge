@@ -56,7 +56,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
 
   // 진행 알림: 이번 라운드 롤링페이퍼가 다 모였는지, 최종 선택을 다 냈는지. 완료로 바뀌는 순간 토스트와 진동.
   const cur = v?.current ?? null;
-  const notesNeed = v && cur ? v.pairs.reduce((s, p) => s + p.f.length * p.m.length * 2, 0) : 0;
+  const notesNeed = v && cur ? v.pairs.reduce((s, p) => s + p.f.reduce((k, a) => k + p.m.filter((b) => b.gender !== a.gender).length, 0) * 2, 0) : 0; // 이성끼리만 서로 한 장씩 (더블: 상대 팀 이성)
   const notesGot = v && cur ? v.extras.notes.filter((n) => n.round === cur.no).length : 0;
   const notesShow = !!cur && notesNeed > 0 && (!!cur.closedAt || notesGot > 0);
   const notesAll = notesShow && notesGot >= notesNeed;
