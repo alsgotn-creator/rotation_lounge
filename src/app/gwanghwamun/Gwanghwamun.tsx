@@ -190,7 +190,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
 
       <section className="fu">
         <h2>자주 묻는 질문</h2>
-        <details><summary>혼자 가도 어색하지 않나요?</summary><p>혼자 와도, 친구와 둘이 와도 괜찮아요. 로테이션이라 한 분씩 차례로 대화하게 돼서 어색할 틈이 적어요.</p></details>
+        <details><summary>혼자 가도 어색하지 않나요?</summary><p>혼자 와도, 친구와 둘이 와도 괜찮아요. 로테이션이라 한 분씩이 아니라 여럿이서 함께 대화하게 돼서 어색할 틈이 적어요.</p></details>
         <details><summary>신청하면 바로 확정인가요?</summary><p>아니에요. 호스트가 나이와 분위기 밸런스를 보고 선별해서 수락해요. 성비가 차면 마감돼요.</p></details>
         <details><summary>뭘 준비해야 해요?</summary><p>휴대폰만 있으면 돼요. 최종선택과 롤링페이퍼 모두 모임웹으로 진행돼요.</p></details>
         <details><summary>제 사진과 정보는 어떻게 되나요?</summary><p>나이·직업·사진 1장만 받고, 모임이 끝나면 폐기해요. 피하고 싶은 회사 동료가 있다면 신청할 때 알려주세요. 걸러드려요.</p></details>
