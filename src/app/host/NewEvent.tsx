@@ -5,7 +5,7 @@ import { api } from '../../lib/api';
 
 export default function NewEvent() {
   const router = useRouter();
-  const [f, setF] = useState({ date: '', time: '19:30', venue: '성수', birthFrom: '1994', birthTo: '1999', tables: '7', perTable: '1', kind: 'rotation', teams: '10' });
+  const [f, setF] = useState({ date: '', time: '19:30', venue: '성수', birthFrom: '1994', birthTo: '1999', tables: '7', perTable: '1', kind: 'rotation', teams: '10', price: '' });
   const double = f.kind === 'double';
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -29,6 +29,7 @@ export default function NewEvent() {
         <label className="fld"><span>시간</span><input type="time" value={f.time} onChange={set('time')} required /></label>
       </div>
       <label className="fld"><span>장소</span><input value={f.venue} onChange={set('venue')} maxLength={40} /></label>
+      <label className="fld"><span>참가비 (원, 비우면 기본 {double ? '32,000' : '30,000'}원)</span><input inputMode="numeric" value={f.price} onChange={set('price')} placeholder={double ? '32000' : '30000'} maxLength={9} /></label>
       <div className="btn2" style={{ gridTemplateColumns: '1fr 1fr' }}>
         <label className="fld"><span>몇 년생부터</span><input inputMode="numeric" value={f.birthFrom} onChange={set('birthFrom')} maxLength={4} /></label>
         <label className="fld"><span>몇 년생까지</span><input inputMode="numeric" value={f.birthTo} onChange={set('birthTo')} maxLength={4} /></label>

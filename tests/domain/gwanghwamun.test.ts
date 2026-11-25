@@ -1,5 +1,23 @@
 import { describe, expect, test } from 'vitest';
-import { isGwanghwamun } from '../../src/lib/signup/rules';
+import { isGwanghwamun, parsePrice } from '../../src/lib/signup/rules';
+
+describe('parsePrice', () => {
+  test('blank falls back to the default fee', () => {
+    expect(parsePrice('', 30000)).toBe(30000);
+    expect(parsePrice(undefined, 32000)).toBe(32000);
+  });
+  test('accepts plain or formatted won amounts', () => {
+    expect(parsePrice('40000', 30000)).toBe(40000);
+    expect(parsePrice('40,000원', 30000)).toBe(40000);
+    expect(parsePrice(0, 30000)).toBe(0);
+  });
+  test('rejects non-integers, negatives and absurd amounts', () => {
+    expect(parsePrice('4만', 30000)).toBeNull();
+    expect(parsePrice('-1', 30000)).toBeNull();
+    expect(parsePrice('39999.5', 30000)).toBeNull();
+    expect(parsePrice('2000000', 30000)).toBeNull();
+  });
+});
 
 describe('isGwanghwamun', () => {
   test('picks lounges held around 광화문 or 을지로', () => {

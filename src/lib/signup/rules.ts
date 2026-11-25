@@ -12,6 +12,14 @@ export type Session = {
   seatsF: number; seatsM: number; closed?: boolean; double?: boolean;
 };
 
+/** 호스트가 적은 참가비(원). 비우면 기본값, 0~100만 원의 정수가 아니면 null(거절) */
+export function parsePrice(v: unknown, fallback: number): number | null {
+  const s = String(v ?? '').replace(/[,\s원]/g, '');
+  if (!s) return fallback;
+  const n = Number(s);
+  return Number.isInteger(n) && n >= 0 && n <= 1_000_000 ? n : null;
+}
+
 /** /gwanghwamun 랜딩이 보여줄 모임: 장소에 광화문·을지로가 들어간 일반(더블 아닌) 라운지 */
 export const isGwanghwamun = (e: Pick<EventRow, 'venue' | 'title'>) => /광화문|을지로/.test(e.venue) && !e.title.includes('더블');
 

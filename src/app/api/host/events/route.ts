@@ -4,6 +4,7 @@ import { db } from '../../../../lib/server/supabase';
 import { eventLayout } from '../../../../lib/server/signup';
 import { isHost } from '../../../../lib/server/auth';
 import { DOUBLE_PRICE, PRICE } from '../../../../lib/signup/data';
+import { parsePrice } from '../../../../lib/signup/rules';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -19,6 +20,8 @@ export async function POST(req: Request) {
   if (startsAt.getTime() < Date.now()) return fail('지난 날짜예요.');
   if (!venue) return fail('장소를 적어주세요.');
   if (!(birthFrom >= 1950 && birthTo <= 2010 && birthFrom <= birthTo)) return fail('나이대를 확인해주세요.');
+  const price = parsePrice(b.price, b.kind === 'double' ? DOUBLE_PRICE : PRICE); // 비우면 기본 참가비
+  if (price === null) return fail('참가비를 숫자로 적어주세요. (예: 40000)');
   if (b.kind !== 'double' && !(Number.isInteger(tables) && tables >= 2 && tables <= 12)) return fail('테이블은 2~12개예요.');
   if (b.kind !== 'double' && !(Number.isInteger(perTable) && perTable >= 1 && perTable <= 3)) return fail('한 테이블 인원은 1:1, 2:2, 3:3 중에서 골라주세요.');
 
@@ -29,7 +32,7 @@ export async function POST(req: Request) {
     const slug = randomBytes(6).toString('base64url').replace(/[-_]/g, 'x').slice(0, 8).toLowerCase();
     const { error } = await db().from('events').insert({
       slug, kind: 'double', title: '플러팅 더블 라운지', starts_at: startsAt.toISOString(), venue, birth_from: birthFrom, birth_to: birthTo,
-      capacity_per_gender: teams, table_count: Math.ceil(teams / 2), price: DOUBLE_PRICE, round_duration_sec: 1200, max_picks: 2,
+      capacity_per_gender: teams, table_count: Math.ceil(teams / 2), price, round_duration_sec: 1200, max_picks: 2,
     });
     if (error) return fail('Supabase에서 0014_double.sql을 먼저 실행해주세요.', 500);
     return NextResponse.json({ ok: true, slug });
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
   const capacity = tables * perTable; // 성별당 최대 인원
   const { error } = await db().from('events').insert({
     slug, starts_at: startsAt.toISOString(), venue, birth_from: birthFrom, birth_to: birthTo,
-    capacity_per_gender: capacity, table_count: tables, price: PRICE, round_duration_sec: 720, max_picks: 3,
+    capacity_per_gender: capacity, table_count: tables, price, round_duration_sec: 720, max_picks: 3,
     ...(perTable > 1 ? { per_table: perTable } : {}),
   });
   if (error) return fail(perTable > 1 || capacity > 12 ? 'Supabase에서 0005_per_table.sql을 먼저 실행해주세요.' : '저장하지 못했어요. 다시 시도해주세요.', 500);
