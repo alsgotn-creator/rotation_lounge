@@ -70,7 +70,7 @@ export default function ApplyForm() {
       <p className="qn">1. 이름, 나이, 직업, 본인의 이상형</p>
       <div className="two">
         <label><span>이름</span><input name="name" required maxLength={20} autoComplete="name" /></label>
-        <label><span>나이</span><input name="age" required inputMode="numeric" maxLength={2} placeholder="예: 29" /></label>
+        <label><span>나이 (한국 나이)</span><input name="age" required inputMode="numeric" maxLength={2} placeholder="예: 29" /></label>
       </div>
       <label><span>직업</span><input name="job" required maxLength={30} placeholder="예: 공공기관 기획, IT 디자이너" /></label>
       <label><span>본인의 이상형</span><textarea name="ideal" required maxLength={200} rows={3} placeholder="어떤 사람에게 끌리는지 편하게 적어주세요" /></label>

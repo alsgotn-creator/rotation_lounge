@@ -12,6 +12,9 @@ export type Session = {
   seatsF: number; seatsM: number; closed?: boolean; double?: boolean;
 };
 
+/** 한국 나이 → 출생연도 (올해 29살이면 올해-28). 모임 나이대도 한국 나이 기준으로 정한다 */
+export const birthFromKoreanAge = (age: number, year: number) => year - age + 1;
+
 /** 광화문연가 신청서 → applications 칸. hasColumns=false(0019 마이그레이션 전)면 이상형·근무 여부를 job 칸에 함께 적는다 */
 export function gwApplyRow(job: string, ideal: string, near: string, hasColumns: boolean) {
   const nearKo = near === 'yes' ? '광화문 근처 근무' : '광화문 근처 근무 아님';
@@ -26,8 +29,8 @@ export function parsePrice(v: unknown, fallback: number): number | null {
   return Number.isInteger(n) && n >= 0 && n <= 1_000_000 ? n : null;
 }
 
-/** /gwanghwamun 랜딩이 보여줄 모임: 장소에 광화문·을지로가 들어간 일반(더블 아닌) 라운지 */
-export const isGwanghwamun = (e: Pick<EventRow, 'venue' | 'title'>) => /광화문|을지로/.test(e.venue) && !e.title.includes('더블');
+/** /gwanghwamun 랜딩이 보여줄 모임: 장소에 광화문·을지로가 들어간 라운지 (4명이서 20분씩이라 더블 라운지도 포함) */
+export const isGwanghwamun = (e: Pick<EventRow, 'venue'>) => /광화문|을지로/.test(e.venue);
 
 /** 자리를 차지하는 상태: 입금 대기 + 확정. 새 신청은 자리를 잡지 않는다. */
 export const HOLDS_SEAT: AppStatus[] = ['awaiting_payment', 'confirmed'];

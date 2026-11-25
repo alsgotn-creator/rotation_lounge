@@ -3,7 +3,7 @@ import { db, hasDb, PHOTO_BUCKET } from '../../../../lib/server/supabase';
 import { hash, newToken } from '../../../../lib/server/auth';
 import { nextGwanghwamun } from '../../../../lib/server/signup';
 import { birthError, isName } from '../../../../lib/signup/validate';
-import { gwApplyRow } from '../../../../lib/signup/rules';
+import { birthFromKoreanAge, gwApplyRow } from '../../../../lib/signup/rules';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   if (!isName(name)) return fail('이름을 확인해주세요.');
   if (!(Number.isInteger(age) && age >= 19 && age <= 60)) return fail('나이를 숫자로 적어주세요.');
   const year = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric' }).format(new Date()));
-  const birth = year - age; // 만 나이 기준
+  const birth = birthFromKoreanAge(age, year); // 한국 나이 기준 (모임 나이대도 한국 나이로 정함)
   const birthMsg = birthError(String(birth), event.birth_from, event.birth_to);
   if (birthMsg) return fail(birthMsg.replace('이 일정은', '이번 모임은'));
   if (job.length < 2) return fail('직업을 적어주세요.');
