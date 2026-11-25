@@ -106,6 +106,7 @@ body:has(.gw){background:#080C18}
 .gw .bleed{position:relative;margin:24px -20px 0}
 .gw .bleed img{display:block;width:100%;height:auto;aspect-ratio:10/11;object-fit:cover;object-position:50% 60%}
 .gw .bleed.me img{object-position:50% 35%}
+.gw .bleed.river img{object-position:50% 92%}
 .gw .bleed figcaption{position:absolute;left:0;right:0;bottom:0;padding:96px 20px 26px;background:linear-gradient(rgba(14,20,36,0),rgba(14,20,36,.88) 55%)}
 .gw .bleed figcaption h2{margin:0;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.35)}
 .gw .bleed figcaption p{margin-top:8px;color:var(--text);font-size:15px;opacity:.9}

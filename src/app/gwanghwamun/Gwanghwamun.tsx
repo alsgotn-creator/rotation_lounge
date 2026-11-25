@@ -120,7 +120,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
       </section>
 
       <section className="fu">
-        <figure className="bleed">
+        <figure className="bleed river">
           <img src="/gwanghwamun/river.jpg" width={900} height={1117} loading="lazy" alt="노을 진 한강변에 나란히 앉은 두 사람의 뒷모습" />
           <figcaption><h2>어김없이 찾아온<br />추위와 연말</h2><p>올해는 따뜻하게 보내고 싶어</p></figcaption>
         </figure>
@@ -133,18 +133,14 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
           <p>연말이 다가오던 어느 날, 옆자리 대리님이 이런 고민을 털어놓으셨어요.
             <q>소개팅 한 번 하면 5~6만 원씩 깨지고, 호흡도 너무 길어서 힘들어요 ㅠㅠ</q>
             그래서 “광화문 주변 직장인들만 모아서 소개팅해 보면 어때요?” 하고 여쭤봤더니 “좋은 아이디어인데요?” 하시더라고요. <span className="aside">(급하셔서 다 좋다고 하신 것 같긴 해요)</span></p>
-          <p>사실 제 부캐는 로테이션 소개팅 호스트예요. 사람과 사람을 잇는 걸 좋아하고, 바이브코딩으로 이 웹과 모임 앱까지 직접 만든 디자이너이기도 하고요. 이번 모임도 제가 만든 앱으로 진행돼요.</p>
+          <p>사실 제 부캐는 로테이션 소개팅 호스트예요. 사람과 사람을 잇는 걸 좋아하고, 바이브코딩으로 이 모임웹까지 직접 만든 디자이너이기도 하고요. 이번 모임도 이 모임웹으로 진행돼요.</p>
           <p>대리님과 같은 고민을 하는 분이 분명 더 계실 거예요. 아직 연말 계획이 없다면 용기 내서 신청해 보세요. 나머지는 제가 다 준비할게요. 좋은 분들만 모시고 싶어서, 신청서는 제가 한 분 한 분 직접 보고 수락할게요.</p>
           <p>궁금한 건 언제든 {ig}로 DM 주세요.<br />감기 조심하시고, 한 해 마무리 잘 하시길 바라요 :)</p>
           <p className="sign">호스트 옷깃 드림</p>
         </div>
         <figure className="bleed me">
           <img src="/gwanghwamun/host-me.jpg" width={900} height={1200} loading="lazy" alt="카페에서 노트북으로 작업 중인 호스트 옷깃" />
-          <figcaption><h2>호스트 옷깃</h2><p>이 웹과 모임 앱을 직접 만들었어요</p></figcaption>
-        </figure>
-        <figure className="bleed">
-          <img src="/gwanghwamun/couple.jpg" width={900} height={1125} loading="lazy" alt="광화문 앞에 나란히 서서 웃고 있는 남녀" />
-          <figcaption><h2>광화문 직장인 대상<br />연말 소개팅이 열린대요</h2><p>12월 11일 금요일 오후 7시 · 광화문 근처 카페 통대관</p></figcaption>
+          <figcaption><h2>호스트 옷깃</h2><p>이 모임웹을 직접 만들었어요</p></figcaption>
         </figure>
       </section>
 
@@ -186,7 +182,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
         <ol className="steps">
           <li><span className="n">1</span><h3>간단한 신청서</h3><p>나이·직업·사진 1장만 받아요. 피하고 싶은 회사 동료도 알려주시면 걸러드려요.</p></li>
           <li><span className="n">2</span><h3>호스트가 직접 수락</h3><p>나이와 분위기 밸런스를 보고 한 분씩 확인해요.</p></li>
-          <li><span className="n">3</span><h3>로테이션 대화</h3><p>광화문 근처 카페를 통대관해서, 4명이서 20분씩 대화하고 자리를 바꿔요. 모든 진행은 제가 만든 앱으로 해요.</p></li>
+          <li><span className="n">3</span><h3>로테이션 대화</h3><p>광화문 근처 카페를 통대관해서, 4명이서 20분씩 대화하고 자리를 바꿔요. 모든 진행은 제가 만든 모임웹으로 해요.</p></li>
           <li><span className="n">4</span><h3>최종선택, 결과는 문자로</h3><p>마음에 든 분을 3명까지 고를 수 있어요. 서로 골랐다면 문자로 알려드려요.</p></li>
           <li><span className="n">5</span><h3>롤링페이퍼와 2차</h3><p>나만 볼 수 있는 롤링페이퍼를 받아요. 아쉬운 분들을 위해 2차도 있어요 (참여는 자유예요).</p></li>
         </ol>
@@ -196,7 +192,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
         <h2>자주 묻는 질문</h2>
         <details><summary>혼자 가도 어색하지 않나요?</summary><p>혼자 와도, 친구와 둘이 와도 괜찮아요. 로테이션이라 한 분씩 차례로 대화하게 돼서 어색할 틈이 적어요.</p></details>
         <details><summary>신청하면 바로 확정인가요?</summary><p>아니에요. 호스트가 나이와 분위기 밸런스를 보고 선별해서 수락해요. 성비가 차면 마감돼요.</p></details>
-        <details><summary>뭘 준비해야 해요?</summary><p>휴대폰만 있으면 돼요. 최종선택과 롤링페이퍼 모두 앱으로 진행돼요.</p></details>
+        <details><summary>뭘 준비해야 해요?</summary><p>휴대폰만 있으면 돼요. 최종선택과 롤링페이퍼 모두 모임웹으로 진행돼요.</p></details>
         <details><summary>제 사진과 정보는 어떻게 되나요?</summary><p>나이·직업·사진 1장만 받고, 모임이 끝나면 폐기해요. 피하고 싶은 회사 동료가 있다면 신청할 때 알려주세요. 걸러드려요.</p></details>
         <details><summary>결과는 어떻게 알려주나요?</summary><p>서로 선택했을 때만 문자로 알려드려요. 선택받지 못한 경우엔 아무에게도 알려지지 않아요.</p></details>
       </section>
