@@ -210,7 +210,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
         <button className="gbtn" type="button" onClick={share}>친구에게 링크 보내기</button>
       </footer>
 
-      <div className={`sticky${sticky ? ' on' : ''}`}><a className="gbtn p" href="#apply-form" tabIndex={sticky ? 0 : -1}>신청하기 · 성비 차면 마감</a></div>
+      <div className={`sticky${sticky ? ' on' : ''}`}><a className="gbtn p" href="#apply-form" tabIndex={sticky ? 0 : -1}>신청하기</a></div>
       <div className={`gtoast${toast ? ' on' : ''}`} role="status" aria-live="polite">{toast}</div>
     </div>
   );
