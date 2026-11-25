@@ -1,5 +1,14 @@
 import { describe, expect, test } from 'vitest';
-import { isGwanghwamun, parsePrice } from '../../src/lib/signup/rules';
+import { gwApplyRow, isGwanghwamun, parsePrice } from '../../src/lib/signup/rules';
+
+describe('gwApplyRow', () => {
+  test('uses the ideal/near_work columns when they exist', () => {
+    expect(gwApplyRow('디자이너', '대화가 잘 통하는 사람', 'yes', true)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', near_work: '광화문 근처 근무' });
+  });
+  test('packs everything into job before the 0019 migration', () => {
+    expect(gwApplyRow('디자이너', '웃음이 많은 사람', 'no', false)).toEqual({ job: '디자이너 · 이상형: 웃음이 많은 사람 · 광화문 근처 근무 아님' });
+  });
+});
 
 describe('parsePrice', () => {
   test('blank falls back to the default fee', () => {

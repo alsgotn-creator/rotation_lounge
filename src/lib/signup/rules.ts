@@ -12,6 +12,12 @@ export type Session = {
   seatsF: number; seatsM: number; closed?: boolean; double?: boolean;
 };
 
+/** 광화문연가 신청서 → applications 칸. hasColumns=false(0019 마이그레이션 전)면 이상형·근무 여부를 job 칸에 함께 적는다 */
+export function gwApplyRow(job: string, ideal: string, near: string, hasColumns: boolean) {
+  const nearKo = near === 'yes' ? '광화문 근처 근무' : '광화문 근처 근무 아님';
+  return hasColumns ? { job, ideal, near_work: nearKo } : { job: `${job} · 이상형: ${ideal} · ${nearKo}` };
+}
+
 /** 호스트가 적은 참가비(원). 비우면 기본값, 0~100만 원의 정수가 아니면 null(거절) */
 export function parsePrice(v: unknown, fallback: number): number | null {
   const s = String(v ?? '').replace(/[,\s원]/g, '');

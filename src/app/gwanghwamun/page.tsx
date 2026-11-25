@@ -18,7 +18,7 @@ const ko = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('
 /** 광화문연가 QR 랜딩. 모임 정보는 Supabase events 에서 (장소에 광화문·을지로가 들어간 가장 가까운 모임) */
 export default async function GwanghwamunPage() {
   const next = await nextGwanghwamun();
-  const e = next?.event, s = next?.session;
+  const e = next?.event;
   const d = e ? new Date(e.starts_at) : null;
   const day = d ? ko(d, { month: 'long', day: 'numeric', weekday: 'long' }) : ''; // 12월 11일 금요일
   const time = d ? ko(d, { hour: 'numeric', minute: d.getUTCMinutes() ? '2-digit' : undefined }) : ''; // 오후 7시
@@ -29,14 +29,12 @@ export default async function GwanghwamunPage() {
       startsAt={e?.starts_at ?? null}
       day={day}
       time={time}
-      applyHref={s ? `/apply?s=${s.id}` : '/apply'}
-      closedText={!s ? '다음 모임을 준비하고 있어요' : s.closed ? '이번 모임은 마감됐어요' : null}
       info={[
-        ['일시', d ? `${day} ${time}` : '[곧 공개돼요]'],
+        ['일시', '12월 11일 오후 7시'],
         ['장소', e?.venue || '광화문 근처 카페 통대관'],
-        ['대상', '광화문 근처 2535 직장인 · 나이·직업 밸런스를 보고 수락'],
-        ['인원', '최소 8 : 8'],
-        ['참가비', e ? `${e.price.toLocaleString('ko-KR')}원` : '[곧 공개돼요]'],
+        ['대상', '광화문 근처 2535 직장인'],
+        ['인원', '최소 8 : 8 · 미달 시 진행하지 않고 전부 환불해드려요'],
+        ['참가비', '40,000원'],
       ]}
     />
   </>);

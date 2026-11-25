@@ -1,9 +1,9 @@
 'use client';
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import ApplyForm from './ApplyForm';
 
 const IG = 'pov.love.archive';
-type Props = { startsAt: string | null; day: string; time: string; applyHref: string; closedText: string | null; info: [string, string][] };
+type Props = { startsAt: string | null; day: string; time: string; info: [string, string][] };
 
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 const NS = 'http://www.w3.org/2000/svg';
@@ -14,7 +14,7 @@ function left(at: number) {
   return s > 0 ? [s / 86400, (s / 3600) % 24, (s / 60) % 60, s % 60].map(Math.floor) : null;
 }
 
-export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText, info }: Props) {
+export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const [count, setCount] = useState<number[] | null | undefined>(undefined); // undefined: 첫 렌더(서버와 같게 '--')
   const [sticky, setSticky] = useState(false);
@@ -51,9 +51,16 @@ export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText
     // 스크롤 fade-up
     const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
     el.querySelectorAll('.fu').forEach((e) => io.observe(e));
-    // 본문 신청 버튼이 화면 위로 지나가면 하단 고정 버튼
-    const so = new IntersectionObserver(([e]) => setSticky(!e.isIntersecting && e.boundingClientRect.top < 0));
-    so.observe(q('#cta'));
+    // 첫 화면을 지나면 하단 고정 버튼, 신청서가 보이면 숨김
+    let past = false, formIn = false;
+    const so = new IntersectionObserver((es) => {
+      for (const e of es) {
+        if (e.target.id === 'apply-form') formIn = e.isIntersecting;
+        else past = !e.isIntersecting && e.boundingClientRect.top < 0;
+      }
+      setSticky(past && !formIn);
+    });
+    so.observe(q('.ghero')); so.observe(q('#apply-form'));
     return () => { io.disconnect(); so.disconnect(); el.querySelectorAll('.bokeh i, .city *, .lamps *').forEach((n) => n.remove()); };
   }, []);
 
@@ -63,9 +70,6 @@ export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText
     try { await navigator.clipboard.writeText(location.href); setToast('링크를 복사했어요. 친구에게 붙여넣기 해주세요'); }
     catch { setToast('복사에 실패했어요. 주소창의 링크를 직접 복사해 주세요'); }
   };
-  const apply = (label: string, extra = '', tabIndex?: number) => closedText
-    ? <span className={`gbtn off ${extra}`} aria-disabled="true">{closedText}</span>
-    : <Link className={`gbtn p ${extra}`} href={applyHref} tabIndex={tabIndex}>{label}</Link>;
   const ig = <a className="ig" href={`https://instagram.com/${IG}`} target="_blank" rel="noopener">@{IG}</a>;
 
   return (
@@ -115,12 +119,11 @@ export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText
         </> : <p className="gdate">다음 모임<em>곧 공개돼요</em></p>}
       </section>
 
-      <section className="fu mood">
-        <figure className="photo">
+      <section className="fu">
+        <figure className="bleed top">
           <img src="/gwanghwamun/river.jpg" width={900} height={1117} loading="lazy" alt="노을 진 한강변에 나란히 앉은 두 사람의 뒷모습" />
+          <figcaption><h2>어김없이 찾아온<br />추위와 연말</h2><p>올해는 따뜻하게 보내고 싶어</p></figcaption>
         </figure>
-        <h2>어김없이 찾아온<br />추위와 연말</h2>
-        <p className="lead">올해는 따뜻하게 보내고 싶어</p>
       </section>
 
       <section className="fu">
@@ -135,13 +138,10 @@ export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText
           <p>궁금한 건 언제든 {ig}로 DM 주세요.<br />감기 조심하시고, 한 해 마무리 잘 하시길 바라요 :)</p>
           <p className="sign">호스트 옷깃 드림</p>
         </div>
-        <figure className="photo">
-          <img src="/gwanghwamun/host.jpg" width={900} height={1200} loading="lazy" alt="따뜻한 조명 아래 카페 테이블에 마주 앉아 웃으며 대화하는 두 사람" />
+        <figure className="bleed">
+          <img src="/gwanghwamun/couple.jpg" width={900} height={1125} loading="lazy" alt="광화문 앞에 나란히 서서 웃고 있는 남녀" />
+          <figcaption><h2>광화문 직장인 대상<br />연말 소개팅이 열린대요</h2><p>12월 11일 금요일 오후 7시 · 광화문 근처 카페 통대관</p></figcaption>
         </figure>
-        <div className="btns" id="cta">
-          {apply('신청하기')}
-          <a className="gbtn" href="#about">어떤 모임이에요? ↓</a>
-        </div>
       </section>
 
       <section id="about" className="fu">
@@ -163,20 +163,21 @@ export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText
 
       <section className="fu">
         <h2>이런 분들을 모셔요</h2>
-        <p className="lead strong">광화문 근처 2535 직장인</p>
         <ul className="checks">
           <li>나이, 직업, 사진 1장이 필요해요</li>
           <li>혼자 와도, 친구와 와도 OK</li>
           <li>피하고 싶은 회사 동료를 알려주시면 필터링해드려요</li>
           <li>제출한 사진, 정보는 모임 후 폐기돼요</li>
+          <li>음료와 간식이 무제한이에요</li>
         </ul>
         <p className="note">최소 8 : 8로 진행돼요</p>
       </section>
 
       <section className="fu">
         <h2>이렇게 진행돼요</h2>
-        <figure className="photo mid">
+        <figure className="bleed">
           <img src="/gwanghwamun/table.jpg" width={900} height={720} loading="lazy" alt="카페 테이블에 네 사람이 둘러앉아 대화하는 모습" />
+          <figcaption><h2>4명이서, 20분씩<br />대화하고 자리를 바꿔요</h2></figcaption>
         </figure>
         <ol className="steps">
           <li><span className="n">1</span><h3>간단한 신청서</h3><p>나이·직업·사진 1장만 받아요. 피하고 싶은 회사 동료도 알려주시면 걸러드려요.</p></li>
@@ -196,11 +197,11 @@ export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText
         <details><summary>결과는 어떻게 알려주나요?</summary><p>서로 선택했을 때만 문자로 알려드려요. 선택받지 못한 경우엔 아무에게도 알려지지 않아요.</p></details>
       </section>
 
-      <section className="fu">
+      <section className="fu" id="apply-form">
         <div className="end">
           <h2>송년회는 많아도,<br />같이 보낼 한 사람이면 충분해요</h2>
           <p>신분이 보장된 광화문 근처 직장인들을 위한 프라이빗 모임이에요.</p>
-          {apply('지금 신청하기')}
+          <ApplyForm />
         </div>
       </section>
 
@@ -209,7 +210,7 @@ export default function Gwanghwamun({ startsAt, day, time, applyHref, closedText
         <button className="gbtn" type="button" onClick={share}>친구에게 링크 보내기</button>
       </footer>
 
-      {!closedText && <div className={`sticky${sticky ? ' on' : ''}`}>{apply('신청하기 · 성비 차면 마감', '', sticky ? 0 : -1)}</div>}
+      <div className={`sticky${sticky ? ' on' : ''}`}><a className="gbtn p" href="#apply-form" tabIndex={sticky ? 0 : -1}>신청하기 · 성비 차면 마감</a></div>
       <div className={`gtoast${toast ? ' on' : ''}`} role="status" aria-live="polite">{toast}</div>
     </div>
   );
