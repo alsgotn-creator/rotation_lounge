@@ -12,6 +12,9 @@ export type Session = {
   seatsF: number; seatsM: number; closed?: boolean; double?: boolean;
 };
 
+/** /gwanghwamun 랜딩이 보여줄 모임: 장소에 광화문·을지로가 들어간 일반(더블 아닌) 라운지 */
+export const isGwanghwamun = (e: Pick<EventRow, 'venue' | 'title'>) => /광화문|을지로/.test(e.venue) && !e.title.includes('더블');
+
 /** 자리를 차지하는 상태: 입금 대기 + 확정. 새 신청은 자리를 잡지 않는다. */
 export const HOLDS_SEAT: AppStatus[] = ['awaiting_payment', 'confirmed'];
 

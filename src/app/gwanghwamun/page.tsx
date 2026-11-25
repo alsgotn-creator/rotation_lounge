@@ -1,0 +1,43 @@
+import type { Metadata, Viewport } from 'next';
+import Gwanghwamun from './Gwanghwamun';
+import { nextGwanghwamun } from '../../lib/server/signup';
+import './gw.css';
+
+export const revalidate = 60; // 남은 자리는 1분마다 새로
+
+const DESC = '광화문 근처 2535 직장인 로테이션 소개팅. 카페 통대관, 4명이서 20분씩, 최소 8:8, 결과는 문자로.';
+export const metadata: Metadata = {
+  title: '광화문연가 · 2535 직장인 로테이션 소개팅',
+  description: DESC,
+  openGraph: { type: 'website', locale: 'ko_KR', title: '광화문연가 · 2535 직장인 로테이션 소개팅', description: DESC },
+};
+export const viewport: Viewport = { themeColor: '#0E1424' };
+
+const ko = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', ...o }).format(d);
+
+/** 광화문연가 QR 랜딩. 모임 정보는 Supabase events 에서 (장소에 광화문·을지로가 들어간 가장 가까운 모임) */
+export default async function GwanghwamunPage() {
+  const next = await nextGwanghwamun();
+  const e = next?.event, s = next?.session;
+  const d = e ? new Date(e.starts_at) : null;
+  const day = d ? ko(d, { month: 'long', day: 'numeric', weekday: 'long' }) : ''; // 12월 11일 금요일
+  const time = d ? ko(d, { hour: 'numeric', minute: d.getUTCMinutes() ? '2-digit' : undefined }) : ''; // 오후 7시
+  return (<>
+    {/* React 19가 <head>로 올려준다. 이 페이지에서만 쓰는 폰트 */}
+    <link rel="stylesheet" precedence="default" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;800&display=swap" />
+    <Gwanghwamun
+      startsAt={e?.starts_at ?? null}
+      day={day}
+      time={time}
+      applyHref={s ? `/apply?s=${s.id}` : '/apply'}
+      closedText={!s ? '다음 모임을 준비하고 있어요' : s.closed ? '이번 모임은 마감됐어요' : null}
+      info={[
+        ['일시', d ? `${day} ${time}` : '[곧 공개돼요]'],
+        ['장소', e?.venue || '광화문 근처 카페 통대관'],
+        ['대상', '광화문 근처 2535 직장인 · 나이·직업 밸런스를 보고 수락'],
+        ['인원', '최소 8 : 8'],
+        ['참가비', e ? `${e.price.toLocaleString('ko-KR')}원` : '[곧 공개돼요]'],
+      ]}
+    />
+  </>);
+}

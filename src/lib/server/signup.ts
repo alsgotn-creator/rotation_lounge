@@ -2,7 +2,7 @@ import 'server-only';
 import { db, hasDb, PHOTO_BUCKET } from './supabase';
 import { hash } from './auth';
 import { SAMPLE_EVENTS } from '../signup/data';
-import { toSession, type AppStatus, type EventRow, type Gender, type Session } from '../signup/rules';
+import { isGwanghwamun, toSession, type AppStatus, type EventRow, type Gender, type Session } from '../signup/rules';
 
 export const EVENT_COLS = 'id,slug,title,starts_at,venue,birth_from,birth_to,capacity_per_gender,apply_open,price,payment_due_days';
 
@@ -19,16 +19,27 @@ async function seatRows(eventIds: string[]) {
   return data as { event_id: string; gender: Gender; status: AppStatus }[];
 }
 
+/** 앞으로의, 신청을 받는 모임 (신청을 닫은 모임은 공개 목록에서 뺀다. 시연 모임도) */
+async function openEvents() {
+  const { data, error } = await db().from('events').select(EVENT_COLS).gt('starts_at', new Date().toISOString()).eq('apply_open', true).order('starts_at');
+  if (error) throw error;
+  return data as EventRow[];
+}
+
 /** 소개·신청 화면에 보여줄 앞으로의 일정 (키가 없으면 예시 일정) */
 export async function listSessions(): Promise<Session[]> {
   // 키가 없으면 로컬에서만 예시 일정을 보여주고, 배포 사이트에서는 빈 목록 (가짜 일정에 신청하지 않게)
   if (!hasDb()) return process.env.NODE_ENV === 'production' ? [] : SAMPLE_EVENTS.map((e) => toSession(e, []));
-  // 신청을 닫은 모임은 공개 목록에서 뺀다 (시연 모임도)
-  const { data, error } = await db().from('events').select(EVENT_COLS).gt('starts_at', new Date().toISOString()).eq('apply_open', true).order('starts_at');
-  if (error) throw error;
-  const events = data as EventRow[];
+  const events = await openEvents();
   const apps = await seatRows(events.map((e) => e.id));
   return events.map((e) => toSession(e, apps.filter((a) => a.event_id === e.id)));
+}
+
+/** /gwanghwamun 랜딩: 가장 가까운 광화문·을지로 모임 (없으면 null) */
+export async function nextGwanghwamun() {
+  if (!hasDb()) return null;
+  const e = (await openEvents()).find(isGwanghwamun);
+  return e ? { event: e, session: await eventSeats(e) } : null;
 }
 
 export async function getEvent(by: { id?: string; slug?: string }) {
