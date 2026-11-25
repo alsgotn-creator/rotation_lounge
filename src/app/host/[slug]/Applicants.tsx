@@ -8,7 +8,7 @@ import type { AppStatus, Session } from '../../../lib/signup/rules';
 import { QUESTIONS, typeName } from '../../../lib/domain/loveType';
 
 export type Row = {
-  id: string; name: string; gender: 'f' | 'm'; birthYear: number; job: string; phone: string; email: string; ideal: string; nearWork: string;
+  id: string; name: string; gender: 'f' | 'm'; birthYear: number; job: string; phone: string; email: string; ideal: string; nearWork: string; source: string;
   status: AppStatus; paymentDue: string | null; createdAt: string; number: number | null; avoid: { name: string; note: string }[];
   photos: string[]; avoidHits: string[]; avoidedBy: string[];
   profile: { area: string; mbti: string; keywords: string[]; answers: number[]; loveType: number } | null; // 사전 등록 전이면 null
@@ -93,7 +93,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
           <span className="badge">{STATUS_KO[open.status]}{open.number != null && ` · ${open.gender === 'f' ? '여' : '남'}${open.number}호`}</span>
           <h2 className="q" style={{ fontSize: 22, marginTop: 10 }}>{open.name} <small className="ds" style={{ fontSize: 14 }}>{open.gender === 'f' ? '여' : '남'} · {open.birthYear}년생</small></h2>
           <dl className="sum" style={{ marginTop: 12 }}>
-            {[['하는 일', open.job], ...(open.ideal ? [['이상형', open.ideal]] : []), ...(open.nearWork ? [['근무지', open.nearWork]] : []), ['연락처', open.phone || '수락 후 받기'], ...(open.email ? [['이메일', open.email]] : []), ['신청', ago(open.createdAt)], ...(open.paymentDue ? [['입금 기한', kDue(open.paymentDue)]] : [])]
+            {[['하는 일', open.job], ...(open.ideal ? [['이상형', open.ideal]] : []), ...(open.nearWork ? [['근무지', open.nearWork]] : []), ...(open.source ? [['신청 경로', open.source]] : []), ['연락처', open.phone || '수락 후 받기'], ...(open.email ? [['이메일', open.email]] : []), ['신청', ago(open.createdAt)], ...(open.paymentDue ? [['입금 기한', kDue(open.paymentDue)]] : [])]
               .map(([k, v]) => <div className="kv" key={k} style={{ borderTop: 0 }}><span>{k}</span><b>{k === '연락처' && open.phone ? <a href={`tel:${v}`}>{v}</a> : v}</b></div>)}
           </dl>
           {open.avoid.length > 0 && <div className="alert"><Icon name="info" /><div>
@@ -160,7 +160,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
           <button className="ap" key={r.id} onClick={() => setOpenId(r.id)}>
             <div className="av2" style={r.photos[0] ? { background: `center/cover url("${r.photos[0]}")` } : { background: 'var(--surf2)' }} />
             <div className="in2"><b>{r.name} <small>{r.gender === 'f' ? '여' : '남'} · {String(r.birthYear).slice(2)}</small></b>
-              <span>{r.number != null && <b style={{ color: 'var(--acc)' }}>{r.gender === 'f' ? '여' : '남'}{r.number}호 · </b>}{r.job} · {ago(r.createdAt)}{r.status === 'cancelled' && ' · 취소'}{r.status === 'held' && ' · 대기'}</span>
+              <span>{r.number != null && <b style={{ color: 'var(--acc)' }}>{r.gender === 'f' ? '여' : '남'}{r.number}호 · </b>}{r.source && <b>{r.source} · </b>}{r.job} · {ago(r.createdAt)}{r.status === 'cancelled' && ' · 취소'}{r.status === 'held' && ' · 대기'}</span>
               {(r.avoidHits.length > 0 || r.avoidedBy.length > 0) && <em className="warn"><Icon name="info" />지인 주의</em>}</div>
             <Icon name="next" />
           </button>

@@ -15,10 +15,26 @@ export type Session = {
 /** 한국 나이 → 출생연도 (올해 29살이면 올해-28). 모임 나이대도 한국 나이 기준으로 정한다 */
 export const birthFromKoreanAge = (age: number, year: number) => year - age + 1;
 
-/** 광화문연가 신청서 → applications 칸. hasColumns=false(0019 마이그레이션 전)면 이상형·근무 여부를 job 칸에 함께 적는다 */
-export function gwApplyRow(job: string, ideal: string, near: string, hasColumns: boolean) {
+/** 광화문연가 신청서 → applications 칸.
+ *  level 0: ideal·near_work·source 칸 모두 있음 (0019+0020)
+ *  level 1: source 칸만 없음 → 경로를 job 뒤에 붙임
+ *  level 2: 0019 전 → 이상형·근무 여부·경로를 모두 job 에 함께 적음 */
+export function gwApplyRow(job: string, ideal: string, near: string, source: string, level: 0 | 1 | 2) {
   const nearKo = near === 'yes' ? '광화문 근처 근무' : '광화문 근처 근무 아님';
-  return hasColumns ? { job, ideal, near_work: nearKo } : { job: `${job} · 이상형: ${ideal} · ${nearKo}` };
+  if (level === 0) return { job, ideal, near_work: nearKo, source };
+  if (level === 1) return { job: `${job} · 경로: ${source}`, ideal, near_work: nearKo };
+  return { job: `${job} · 이상형: ${ideal} · ${nearKo} · 경로: ${source}` };
+}
+
+/** 신청 경로: ?from=insta 이거나 인스타 앱 안 브라우저면 인스타, 아니면 QR(카페 팻말) */
+export const gwSource = (from: string | null, userAgent: string) => (from === 'insta' || /Instagram/i.test(userAgent) ? '인스타' : 'QR');
+
+/** "1234, 5678" 처럼 적은 휴대폰 뒷번호 4자리들 (최대 5개). 칸에 뭔가 적었는데 4자리가 하나도 없으면 null */
+export function parseTails(v: string): string[] | null {
+  const t = v.trim();
+  if (!t) return [];
+  const found = t.match(/\d{4}/g);
+  return found ? [...new Set(found)].slice(0, 5) : null;
 }
 
 /** 호스트가 적은 참가비(원). 비우면 기본값, 0~100만 원의 정수가 아니면 null(거절) */
@@ -72,9 +88,12 @@ export function paymentDue(now: Date, startsAt: string, days: number) {
 const norm = (s: string) => s.replace(/\s+/g, '').toLowerCase();
 
 /** 이 신청자가 적은 '피하고 싶은 지인' 중, 같은 행사의 다른 신청자와 이름이 같은 사람 */
-export function avoidHits(me: { id: string; avoid: { name: string }[] }, others: { id: string; name: string; status: AppStatus }[]) {
+export function avoidHits(me: { id: string; avoid: { name: string }[] }, others: { id: string; name: string; status: AppStatus; phone?: string }[]) {
   const wanted = new Set(me.avoid.map((a) => norm(a.name)));
-  return others.filter((o) => o.id !== me.id && o.status !== 'cancelled' && wanted.has(norm(o.name)));
+  // 광화문연가 신청서는 이름 대신 "뒷번호 1234" 로 적는다 → 상대 휴대폰 끝 4자리와 비교 (번호가 저장된 사람만)
+  const tails = new Set(me.avoid.map((a) => /^뒷번호 (\d{4})$/.exec(a.name)?.[1]).filter(Boolean));
+  const tailOf = (p?: string) => (p ?? '').replace(/\D/g, '').slice(-4);
+  return others.filter((o) => o.id !== me.id && o.status !== 'cancelled' && (wanted.has(norm(o.name)) || (tailOf(o.phone).length === 4 && tails.has(tailOf(o.phone)))));
 }
 
 /** 비어 있는 호 번호 중 하나를 무작위로 (1..capacity). 다 찼으면 null */

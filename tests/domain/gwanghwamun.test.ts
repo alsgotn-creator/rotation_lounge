@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { birthFromKoreanAge, gwApplyRow, isGwanghwamun, parsePrice } from '../../src/lib/signup/rules';
+import { avoidHits, birthFromKoreanAge, gwApplyRow, gwSource, isGwanghwamun, parsePrice, parseTails } from '../../src/lib/signup/rules';
 
 describe('birthFromKoreanAge', () => {
   test('Korean age 25~35 in 2026 maps to 2002~1992', () => {
@@ -9,11 +9,41 @@ describe('birthFromKoreanAge', () => {
 });
 
 describe('gwApplyRow', () => {
-  test('uses the ideal/near_work columns when they exist', () => {
-    expect(gwApplyRow('디자이너', '대화가 잘 통하는 사람', 'yes', true)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', near_work: '광화문 근처 근무' });
+  test('uses the ideal/near_work/source columns when they all exist', () => {
+    expect(gwApplyRow('디자이너', '대화가 잘 통하는 사람', 'yes', '인스타', 0)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', near_work: '광화문 근처 근무', source: '인스타' });
+  });
+  test('appends the source to job when only the source column is missing', () => {
+    expect(gwApplyRow('디자이너', '웃음이 많은 사람', 'no', 'QR', 1)).toEqual({ job: '디자이너 · 경로: QR', ideal: '웃음이 많은 사람', near_work: '광화문 근처 근무 아님' });
   });
   test('packs everything into job before the 0019 migration', () => {
-    expect(gwApplyRow('디자이너', '웃음이 많은 사람', 'no', false)).toEqual({ job: '디자이너 · 이상형: 웃음이 많은 사람 · 광화문 근처 근무 아님' });
+    expect(gwApplyRow('디자이너', '웃음이 많은 사람', 'no', 'QR', 2)).toEqual({ job: '디자이너 · 이상형: 웃음이 많은 사람 · 광화문 근처 근무 아님 · 경로: QR' });
+  });
+});
+
+describe('gwSource', () => {
+  test('instagram link or in-app browser counts as 인스타, the rest as QR', () => {
+    expect(gwSource('insta', 'Mozilla/5.0 Safari')).toBe('인스타');
+    expect(gwSource(null, 'Mozilla/5.0 (iPhone) Instagram 312.0')).toBe('인스타');
+    expect(gwSource(null, 'Mozilla/5.0 (iPhone) Safari')).toBe('QR');
+  });
+});
+
+describe('parseTails', () => {
+  test('empty is fine, digits are picked out, junk is rejected', () => {
+    expect(parseTails('')).toEqual([]);
+    expect(parseTails('1234, 5678 1234')).toEqual(['1234', '5678']);
+    expect(parseTails('엄마')).toBeNull();
+  });
+});
+
+describe('avoidHits by phone tail', () => {
+  test("matches 뒷번호 entries against other applicants' phone endings", () => {
+    const me = { id: 'a', avoid: [{ name: '뒷번호 5678' }] };
+    const others = [
+      { id: 'b', name: '김철수', status: 'confirmed' as const, phone: '010-1234-5678' },
+      { id: 'c', name: '이영희', status: 'new' as const, phone: '' },
+    ];
+    expect(avoidHits(me, others).map((o) => o.id)).toEqual(['b']);
   });
 });
 

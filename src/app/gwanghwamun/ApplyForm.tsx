@@ -36,6 +36,7 @@ export default function ApplyForm() {
     if (!near) return setErr('광화문 근처 근무 여부를 골라주세요.');
     const fd = new FormData(e.currentTarget);
     fd.set('gender', gender); fd.set('near', near);
+    fd.set('from', new URLSearchParams(location.search).get('from') ?? ''); // 리틀리 링크는 ?from=insta
     const img = await shrink(photo);
     if (img.size > 4_000_000) return setErr('사진이 너무 커요. 다른 사진을 골라주세요.');
     fd.set('photo', img, 'photo.jpg');
@@ -88,7 +89,10 @@ export default function ApplyForm() {
         </div>
       </fieldset>
 
-      <p className="qn">4. 입금 및 연락처는 모임 수락이 되고 나면 부탁드릴게요.</p>
+      <label><span className="qn">4. 마주치고 싶지 않은 사람의 뒷번호를 입력해주세요 (선택)</span>
+        <input name="avoidTails" inputMode="numeric" maxLength={40} placeholder="휴대폰 뒷번호 4자리, 여러 명이면 쉼표로 (예: 1234, 5678)" /></label>
+
+      <p className="qn">5. 입금 및 연락처는 모임 수락이 되고 나면 부탁드릴게요.</p>
       <p className="fine">제출한 사진과 정보는 모임 후 폐기돼요.</p>
       {err && <p className="ferr" role="alert">{err}</p>}
       <button className="gbtn p" disabled={busy}>{busy ? '보내는 중…' : '신청서 보내기'}</button>
