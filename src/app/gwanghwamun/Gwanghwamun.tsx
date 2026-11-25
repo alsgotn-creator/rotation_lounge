@@ -120,7 +120,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
       </section>
 
       <section className="fu">
-        <figure className="bleed top">
+        <figure className="bleed">
           <img src="/gwanghwamun/river.jpg" width={900} height={1117} loading="lazy" alt="노을 진 한강변에 나란히 앉은 두 사람의 뒷모습" />
           <figcaption><h2>어김없이 찾아온<br />추위와 연말</h2><p>올해는 따뜻하게 보내고 싶어</p></figcaption>
         </figure>
@@ -138,6 +138,10 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
           <p>궁금한 건 언제든 {ig}로 DM 주세요.<br />감기 조심하시고, 한 해 마무리 잘 하시길 바라요 :)</p>
           <p className="sign">호스트 옷깃 드림</p>
         </div>
+        <figure className="bleed me">
+          <img src="/gwanghwamun/host-me.jpg" width={900} height={1200} loading="lazy" alt="카페에서 노트북으로 작업 중인 호스트 옷깃" />
+          <figcaption><h2>호스트 옷깃</h2><p>이 웹과 모임 앱을 직접 만들었어요</p></figcaption>
+        </figure>
         <figure className="bleed">
           <img src="/gwanghwamun/couple.jpg" width={900} height={1125} loading="lazy" alt="광화문 앞에 나란히 서서 웃고 있는 남녀" />
           <figcaption><h2>광화문 직장인 대상<br />연말 소개팅이 열린대요</h2><p>12월 11일 금요일 오후 7시 · 광화문 근처 카페 통대관</p></figcaption>
