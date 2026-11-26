@@ -53,7 +53,7 @@ export default function ApplyForm() {
   if (done) return (
     <div className="gdone" role="status">
       <b>신청서가 도착했어요</b>
-      <p>호스트가 한 분 한 분 직접 보고 수락해요.<br />참가비는 40,000원이고, 입금계좌는 모임 수락 후 안내드려요.</p>
+      <p>호스트가 한 분 한 분 직접 보고 수락해요.<br />입금계좌는 모임 수락 후 안내드려요.</p>
       <a className="gbtn" href={`/status/${done}`}>내 신청 상태 보기</a>
       <small>이 링크를 저장해두면 언제든 결과를 확인할 수 있어요.</small>
     </div>
@@ -93,7 +93,7 @@ export default function ApplyForm() {
       <label><span className="qn">4. 마주치고 싶지 않은 사람의 뒷번호를 입력해주세요 (선택)</span>
         <input name="avoidTails" inputMode="numeric" maxLength={40} placeholder="휴대폰 뒷번호 4자리, 여러 명이면 쉼표로 (예: 1234, 5678)" /></label>
 
-      <p className="qn">5. 참가비 40,000원. 입금계좌는 모임 수락 후 안내드려요.</p>
+      <p className="qn">5. 입금계좌는 모임 수락 후 안내드려요. 4일 전부터는 모임금액이 소폭 올라요. 미리 입금해주세요</p>
       <p className="fine">제출한 사진과 정보는 모임 후 폐기돼요.</p>
       {err && <p className="ferr" role="alert">{err}</p>}
       <button className="gbtn p" disabled={busy}>{busy ? '보내는 중…' : '신청서 보내기'}</button>

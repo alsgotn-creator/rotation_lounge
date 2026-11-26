@@ -67,6 +67,9 @@ body:has(.gw){background:#080C18}
 .gw dl.info{background:var(--card);border-radius:16px;padding:6px 20px}
 .gw dl.info div{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
 .gw dl.info div:last-child{border:0}
+.gw dl.info dd s{color:var(--sub);margin-right:4px}
+.gw dl.info dd b{color:var(--amber);font-size:1.12em}
+.gw dl.info dd small{display:block;margin-top:4px;font-size:12px;color:var(--sub)}
 .gw dt{flex:0 0 52px;color:var(--amber);font-weight:700;font-size:15px}
 .gw dd{flex:1}
 .gw dd.gempty{color:var(--sub);text-decoration:underline dotted var(--rose);text-decoration-thickness:2px;text-underline-offset:5px}
