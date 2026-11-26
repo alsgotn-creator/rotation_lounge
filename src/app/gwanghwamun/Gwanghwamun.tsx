@@ -78,6 +78,11 @@ export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props
 
       <section className="ghero">
         <div className="titlebox">
+          <div className="gtitle">
+            <p className="kick">광화문 남녀 직장인을 위한</p>
+            <h1>퇴근 후, 새로운 설렘</h1>
+            <p className="sub2">2:2 로테이션 소셜링</p>
+          </div>
           <svg viewBox="0 0 390 260" aria-hidden="true">
             <defs>
               <radialGradient id="gw-glow" cx="50%" cy="100%" r="65%"><stop offset="0" stopColor="#F4B968" stopOpacity=".28" /><stop offset="1" stopColor="#F4B968" stopOpacity="0" /></radialGradient>
@@ -102,10 +107,8 @@ export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props
               <path d="M244 260V241A11 11 0 0 1 266 241V260Z" />
             </g>
           </svg>
-          <h1 className="gtitle">광화문<br /><span className="y">연가</span><small lang="zh">戀歌</small></h1>
         </div>
-        <p className="desc"><span>광화문 근처 2535 직장인들을 위한 로테이션 소모임</span><span>20분씩 대화하고, 서로 고르면 매칭이 돼요.</span><span>뒷풀이는 원하는 분들만.</span></p>
-        <ul className="tags"><li>둘이 와도 OK</li><li>최소 8 : 8</li><li>광화문 카페 통대관</li><li>결과는 문자로</li></ul>
+        <p className="desc">단둘의 어색함 없이, 넷이서 시작하는 설렘.</p>
       </section>
 
       <section className="when">
@@ -180,7 +183,7 @@ export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props
         <ol className="steps">
           <li><span className="n">1</span><h3>간단한 신청서</h3><p>나이·직업·사진 1장만 받아요. 피하고 싶은 회사 동료도 알려주시면 걸러드려요.</p></li>
           <li><span className="n">2</span><h3>호스트가 직접 수락</h3><p>나이와 분위기 밸런스를 보고 한 분씩 확인해요.</p></li>
-          <li><span className="n">3</span><h3>로테이션 대화</h3><p>광화문 근처 카페를 통대관해서, 4명이서 20분씩 대화하고 자리를 바꿔요. 모든 진행은 제가 만든 모임웹으로 해요.</p></li>
+          <li><span className="n">3</span><h3>로테이션과 앱 콘텐츠</h3><p>광화문 근처 공간을 통대관했어요. 4명이서 20분씩 대화하고, 앱을 통한 익명게임 등 간단한 콘텐츠로 금방 친해져요</p></li>
           <li><span className="n">4</span><h3>최종선택, 결과는 문자로</h3><p>마음에 든 분을 3명까지 고를 수 있어요. 서로 골랐다면 문자로 알려드려요.</p></li>
           <li><span className="n">5</span><h3>롤링페이퍼와 2차</h3><p>나만 볼 수 있는 롤링페이퍼를 받아요. 아쉬운 분들을 위해 2차도 있어요 (참여는 자유예요).</p></li>
         </ol>

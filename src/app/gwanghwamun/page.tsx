@@ -5,11 +5,11 @@ import './gw.css';
 
 export const revalidate = 60; // 남은 자리는 1분마다 새로
 
-const DESC = '광화문 근처 2535 직장인들을 위한 로테이션 소모임. 20분씩 대화하고, 서로 고르면 매칭이 돼요. 뒷풀이는 원하는 분들만.';
+const DESC = '2:2 로테이션 소셜링. 단둘의 어색함 없이, 넷이서 시작하는 설렘.';
 export const metadata: Metadata = {
-  title: '광화문연가 · 2535 직장인 로테이션 소개팅',
+  title: '퇴근 후, 새로운 설렘 · 광화문 남녀 직장인을 위한 2:2 로테이션 소셜링',
   description: DESC,
-  openGraph: { type: 'website', locale: 'ko_KR', title: '광화문연가 · 2535 직장인 로테이션 소개팅', description: DESC },
+  openGraph: { type: 'website', locale: 'ko_KR', title: '퇴근 후, 새로운 설렘 · 광화문 남녀 직장인을 위한 2:2 로테이션 소셜링', description: DESC },
 };
 export const viewport: Viewport = { themeColor: '#0E1424' };
 
