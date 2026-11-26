@@ -13,7 +13,7 @@ async function shrink(file: File): Promise<Blob> {
   } catch { return file; }
 }
 
-/** 광화문연가 신청서: 성별 · 이름 · 나이 · 직업 · 이상형 · 사진 1장 · 광화문 근무 여부. 연락처·입금은 수락 뒤에 받는다 */
+/** 광화문연가 신청서: 성별 · 이름 · 나이 · 직업 · 이상형 · 사진 1장 · 광화문 근무 여부. 입금은 수락 뒤에 안내한다 */
 export default function ApplyForm() {
   const [gender, setGender] = useState<'f' | 'm' | ''>('');
   const [near, setNear] = useState<'yes' | 'no' | ''>('');
@@ -53,7 +53,7 @@ export default function ApplyForm() {
   if (done) return (
     <div className="gdone" role="status">
       <b>신청서가 도착했어요</b>
-      <p>호스트가 한 분 한 분 직접 보고 수락해요.<br />수락되면 그때 입금과 연락처를 부탁드릴게요.</p>
+      <p>호스트가 한 분 한 분 직접 보고 수락해요.<br />수락되면 그때 참가비(40,000원) 입금을 안내드릴게요.</p>
       <a className="gbtn" href={`/status/${done}`}>내 신청 상태 보기</a>
       <small>이 링크를 저장해두면 언제든 결과를 확인할 수 있어요.</small>
     </div>
@@ -68,12 +68,13 @@ export default function ApplyForm() {
           {([['f', '여성'], ['m', '남성']] as const).map(([v, l]) => <button type="button" key={v} aria-pressed={gender === v} onClick={() => setGender(v)}>{l}</button>)}
         </div>
       </fieldset>
-      <p className="qn">1. 이름, 나이, 직업, 본인의 이상형</p>
+      <p className="qn">1. 이름, 나이, 직업, 연락처, 본인의 이상형</p>
       <div className="two">
         <label><span>이름</span><input name="name" required maxLength={20} autoComplete="name" /></label>
         <label><span>나이 (한국 나이)</span><input name="age" required inputMode="numeric" maxLength={2} placeholder="예: 29" /></label>
       </div>
       <label><span>직업</span><input name="job" required maxLength={30} placeholder="예: 공공기관 기획, IT 디자이너" /></label>
+      <label><span>휴대폰 번호</span><input name="phone" type="tel" required inputMode="tel" maxLength={13} autoComplete="tel" placeholder="010-1234-5678" /></label>
       <label><span>본인의 이상형</span><textarea name="ideal" required maxLength={200} rows={3} placeholder="어떤 사람에게 끌리는지 편하게 적어주세요" /></label>
 
       <p className="qn">2. 잘 나온 사진 1장</p>
@@ -92,7 +93,7 @@ export default function ApplyForm() {
       <label><span className="qn">4. 마주치고 싶지 않은 사람의 뒷번호를 입력해주세요 (선택)</span>
         <input name="avoidTails" inputMode="numeric" maxLength={40} placeholder="휴대폰 뒷번호 4자리, 여러 명이면 쉼표로 (예: 1234, 5678)" /></label>
 
-      <p className="qn">5. 입금 및 연락처는 모임 수락이 되고 나면 부탁드릴게요.</p>
+      <p className="qn">5. 참가비는 40,000원이에요. 입금은 모임 수락이 되고 나면 안내드릴게요.</p>
       <p className="fine">제출한 사진과 정보는 모임 후 폐기돼요.</p>
       {err && <p className="ferr" role="alert">{err}</p>}
       <button className="gbtn p" disabled={busy}>{busy ? '보내는 중…' : '신청서 보내기'}</button>

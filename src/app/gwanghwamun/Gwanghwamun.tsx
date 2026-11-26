@@ -199,7 +199,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
 
       <section className="fu" id="apply-form">
         <div className="end">
-          <h2>송년회는 많아도,<br />같이 보낼 한 사람이면 충분해요</h2>
+          <h2>광화문 직장인들을 위해<br />열심히 준비할게요!<br />한번 믿어주세요!</h2>
           <p>신분이 보장된 광화문 근처 직장인들을 위한 프라이빗 모임이에요.</p>
           <ApplyForm />
         </div>
