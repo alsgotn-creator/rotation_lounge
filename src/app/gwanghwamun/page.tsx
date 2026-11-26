@@ -19,7 +19,7 @@ const ko = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('
 export default async function GwanghwamunPage() {
   const next = await nextGwanghwamun();
   const e = next?.event;
-  const raised = Date.now() >= Date.parse('2026-12-08T00:00:00+09:00'); // 12월 8일부터 참가비 42,000원 (페이지는 1분마다 새로 만들어진다)
+  const raised = Date.now() >= Date.parse('2026-12-07T00:00:00+09:00'); // 12월 7일부터 참가비 42,000원 (페이지는 1분마다 새로 만들어진다)
   const d = e ? new Date(e.starts_at) : null;
   const day = d ? ko(d, { month: 'long', day: 'numeric', weekday: 'long' }) : ''; // 12월 11일 금요일
   const time = d ? ko(d, { hour: 'numeric', minute: d.getUTCMinutes() ? '2-digit' : undefined }) : ''; // 오후 7시

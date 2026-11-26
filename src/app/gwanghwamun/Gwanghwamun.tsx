@@ -146,7 +146,7 @@ export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props
       <section id="about" className="fu">
         <h2>모임 안내</h2>
         <dl className="info">
-          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k === '참가비' && !raised ? <><s>42,000원</s> <b>{v}</b><small>12월 8일부터 42,000원으로 올라요</small></> : v}</dd></div>)}
+          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k === '참가비' && !raised ? <><s>42,000원</s> <b>{v}</b><small>12월 7일부터 42,000원으로 올라요</small></> : v}</dd></div>)}
         </dl>
       </section>
 
