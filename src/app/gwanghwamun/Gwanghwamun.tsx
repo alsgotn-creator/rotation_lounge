@@ -77,7 +77,6 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
       <div className="bokeh" aria-hidden="true" />
 
       <section className="ghero">
-        <p className="eyebrow">2535 직장인</p>
         <div className="titlebox">
           <svg viewBox="0 0 390 260" aria-hidden="true">
             <defs>
@@ -105,7 +104,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
           </svg>
           <h1 className="gtitle">광화문<br /><span className="y">연가</span><small lang="zh">戀歌</small></h1>
         </div>
-        <p className="desc"><span>광화문 근처 2535 직장인 로테이션 소개팅.</span><span>4명이서 20분씩 대화하고, 서로 고르면 매칭돼요.</span></p>
+        <p className="desc"><span>광화문 근처 2535 직장인들을 위한 로테이션 소모임</span><span>20분씩 대화하고, 서로 고르면 매칭이 돼요.</span><span>뒷풀이는 원하는 분들만.</span></p>
         <ul className="tags"><li>둘이 와도 OK</li><li>최소 8 : 8</li><li>광화문 카페 통대관</li><li>결과는 문자로</li></ul>
       </section>
 
@@ -122,7 +121,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
       <section className="fu">
         <figure className="bleed river">
           <img src="/gwanghwamun/river.jpg" width={900} height={1117} loading="lazy" alt="노을 진 한강변에 나란히 앉은 두 사람의 뒷모습" />
-          <figcaption><h2>어김없이 찾아온<br />추위와 연말</h2><p>올해는 따뜻하게 보내고 싶어</p></figcaption>
+          <figcaption><h2>어김없이 찾아온<br />추위와 연말</h2><p>설렘도 좋지만 안정적인.<br />농담보다 진짜 대화가 중요한 나이</p></figcaption>
         </figure>
       </section>
 
@@ -168,9 +167,8 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
           <li>혼자 와도, 친구와 와도 OK</li>
           <li>피하고 싶은 회사 동료를 알려주시면 필터링해드려요</li>
           <li>제출한 사진, 정보는 모임 후 폐기돼요</li>
-          <li>음료와 간식이 무제한이에요</li>
+          <li>음료와 간식이 무제한이에요 (와인, 제로콜라, 생수 제공)</li>
         </ul>
-        <p className="note">최소 8 : 8로 진행돼요</p>
       </section>
 
       <section className="fu">
@@ -199,12 +197,13 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
 
       <section className="fu" id="apply-form">
         <div className="end">
-          <h2>광화문 직장인들을 위한<br />딱 한번의 연말모임<br />선착순 참가 가능해요.</h2>
+          <h2>광화문 직장인들을 위한<br />올해 마지막 연말모임(선착순)</h2>
           <ApplyForm />
         </div>
       </section>
 
       <footer>
+        <p className="use">대관비, 다과비, 수고비, 콘텐츠제작비로 활용돼요</p>
         <p>Hosted by 옷깃 · {ig}</p>
         <button className="gbtn" type="button" onClick={share}>친구에게 링크 보내기</button>
       </footer>

@@ -5,7 +5,7 @@ import './gw.css';
 
 export const revalidate = 60; // 남은 자리는 1분마다 새로
 
-const DESC = '광화문 근처 2535 직장인 로테이션 소개팅. 카페 통대관, 4명이서 20분씩, 최소 8:8, 결과는 문자로.';
+const DESC = '광화문 근처 2535 직장인들을 위한 로테이션 소모임. 20분씩 대화하고, 서로 고르면 매칭이 돼요. 뒷풀이는 원하는 분들만.';
 export const metadata: Metadata = {
   title: '광화문연가 · 2535 직장인 로테이션 소개팅',
   description: DESC,
