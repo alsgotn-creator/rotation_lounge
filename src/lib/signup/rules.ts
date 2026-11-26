@@ -15,15 +15,26 @@ export type Session = {
 /** 한국 나이 → 출생연도 (올해 29살이면 올해-28). 모임 나이대도 한국 나이 기준으로 정한다 */
 export const birthFromKoreanAge = (age: number, year: number) => year - age + 1;
 
-/** 광화문연가 신청서 → applications 칸.
- *  level 0: ideal·near_work·source 칸 모두 있음 (0019+0020)
- *  level 1: source 칸만 없음 → 경로를 job 뒤에 붙임
- *  level 2: 0019 전 → 이상형·근무 여부·경로를 모두 job 에 함께 적음 */
-export function gwApplyRow(job: string, ideal: string, near: string, source: string, level: 0 | 1 | 2) {
-  const nearKo = near === 'yes' ? '광화문 근처 근무' : '광화문 근처 근무 아님';
-  if (level === 0) return { job, ideal, near_work: nearKo, source };
-  if (level === 1) return { job: `${job} · 경로: ${source}`, ideal, near_work: nearKo };
-  return { job: `${job} · 이상형: ${ideal} · ${nearKo} · 경로: ${source}` };
+/** 광화문연가 신청서 → applications 칸. 마이그레이션을 아직 안 돌렸으면 없는 칸의 값을 있는 칸 뒤에 붙인다.
+ *  level 0: ideal·source·mbti·host_message 칸 모두 있음 (0019+0020+0021)
+ *  level 1: 0021 전 → MBTI 는 job 뒤, 호스트에게 할 말은 ideal 뒤에 붙임
+ *  level 2: 0020 전 → 위 + 경로를 job 뒤에 붙임
+ *  level 3: 0019 전 → 이상형·호스트에게 할 말·MBTI·경로를 모두 job 에 함께 적음 */
+export type GwForm = { job: string; ideal: string; mbti: string; message: string; source: string };
+export function gwApplyRow(f: GwForm, level: 0 | 1 | 2 | 3) {
+  const { job, ideal, mbti, message, source } = f;
+  if (level === 0) return { job, ideal, source, mbti, host_message: message };
+  const jobM = mbti ? `${job} · MBTI: ${mbti}` : job;
+  const idealM = message ? `${ideal} · 호스트에게: ${message}` : ideal;
+  if (level === 1) return { job: jobM, ideal: idealM, source };
+  if (level === 2) return { job: `${jobM} · 경로: ${source}`, ideal: idealM };
+  return { job: `${jobM} · 이상형: ${idealM} · 경로: ${source}` };
+}
+
+/** MBTI: 비워도 되고, 적었다면 4글자 유형(ENFP 등)이어야 한다. 대문자로 돌려주고 틀리면 null */
+export function parseMbti(v: string): string | null {
+  const t = v.trim().toUpperCase();
+  return !t || /^[EI][NS][TF][JP]$/.test(t) ? t : null;
 }
 
 /** 신청 경로: ?from=insta 이거나 인스타 앱 안 브라우저면 인스타, 아니면 QR(카페 팻말) */

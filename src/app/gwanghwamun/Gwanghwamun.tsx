@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import ApplyForm from './ApplyForm';
 
 const IG = 'pov.love.archive';
-type Props = { startsAt: string | null; day: string; time: string; info: [string, string][] };
+type Props = { startsAt: string | null; day: string; time: string; info: [string, string][]; raised: boolean };
 
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 const NS = 'http://www.w3.org/2000/svg';
@@ -14,7 +14,7 @@ function left(at: number) {
   return s > 0 ? [s / 86400, (s / 3600) % 24, (s / 60) % 60, s % 60].map(Math.floor) : null;
 }
 
-export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
+export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const [count, setCount] = useState<number[] | null | undefined>(undefined); // undefined: 첫 렌더(서버와 같게 '--')
   const [sticky, setSticky] = useState(false);
@@ -146,7 +146,7 @@ export default function Gwanghwamun({ startsAt, day, time, info }: Props) {
       <section id="about" className="fu">
         <h2>모임 안내</h2>
         <dl className="info">
-          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k === '참가비' ? <><s>42,000원</s> <b>{v}</b><small>12월 8일부터 42,000원으로 올라요</small></> : v}</dd></div>)}
+          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k === '참가비' && !raised ? <><s>42,000원</s> <b>{v}</b><small>12월 8일부터 42,000원으로 올라요</small></> : v}</dd></div>)}
         </dl>
       </section>
 

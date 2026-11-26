@@ -19,6 +19,7 @@ const ko = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('
 export default async function GwanghwamunPage() {
   const next = await nextGwanghwamun();
   const e = next?.event;
+  const raised = Date.now() >= Date.parse('2026-12-08T00:00:00+09:00'); // 12월 8일부터 참가비 42,000원 (페이지는 1분마다 새로 만들어진다)
   const d = e ? new Date(e.starts_at) : null;
   const day = d ? ko(d, { month: 'long', day: 'numeric', weekday: 'long' }) : ''; // 12월 11일 금요일
   const time = d ? ko(d, { hour: 'numeric', minute: d.getUTCMinutes() ? '2-digit' : undefined }) : ''; // 오후 7시
@@ -27,14 +28,15 @@ export default async function GwanghwamunPage() {
     <link rel="stylesheet" precedence="default" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;800&display=swap" />
     <Gwanghwamun
       startsAt={e?.starts_at ?? null}
+      raised={raised}
       day={day}
       time={time}
       info={[
         ['일시', '12월 11일 오후 7시'],
-        ['장소', e?.venue || '광화문 근처 카페 통대관'],
+        ['장소', '광화문 근처 공간 (참가하시는 분들께 따로 전달)'],
         ['대상', '광화문 근처 2535 직장인'],
         ['인원', '최소 8 : 8 · 미달 시 진행하지 않고 전부 환불해드려요'],
-        ['참가비', '39,000원'],
+        ['참가비', raised ? '42,000원' : '39,000원'],
       ]}
     />
   </>);

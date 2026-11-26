@@ -3,7 +3,7 @@ import { db, hasDb, PHOTO_BUCKET } from '../../../../lib/server/supabase';
 import { hash, newToken } from '../../../../lib/server/auth';
 import { nextGwanghwamun } from '../../../../lib/server/signup';
 import { birthError, formatPhone, isName, isPhone } from '../../../../lib/signup/validate';
-import { birthFromKoreanAge, gwApplyRow, gwSource, parseTails } from '../../../../lib/signup/rules';
+import { birthFromKoreanAge, gwApplyRow, gwSource, parseMbti, parseTails } from '../../../../lib/signup/rules';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -26,9 +26,9 @@ export async function POST(req: Request) {
   if (f.get('website')) return NextResponse.json({ ok: true, statusToken: newToken() }); // 봇용 숨은 칸
 
   const s = (k: string, max: number) => String(f.get(k) ?? '').trim().slice(0, max);
-  const gender = s('gender', 1), name = s('name', 20), job = s('job', 30), ideal = s('ideal', 200), near = s('near', 3);
+  const gender = s('gender', 1), name = s('name', 20), job = s('job', 30), ideal = s('ideal', 200), message = s('message', 300), mbti = parseMbti(s('mbti', 4));
   const age = Number(s('age', 3)), phone = formatPhone(s('phone', 20));
-  const photo = f.get('photo');
+  const photos = [f.get('photo'), f.get('photo2')].filter((x): x is File => x instanceof File && x.size > 0).slice(0, 2);
   const source = gwSource(s('from', 20) || null, req.headers.get('user-agent') ?? ''); // 인스타 / QR
   const tails = parseTails(s('avoidTails', 80));
 
@@ -47,27 +47,29 @@ export async function POST(req: Request) {
   if (!isPhone(phone)) return fail('휴대폰 번호를 확인해주세요.');
   if (job.length < 2) return fail('직업을 적어주세요.');
   if (ideal.length < 2) return fail('이상형을 적어주세요.');
-  if (near !== 'yes' && near !== 'no') return fail('광화문 근처 근무 여부를 골라주세요.');
+  if (mbti === null) return fail('MBTI는 ENFP처럼 4글자로 적어주세요. 모르면 비워두셔도 돼요.');
   if (tails === null) return fail('마주치고 싶지 않은 분의 휴대폰 뒷번호 4자리를 확인해주세요.');
-  if (!(photo instanceof File) || photo.size === 0) return fail('사진 1장을 올려주세요.');
-  if (!photo.type.startsWith('image/')) return fail('사진 파일만 올릴 수 있어요.');
-  if (photo.size > 4_000_000) return fail('사진이 너무 커요. 다른 사진을 골라주세요.');
+  if (!photos.length || !(f.get('photo') instanceof File)) return fail('얼굴이 나온 사진을 1장 이상 올려주세요.');
+  if (photos.some((p) => !p.type.startsWith('image/'))) return fail('사진 파일만 올릴 수 있어요.');
+  if (photos.reduce((n, p) => n + p.size, 0) > 4_200_000) return fail('사진이 너무 커요. 다른 사진을 골라주세요.');
 
   const id = crypto.randomUUID();
-  const path = `${event.id}/${id}/1.jpg`;
-  const up = await db().storage.from(PHOTO_BUCKET).upload(path, photo, { contentType: photo.type, upsert: false });
-  if (up.error) return fail('사진을 저장하지 못했어요. 다시 시도해주세요.', 500);
+  const paths = photos.map((_, i) => `${event.id}/${id}/${i + 1}.jpg`);
+  for (const [i, p] of photos.entries()) {
+    const up = await db().storage.from(PHOTO_BUCKET).upload(paths[i], p, { contentType: p.type, upsert: false });
+    if (up.error) { await db().storage.from(PHOTO_BUCKET).remove(paths); return fail('사진을 저장하지 못했어요. 다시 시도해주세요.', 500); }
+  }
 
   const statusToken = newToken();
-  const base = { id, event_id: event.id, gender, name, birth_year: birth, phone, email: '', photo_paths: [path], avoid: tails.map((t) => ({ name: `뒷번호 ${t}`, note: '' })), status_token_hash: hash(statusToken) };
-  // 0019(ideal·near_work) · 0020(source) 마이그레이션을 아직 안 돌렸으면 없는 칸의 값을 job 칸에 함께 적는다
+  const base = { id, event_id: event.id, gender, name, birth_year: birth, phone, email: '', photo_paths: paths, avoid: tails.map((t) => ({ name: `뒷번호 ${t}`, note: '' })), status_token_hash: hash(statusToken) };
+  // 0019(ideal) · 0020(source) · 0021(mbti·host_message) 마이그레이션을 아직 안 돌렸으면 없는 칸의 값을 있는 칸 뒤에 붙인다
   let error = null as null | { message: string };
-  for (const level of [0, 1, 2] as const) {
-    ({ error } = await db().from('applications').insert({ ...base, ...gwApplyRow(job, ideal, near, source, level) }));
+  for (const level of [0, 1, 2, 3] as const) {
+    ({ error } = await db().from('applications').insert({ ...base, ...gwApplyRow({ job, ideal, mbti, message, source }, level) }));
     if (!error || !/ideal|near_work|source|column/i.test(error.message)) break;
   }
   if (error) {
-    await db().storage.from(PHOTO_BUCKET).remove([path]);
+    await db().storage.from(PHOTO_BUCKET).remove(paths);
     return fail('신청을 저장하지 못했어요. 다시 시도해주세요.', 500);
   }
   return NextResponse.json({ ok: true, statusToken });

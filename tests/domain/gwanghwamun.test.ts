@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { avoidHits, birthFromKoreanAge, gwApplyRow, gwSource, isGwanghwamun, parsePrice, parseTails } from '../../src/lib/signup/rules';
+import { avoidHits, birthFromKoreanAge, gwApplyRow, gwSource, isGwanghwamun, parseMbti, parsePrice, parseTails } from '../../src/lib/signup/rules';
 
 describe('birthFromKoreanAge', () => {
   test('Korean age 25~35 in 2026 maps to 2002~1992', () => {
@@ -9,14 +9,27 @@ describe('birthFromKoreanAge', () => {
 });
 
 describe('gwApplyRow', () => {
-  test('uses the ideal/near_work/source columns when they all exist', () => {
-    expect(gwApplyRow('디자이너', '대화가 잘 통하는 사람', 'yes', '인스타', 0)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', near_work: '광화문 근처 근무', source: '인스타' });
+  const f = { job: '디자이너', ideal: '대화가 잘 통하는 사람', mbti: 'ENFP', message: '잘 부탁드려요', source: '인스타' };
+  test('uses the new columns when 0019~0021 all exist', () => {
+    expect(gwApplyRow(f, 0)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', source: '인스타', mbti: 'ENFP', host_message: '잘 부탁드려요' });
   });
-  test('appends the source to job when only the source column is missing', () => {
-    expect(gwApplyRow('디자이너', '웃음이 많은 사람', 'no', 'QR', 1)).toEqual({ job: '디자이너 · 경로: QR', ideal: '웃음이 많은 사람', near_work: '광화문 근처 근무 아님' });
+  test('appends mbti to job and the message to ideal before 0021', () => {
+    expect(gwApplyRow(f, 1)).toEqual({ job: '디자이너 · MBTI: ENFP', ideal: '대화가 잘 통하는 사람 · 호스트에게: 잘 부탁드려요', source: '인스타' });
+  });
+  test('appends the source to job as well before 0020', () => {
+    expect(gwApplyRow({ ...f, mbti: '', message: '', source: 'QR' }, 2)).toEqual({ job: '디자이너 · 경로: QR', ideal: '대화가 잘 통하는 사람' });
   });
   test('packs everything into job before the 0019 migration', () => {
-    expect(gwApplyRow('디자이너', '웃음이 많은 사람', 'no', 'QR', 2)).toEqual({ job: '디자이너 · 이상형: 웃음이 많은 사람 · 광화문 근처 근무 아님 · 경로: QR' });
+    expect(gwApplyRow({ ...f, source: 'QR' }, 3)).toEqual({ job: '디자이너 · MBTI: ENFP · 이상형: 대화가 잘 통하는 사람 · 호스트에게: 잘 부탁드려요 · 경로: QR' });
+  });
+});
+
+describe('parseMbti', () => {
+  test('blank is fine, 4-letter types are upper-cased, anything else is rejected', () => {
+    expect(parseMbti('')).toBe('');
+    expect(parseMbti(' enfp ')).toBe('ENFP');
+    expect(parseMbti('ABCD')).toBeNull();
+    expect(parseMbti('ENF')).toBeNull();
   });
 });
 

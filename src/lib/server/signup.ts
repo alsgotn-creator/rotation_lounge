@@ -10,7 +10,7 @@ export type Application = {
   id: string; event_id: string; gender: Gender; name: string; birth_year: number; phone: string; email: string; job: string;
   photo_paths: string[]; avoid: { name: string; note: string }[]; status: AppStatus; payment_due: string | null;
   invite_token_hash: string | null; created_at: string; number: number | null;
-  ideal?: string; near_work?: string; source?: string; // 0019·0020 (광화문연가 신청서)
+  ideal?: string; near_work?: string; source?: string; mbti?: string; host_message?: string; // 0019~0021 (광화문연가 신청서)
 };
 
 async function seatRows(eventIds: string[]) {

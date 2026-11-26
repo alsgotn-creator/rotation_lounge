@@ -1,45 +1,46 @@
 'use client';
 import { useState } from 'react';
 
-/** 사진을 긴 변 1280px JPEG로 줄인다 (Vercel 요청 4.5MB 제한 안에 들어가게). 못 읽는 형식이면 원본 그대로 */
+/** 사진을 긴 변 1080px JPEG로 줄인다 (Vercel 요청 4.5MB 제한 안에 2장이 들어가게). 못 읽는 형식이면 원본 그대로 */
 async function shrink(file: File): Promise<Blob> {
   try {
     const bmp = await createImageBitmap(file);
-    const k = Math.min(1, 1280 / Math.max(bmp.width, bmp.height));
+    const k = Math.min(1, 1080 / Math.max(bmp.width, bmp.height));
     const c = document.createElement('canvas');
     c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
     c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
-    return await new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no()), 'image/jpeg', 0.85));
+    return await new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no()), 'image/jpeg', 0.8));
   } catch { return file; }
 }
 
-/** 광화문연가 신청서: 성별 · 이름 · 나이 · 직업 · 이상형 · 사진 1장 · 광화문 근무 여부. 입금은 수락 뒤에 안내한다 */
+/** 광화문연가 신청서: 성별 · 이름 · 나이 · 직업 · MBTI · 연락처 · 이상형 · 호스트에게 · 사진 1~2장. 입금은 수락 뒤에 안내한다 */
 export default function ApplyForm() {
   const [gender, setGender] = useState<'f' | 'm' | ''>('');
-  const [near, setNear] = useState<'yes' | 'no' | ''>('');
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [preview, setPreview] = useState('');
+  const [photos, setPhotos] = useState<(File | null)[]>([null, null]);
+  const [previews, setPreviews] = useState(['', '']);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState('');
 
-  const pick = (f: File | null) => {
-    setPhoto(f); setErr('');
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview(f ? URL.createObjectURL(f) : '');
+  const pick = (i: number, f: File | null) => {
+    setErr('');
+    if (previews[i]) URL.revokeObjectURL(previews[i]);
+    const url = f ? URL.createObjectURL(f) : '';
+    setPhotos((p) => p.map((x, j) => (j === i ? f : x)));
+    setPreviews((p) => p.map((x, j) => (j === i ? url : x)));
   };
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setErr('');
     if (!gender) return setErr('성별을 골라주세요.');
-    if (!photo) return setErr('잘 나온 사진 1장을 올려주세요.');
-    if (!near) return setErr('광화문 근처 근무 여부를 골라주세요.');
+    if (!photos[0]) return setErr('얼굴이 나온 사진을 1장 이상 올려주세요.');
     const fd = new FormData(e.currentTarget);
-    fd.set('gender', gender); fd.set('near', near);
+    fd.set('gender', gender);
     fd.set('from', new URLSearchParams(location.search).get('from') ?? ''); // 리틀리 링크는 ?from=insta
-    const img = await shrink(photo);
-    if (img.size > 4_000_000) return setErr('사진이 너무 커요. 다른 사진을 골라주세요.');
-    fd.set('photo', img, 'photo.jpg');
+    const imgs = await Promise.all(photos.filter((p): p is File => !!p).map(shrink));
+    if (imgs.reduce((n, b) => n + b.size, 0) > 4_200_000) return setErr('사진이 너무 커요. 다른 사진을 골라주세요.');
+    fd.set('photo', imgs[0], 'photo.jpg');
+    if (imgs[1]) fd.set('photo2', imgs[1], 'photo2.jpg');
     setBusy(true);
     try {
       const r = await fetch('/api/gwanghwamun/apply', { method: 'POST', body: fd });
@@ -68,33 +69,41 @@ export default function ApplyForm() {
           {([['f', '여성'], ['m', '남성']] as const).map(([v, l]) => <button type="button" key={v} aria-pressed={gender === v} onClick={() => setGender(v)}>{l}</button>)}
         </div>
       </fieldset>
-      <p className="qn">1. 이름, 나이, 직업, 연락처, 본인의 이상형</p>
+      <p className="qn">1. 기본 정보</p>
       <div className="two">
         <label><span>이름</span><input name="name" required maxLength={20} autoComplete="name" /></label>
         <label><span>나이 (한국 나이)</span><input name="age" required inputMode="numeric" maxLength={2} placeholder="예: 29" /></label>
       </div>
-      <label><span>직업</span><input name="job" required maxLength={30} placeholder="예: 공공기관 기획, IT 디자이너" /></label>
+      <div className="two">
+        <label><span>직업</span><input name="job" required maxLength={30} placeholder="예: IT 디자이너" /></label>
+        <label><span>MBTI</span><input name="mbti" maxLength={4} autoCapitalize="characters" placeholder="예: ENFP" /></label>
+      </div>
       <label><span>휴대폰 번호</span><input name="phone" type="tel" required inputMode="tel" maxLength={13} autoComplete="tel" placeholder="010-1234-5678" /></label>
-      <label><span>본인의 이상형</span><textarea name="ideal" required maxLength={200} rows={3} placeholder="어떤 사람에게 끌리는지 편하게 적어주세요" /></label>
+      <div className="two">
+        <label><span>본인의 이상형</span><textarea name="ideal" required maxLength={200} rows={4} placeholder="끌리는 사람을 편하게 적어주세요" /></label>
+        <label><span>호스트에게 할 말 (선택)</span><textarea name="message" maxLength={300} rows={4} placeholder="궁금한 점, 바라는 점 등" /></label>
+      </div>
 
-      <p className="qn">2. 잘 나온 사진 1장</p>
-      <label className="file">
-        {preview ? <img src={preview} alt="올린 사진 미리보기" /> : <span>사진 고르기</span>}
-        <input type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0] ?? null)} />
-      </label>
+      <p className="qn">2. 얼굴이 나온 사진 (1~2장)</p>
+      <div className="two">
+        {[0, 1].map((i) => (
+          <label className="file" key={i}>
+            {previews[i] ? <img src={previews[i]} alt={`올린 사진 ${i + 1} 미리보기`} /> : <span>{i === 0 ? '사진 1 (필수)' : '사진 2 (선택)'}</span>}
+            <input type="file" accept="image/*" onChange={(e) => pick(i, e.target.files?.[0] ?? null)} />
+          </label>
+        ))}
+      </div>
 
-      <fieldset>
-        <legend className="qn">3. 광화문 근처에 근무하고 계시나요?</legend>
-        <div className="seg">
-          {([['yes', '네'], ['no', '아니요']] as const).map(([v, l]) => <button type="button" key={v} aria-pressed={near === v} onClick={() => setNear(v)}>{l}</button>)}
-        </div>
-      </fieldset>
-
-      <label><span className="qn">4. 마주치고 싶지 않은 사람의 뒷번호를 입력해주세요 (선택)</span>
+      <label><span className="qn">3. 마주치고 싶지 않은 사람의 뒷번호를 입력해주세요 (선택)</span>
         <input name="avoidTails" inputMode="numeric" maxLength={40} placeholder="휴대폰 뒷번호 4자리, 여러 명이면 쉼표로 (예: 1234, 5678)" /></label>
 
-      <p className="qn">5. 입금계좌는 모임 수락 후 안내드려요. 4일 전부터는 모임금액이 소폭 올라요. 미리 입금해주세요</p>
-      <p className="fine">제출한 사진과 정보는 모임 후 폐기돼요.</p>
+      <p className="qn">유의사항</p>
+      <ul className="notes">
+        <li>광화문, 종각, 을지로 직장인만 참여 가능합니다 (명함 랜덤확인 예정)</li>
+        <li>입금계좌는 모임 수락 후 안내드려요. 4일 전부터는 모임금액이 소폭 올라요. 입금해주셔야 참가 신청됩니다.</li>
+        <li>모임 4일 전까지 환불 가능해요.</li>
+        <li>제출한 사진과 정보는 모임 후 폐기돼요.</li>
+      </ul>
       {err && <p className="ferr" role="alert">{err}</p>}
       <button className="gbtn p" disabled={busy}>{busy ? '보내는 중…' : '신청서 보내기'}</button>
     </form>
