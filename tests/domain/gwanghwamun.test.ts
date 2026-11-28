@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { gwPhase } from '../../src/app/gwanghwamun/config';
+import { isClosed } from '../../src/app/gwanghwamun/config';
 import { avoidHits, birthFromKoreanAge, gwApplyRow, gwSource, isGwanghwamun, parseMbti, parsePrice, parseTails } from '../../src/lib/signup/rules';
 
 describe('birthFromKoreanAge', () => {
@@ -28,18 +28,10 @@ describe('gwApplyRow', () => {
   });
 });
 
-describe('gwPhase (KST, whatever the device timezone)', () => {
-  test('12/8 23:00 is still early bird, D-DAY', () => {
-    expect(gwPhase(Date.parse('2026-12-08T23:00:00+09:00'))).toEqual({ phase: 'early', price: 39000, dDay: 0 });
-  });
-  test('12/9 00:10 is regular price', () => {
-    expect(gwPhase(Date.parse('2026-12-09T00:10:00+09:00'))).toMatchObject({ phase: 'regular', price: 42000 });
-  });
-  test('12/10 10:10 is closed', () => {
-    expect(gwPhase(Date.parse('2026-12-10T10:10:00+09:00')).phase).toBe('closed');
-  });
-  test('counts days in Korean dates, not UTC', () => {
-    expect(gwPhase(Date.parse('2026-12-05T08:00:00+09:00')).dDay).toBe(3); // UTC 로는 아직 12/4
+describe('isClosed (KST deadline)', () => {
+  test('open until 12/10 10:00 KST, closed from then', () => {
+    expect(isClosed(Date.parse('2026-12-10T09:59:00+09:00'))).toBe(false);
+    expect(isClosed(Date.parse('2026-12-10T10:10:00+09:00'))).toBe(true);
   });
 });
 

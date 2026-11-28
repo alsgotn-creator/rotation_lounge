@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import ApplyForm from './ApplyForm';
-import { dLabel, gwPhase, PRICE_REGULAR, won } from './config';
+import { isClosed, PRICE, won } from './config';
 
 const IG = 'pov.love.archive';
 type Props = { startsAt: string | null; day: string; time: string; info: [string, string][]; serverNow: number };
@@ -22,11 +22,9 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
   const [toast, setToast] = useState('');
   const [now, setNow] = useState(serverNow); // 첫 렌더는 서버 시각, 이후 1분마다 기기 시각 (판단은 config 에서 한국 시간으로)
   useEffect(() => { setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(t); }, []);
-  const ph = gwPhase(now);
-  const closed = ph.phase === 'closed';
+  const closed = isClosed(now);
   const priceLine = closed ? <p className="gprice"><b>이번 모집은 마감됐어요</b></p>
-    : ph.phase === 'early' ? <p className="gprice">참가비 <b>{won(ph.price)}</b> <s>{won(PRICE_REGULAR)}</s> <em>{won(ph.price)}까지 {dLabel(ph.dDay)}</em></p>
-    : <p className="gprice">참가비 <b>{won(ph.price)}</b></p>;
+    : <p className="gprice">참가비 <b>{won(PRICE)}</b></p>;
 
   useEffect(() => {
     if (!startsAt) return;
@@ -169,7 +167,7 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
       <section id="about" className="fu">
         <h2>모임 안내</h2>
         <dl className="info">
-          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k !== '참가비' ? v : ph.phase === 'early' ? <><b>{won(ph.price)}</b> <s>{won(PRICE_REGULAR)}</s><small>12월 8일(화)까지 얼리버드 · {dLabel(ph.dDay)}</small></> : won(ph.price)}</dd></div>)}
+          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k !== '참가비' ? v : won(PRICE)}</dd></div>)}
         </dl>
       </section>
 
@@ -238,7 +236,7 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
 
       <div className={`sticky${sticky ? ' on' : ''}`}>{closed
         ? <span className="gbtn p" aria-disabled="true">이번 모집은 마감됐어요</span>
-        : <a className="gbtn p" href="#apply-form" tabIndex={sticky ? 0 : -1}>신청하기 · {ph.phase === 'early' ? `${won(ph.price)} ${dLabel(ph.dDay)}` : '마감 임박'}</a>}</div>
+        : <a className="gbtn p" href="#apply-form" tabIndex={sticky ? 0 : -1}>신청하기 · {won(PRICE)}</a>}</div>
       <div className={`gtoast${toast ? ' on' : ''}`} role="status" aria-live="polite">{toast}</div>
     </div>
   );

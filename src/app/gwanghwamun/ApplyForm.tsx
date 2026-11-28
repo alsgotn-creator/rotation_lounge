@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { PRICE_EARLY, PRICE_REGULAR, won } from './config';
+import { PRICE, won } from './config';
 
 /** 사진을 긴 변 1080px JPEG로 줄인다 (Vercel 요청 4.5MB 제한 안에 2장이 들어가게). 못 읽는 형식이면 원본 그대로 */
 async function shrink(file: File): Promise<Blob> {
@@ -112,7 +112,7 @@ export default function ApplyForm() {
       <p className="qn">유의사항</p>
       <ul className="notes">
         <li>광화문, 종각, 을지로 직장인만 참여 가능합니다 (명함 랜덤확인 예정)</li>
-        <li>입금계좌는 모임 수락 후 안내드려요. 12월 8일(화)까지는 얼리버드 {won(PRICE_EARLY)}, 9일부터는 {won(PRICE_REGULAR)}이에요. 입금해주셔야 참가 신청됩니다.</li>
+        <li>입금계좌는 모임 수락 후 안내드려요. 참가비는 {won(PRICE)}이에요. 입금해주셔야 참가 신청됩니다.</li>
         <li>환불은 12/4까지 100%, 12/6까지 50%, 12/7부터는 되지 않아요.</li>
         <li>제출한 사진과 정보는 모임 후 폐기돼요.</li>
       </ul>
