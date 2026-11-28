@@ -114,8 +114,8 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
             </g>
           </svg>
         </div>
-        <p className="desc">광화문·을지로 직장인만 모이는 로테이션 소개팅. 모임 전에 파트너와 먼저 인사하고, 당일엔 게임하며 자연스럽게 가까워져요.</p>
-        <ul className="tags"><li>혼자 와도 OK</li><li>10 : 10</li><li>사전채팅</li></ul>
+        <p className="desc">광화문·을지로 직장인만 모이는 로테이션 소셜링. 모임 전에 파트너와 먼저 인사하고, 당일엔 게임하며 자연스럽게 가까워져요.</p>
+        <ul className="tags"><li>혼자 와도 OK</li><li>신분확인 철저</li><li>포틀럭 모임</li></ul>
         {priceLine}
       </section>
 
@@ -141,9 +141,9 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
         <div className="letter">
           <p>안녕하세요, 광화문연가에 관심 가져주셔서 감사해요.<br />저도 광화문 근처 회사에 다니는 직장인이에요.</p>
           <p>연말이 다가오던 어느 날, 옆자리 대리님이 이런 고민을 털어놓으셨어요.
-            <q>소개팅 한 번 하면 5~6만 원씩 깨지고, 호흡도 너무 길어서 힘들어요 ㅠㅠ</q>
-            그래서 “광화문 주변 직장인들만 모아서 소개팅해 보면 어때요?” 하고 여쭤봤더니 “좋은 아이디어인데요?” 하시더라고요. <span className="aside">(급하셔서 다 좋다고 하신 것 같긴 해요)</span></p>
-          <p>사실 제 부캐는 로테이션 소개팅 호스트예요. 사람과 사람을 잇는 걸 좋아하고, 바이브코딩으로 이 모임웹까지 직접 만든 디자이너이기도 하고요. 이번 모임도 이 모임웹으로 진행돼요.</p>
+            <q>새로운 사람 한 번 만나려면 5~6만 원씩 깨지고, 호흡도 너무 길어서 힘들어요 ㅠㅠ</q>
+            그래서 “광화문 주변 직장인들만 모아서 모임을 열어보면 어때요?” 하고 여쭤봤더니 “좋은 아이디어인데요?” 하시더라고요. <span className="aside">(급하셔서 다 좋다고 하신 것 같긴 해요)</span></p>
+          <p>사실 제 부캐는 로테이션 소셜링 호스트예요. 사람과 사람을 잇는 걸 좋아하고, 바이브코딩으로 이 모임웹까지 직접 만든 디자이너이기도 하고요. 이번 모임도 이 모임웹으로 진행돼요.</p>
           <p>대리님과 같은 고민을 하는 분이 분명 더 계실 거예요. 아직 연말 계획이 없다면 용기 내서 신청해 보세요. 나머지는 제가 다 준비할게요. 좋은 분들만 모시고 싶어서, 신청서는 제가 한 분 한 분 직접 보고 수락할게요.</p>
           <p>궁금한 건 언제든 {ig}로 DM 주세요.<br />감기 조심하시고, 한 해 마무리 잘 하시길 바라요 :)</p>
           <p className="sign">호스트 옷깃 드림</p>
@@ -154,15 +154,6 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
         </figure>
       </section>
 
-      <section className="fu">
-        <h2>숫자로 보는 광화문연가</h2>
-        <ul className="stats">
-          <li><b>10 : 10</b><span>최대 20명, 한 사람씩 제대로 이야기할 수 있는 규모</span></li>
-          <li><b>D-2</b><span>모임 이틀 전 사전채팅 오픈</span></li>
-          <li><b>3년차</b><span>호스트가 첫인사부터 직접 케어</span></li>
-          <li><b>6쌍</b><span>호스트가 운영한 플러팅 라운지 21회차 매칭 기록</span></li>
-        </ul>
-      </section>
 
       <section id="about" className="fu">
         <h2>모임 안내</h2>
@@ -172,11 +163,11 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
       </section>
 
       <section className="fu">
-        <h2>이런 분이라면</h2>
+        <h2>이런 분에게 추천드려요</h2>
         <ul className="checks">
           <li>송년회는 4개, 크리스마스 약속은 0개인 분</li>
           <li>회사-집-회사, 새로운 사람 만날 틈이 없던 분</li>
-          <li>어플은 불안하고 소개팅은 어려운 분</li>
+          <li>어플은 불안하고 1:1 만남은 부담스러운 분</li>
           <li>설렘도 좋지만, 대화가 통하는 사람이 궁금한 분</li>
         </ul>
       </section>
@@ -196,7 +187,7 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
         <h2>이렇게 진행돼요</h2>
         <figure className="bleed">
           <img src="/gwanghwamun/table.jpg" width={900} height={720} loading="lazy" alt="카페 테이블에 네 사람이 둘러앉아 대화하는 모습" />
-          <figcaption><h2>4명이서, 20분씩<br />대화하고 자리를 바꿔요</h2></figcaption>
+          <figcaption><h2>4명이서, 25분씩<br />대화하고 자리를 바꿔요</h2></figcaption>
         </figure>
         <ol className="steps">
           <li><span className="n">1</span><h3>간단한 신청서</h3><p>나이·직군·성격 키워드와 연락처, 사진을 적어요. 회사명은 묻지 않아요.</p></li>
@@ -204,7 +195,7 @@ export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Pr
           <li><span className="n">3</span><h3>웹앱 프로필 작성</h3><p>연애 가치관과 간단한 소개를 적어요.</p></li>
           <li><span className="n">4</span><h3>사전채팅 오픈(모임 2일 전)</h3><p>파트너와 서로의 이상형을 묻고 어색함을 풀어요.</p></li>
           <li><span className="n">5</span><h3>모임 당일</h3><p>파트너와 한 팀이 되어 게임하고, 자리를 돌며 이야기해요.</p></li>
-          <li><span className="n">6</span><h3>최종 선택</h3><p>파트너 또는 다른 이성 2명 중 한 분을 골라요. 파트너를 고르면 커피 지원금이 나가요. 2차 뒷풀이 자리는 안내해 드려요.</p></li>
+          <li><span className="n">6</span><h3>최종 선택</h3><p>파트너 또는 다른 이성 2명 중 한 분을 골라요.<br />파트너를 고르면 커피 지원금이 나가요.<br />2차 뒷풀이 자리는 안내해 드려요.</p></li>
         </ol>
       </section>
 

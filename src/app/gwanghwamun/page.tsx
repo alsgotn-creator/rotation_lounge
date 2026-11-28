@@ -6,11 +6,11 @@ import './gw.css';
 
 export const revalidate = 60; // 남은 자리는 1분마다 새로
 
-const DESC = '광화문·을지로 직장인만 모이는 로테이션 소개팅. 모임 전에 파트너와 먼저 인사하고, 당일엔 게임하며 자연스럽게 가까워져요.';
+const DESC = '광화문·을지로 직장인만 모이는 로테이션 소셜링. 모임 전에 파트너와 먼저 인사하고, 당일엔 게임하며 자연스럽게 가까워져요.';
 export const metadata: Metadata = {
-  title: '퇴근 후, 새로운 설렘 · 광화문·을지로 직장인 로테이션 소개팅',
+  title: '퇴근 후, 새로운 설렘 · 광화문·을지로 직장인 로테이션 소셜링',
   description: DESC,
-  openGraph: { type: 'website', locale: 'ko_KR', title: '퇴근 후, 새로운 설렘 · 광화문·을지로 직장인 로테이션 소개팅', description: DESC },
+  openGraph: { type: 'website', locale: 'ko_KR', title: '퇴근 후, 새로운 설렘 · 광화문·을지로 직장인 로테이션 소셜링', description: DESC },
 };
 export const viewport: Viewport = { themeColor: '#0E1424' };
 

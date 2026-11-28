@@ -152,9 +152,4 @@ body:has(.gw){background:#080C18}
 .gw .end .due{margin:-8px 0 0;color:var(--sub);font-size:14px}
 .gw .end .closed{margin-top:18px;color:var(--text);font-weight:500}
 .gw .sticky span.gbtn{opacity:.6;cursor:not-allowed}
-/* 숫자 카드 */
-.gw .stats{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.gw .stats li{background:var(--card);border-radius:16px;padding:18px 16px;display:grid;gap:6px}
-.gw .stats b{font:800 26px/1.1 var(--serif);color:var(--amber)}
-.gw .stats span{font-size:13px;line-height:1.5;color:var(--sub)}
 .gw footer .film{margin-top:6px;font-size:13px}
