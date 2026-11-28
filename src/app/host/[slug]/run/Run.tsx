@@ -85,7 +85,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
   const nf = seated.filter((p) => p.gender === 'f').length, nm = seated.filter((p) => p.gender === 'm').length;
   const double = ev.kind === 'double';
   const teamed = new Set(v.teams.flatMap((t) => [t.f, t.m]));
-  const pairTeams = (mode: 'opposite' | 'random' = 'opposite') => (!v.teams.length || window.confirm('팀을 새로 짜요. 지금 팀 이름과 파트너 채팅이 모두 지워져요. 다시 짤까요?')) && send({ type: 'pairTeams', mode }).then((j) => j.ok && show(mode === 'random' ? '랜덤으로 파트너 팀을 만들었어요' : '파트너 팀을 만들었어요'));
+  const pairTeams = (mode: 'opposite' | 'random' | 'best' = 'opposite') => (!v.teams.length || window.confirm('팀을 새로 짜요. 지금 팀 이름과 파트너 채팅이 모두 지워져요. 다시 짤까요?')) && send({ type: 'pairTeams', mode }).then((j) => j.ok && show(mode === 'random' ? '랜덤으로 파트너 팀을 만들었어요' : mode === 'best' ? '가장 잘 맞는 짝끼리 팀을 만들었어요' : '파트너 팀을 만들었어요'));
 
   return (
     <main>
@@ -101,12 +101,12 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
         {double && ev.phase === 'before' && (() => {
           const d = new Date(chatOpensAt(ev.starts_at) + 9 * 3600e3), from = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
           const now = preScreen('before', ev.pre_stage, ev.starts_at);
-          const opts: [PreStage, string][] = [['auto', `자동 · ${from}부터 채팅`], ['chat', '채팅방 지금 열기'], ['lounge', '라운지 열기 (당일)']];
+          const opts: [PreStage, string][] = [['wait', '대기 · 내가 열 때까지'], ['auto', `자동 · ${from}부터 채팅`], ['chat', '채팅방 지금 열기'], ['lounge', '라운지 열기 (당일)']];
           return <div className="run-stage">
             <p className="eb" style={{ margin: '18px 0 6px' }}>참가자 화면 · 지금 <b>{now === 'lounge' ? '라운지' : now === 'chat' ? '파트너 채팅방' : '채팅방 열리기 전'}</b></p>
             <div className="phases" role="radiogroup" aria-label="참가자 화면" style={{ marginTop: 0 }}>
               {opts.map(([k, label]) => <button key={k} role="radio" aria-checked={ev.pre_stage === k} className={ev.pre_stage === k ? 'on' : ''} disabled={busy}
-                onClick={() => ev.pre_stage !== k && send({ type: 'stage', stage: k }).then((j) => j.ok && show(k === 'lounge' ? '참가자 화면에 라운지가 열렸어요' : k === 'chat' ? '파트너 채팅방을 열었어요' : '채팅방이 모임 이틀 전에 열려요'))}>{label}</button>)}
+                onClick={() => ev.pre_stage !== k && send({ type: 'stage', stage: k }).then((j) => j.ok && show(k === 'lounge' ? '참가자 화면에 라운지가 열렸어요' : k === 'chat' ? '파트너 채팅방을 열었어요' : k === 'wait' ? '채팅방을 열 때까지 대기 화면이에요' : '채팅방이 모임 이틀 전에 열려요'))}>{label}</button>)}
             </div>
           </div>;
         })()}
@@ -139,6 +139,7 @@ export default function Run({ slug, when }: { slug: string; when: string }) {
 
         {double && <>
           <p className="eb" style={{ marginTop: 26 }}>파트너 팀 ({v.teams.length})</p>
+          {!current && <button className="btn" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={() => pairTeams('best')}>{v.teams.length ? '가장 잘 맞는 짝으로 다시 매칭' : '파트너 매칭 · 가치관·MBTI 가장 잘 맞는 남녀끼리'}</button>}
           {!current && <button className="btn sub" style={{ height: 46, fontSize: 15, marginBottom: 10 }} disabled={busy} onClick={() => pairTeams()}>{v.teams.length ? '파트너 다시 매칭하기' : '파트너 매칭 · 가치관·MBTI 가장 안 맞는 남녀끼리'}</button>}
           <div className="people">
             {v.teams.length === 0 && <p className="empty" style={{ padding: '12px 0' }}>사전 등록이 끝나면 모임 전날 눌러주세요. 그때부터 팀 채팅이 열려요.</p>}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chatOpensAt, preScreen, fit, mbtiSame, otherTeam, pairTeams, randomTeams, tablesFor, teamTable, type Team } from './double';
+import { bestTeams, chatOpensAt, preScreen, fit, mbtiSame, otherTeam, pairTeams, randomTeams, tablesFor, teamTable, type Team } from './double';
 
 const A = (v: number) => Array(15).fill(v);
 
@@ -64,4 +64,27 @@ it('채팅방은 모임 이틀 전 0시(한국 시간)부터, 당일 라운지�
   expect(preScreen('before', 'chat', starts, Date.parse('2026-11-20T12:00:00+09:00'))).toBe('chat');
   expect(preScreen('before', 'lounge', starts, Date.parse('2026-11-20T12:00:00+09:00'))).toBe('lounge');
   expect(preScreen('talk', 'auto', starts, Date.parse('2026-11-20T12:00:00+09:00'))).toBe('lounge');
+});
+
+describe('bestTeams', () => {
+  const A = (v: number) => Array(15).fill(v);
+  it('pairs the most compatible man and woman first', () => {
+    const fs = [{ id: 'f1', answers: A(1), mbti: 'ESTJ' }, { id: 'f2', answers: A(5), mbti: 'INFP' }];
+    const ms = [{ id: 'm1', answers: A(5), mbti: 'INFP' }, { id: 'm2', answers: A(1), mbti: 'ESTJ' }];
+    const t = bestTeams(fs, ms, () => 0.5).map((x) => x.f + x.m).sort();
+    expect(t).toEqual(['f1m2', 'f2m1']);
+  });
+  it('ties are broken at random and leftovers stay unpaired', () => {
+    const fs = [{ id: 'f1', answers: A(3), mbti: 'INFP' }];
+    const ms = [{ id: 'm1', answers: A(3), mbti: 'INFP' }, { id: 'm2', answers: A(3), mbti: 'INFP' }];
+    const seq = [0.9, 0.1]; let i = 0;
+    expect(bestTeams(fs, ms, () => seq[i++ % 2])).toHaveLength(1);
+    expect(bestTeams(fs, ms, () => seq[i++ % 2])[0].m).toMatch(/^m[12]$/);
+  });
+});
+
+describe('preScreen wait', () => {
+  it("'wait' keeps the waiting screen even after the D-2 date", () => {
+    expect(preScreen('before', 'wait', '2026-12-11T10:00:00Z', Date.parse('2026-12-10T00:00:00Z'))).toBe('wait');
+  });
 });

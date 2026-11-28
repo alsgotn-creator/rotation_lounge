@@ -48,11 +48,14 @@ export default async function Lounge({ params, searchParams }: { params: Promise
   const double = kind === 'double';
   // 이상형·매력 포인트는 더블 모임에만 있는 칸 (기본형 조회에 넣으면 0014 전에는 조회가 깨진다)
   const extra = double && p ? (await db().from('participants').select('ideal,charm').eq('id', p.id).single()).data : null;
+  // 이상형 월드컵은 더블 모임 사전 등록 뒤에 한 번 (worldcup 칸이 아직 없으면(0023 전) 건너뛴다)
+  const wc = double && p ? await db().from('participants').select('worldcup').eq('id', p.id).single() : null;
+  const needWc = !!wc && !wc.error && !wc.data?.worldcup;
   const lounge = p ? view : null;
   const s = toSession(event, []);
   const given = { name: me.name, number: me.number, gender: me.gender, age: Math.min(new Date(event.starts_at).getUTCFullYear(), new Date().getUTCFullYear() + 1) - me.birth_year /* 시연 모임(9999년)에서 나이가 튀지 않게 */, job: me.job };
   return (
-    <Entry slug={slug} given={given} when={`${s.dateLabel} ${s.time}`} devStep={devStep} lounge={lounge} double={double}
+    <Entry slug={slug} given={given} needWc={needWc} when={`${s.dateLabel} ${s.time}`} devStep={devStep} lounge={lounge} double={double}
       me={p && { area: p.area, mbti: p.mbti, keywords: p.keywords, answers: p.answers, loveType: p.love_type, shape: p.shape as Shape, prop: p.prop, ideal: extra?.ideal ?? '', charm: extra?.charm ?? '' }} />
   );
 }

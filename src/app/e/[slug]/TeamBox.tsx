@@ -7,6 +7,7 @@ import { api } from '../../../lib/api';
 import { ho } from '../../../lib/domain/lounge';
 import type { Shape } from '../../../lib/domain/register';
 import type { TeamScreen, TeamView } from '../../api/e/[slug]/team/route';
+import { wcImg } from '../../../lib/domain/worldcup';
 
 // 브라우저용 Supabase: 데이터는 읽지 않고, 둘만의 채널로 '입력 중'·'새 메시지' 신호만 주고받는다
 let rt: ReturnType<typeof createClient> | null = null;
@@ -141,6 +142,7 @@ export function TeamChat({ slug, team, reload, onBack, mini = false }: { slug: s
           <div><dt>이상형</dt><dd>{p.ideal || '아직 안 적었어요'}</dd></div>
           <div><dt>매력</dt><dd>{p.charm || '아직 안 적었어요'}</dd></div>
         </dl>
+        {p.wc && <figure className="tm-wc"><img src={wcImg(p.wc.id)} alt="" /><figcaption><small>이상형 월드컵 1위</small>{p.wc.line}</figcaption></figure>}
       </div>}
 
       <div className="tc-msgs" aria-live="polite">

@@ -4,6 +4,7 @@ import { getEvent } from '../../../../../lib/server/signup';
 import { invitedFromCookie, participantOf } from '../../../../../lib/server/invite';
 import { preScreen, chatOpensAt, PRE_STAGES, teamTable, type PreStage } from '../../../../../lib/domain/double';
 import { createHmac } from 'node:crypto';
+import { wcCard } from '../../../../../lib/domain/worldcup';
 
 export const dynamic = 'force-dynamic';
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
@@ -12,7 +13,7 @@ export type TeamView = null | {
   no: number; name: string; firstTable: number;
   /** 둘만의 실시간 채널 이름(입력 중 표시 · 새 메시지 알림). 추측할 수 없게 서버 비밀로 만든다 */
   channel: string;
-  partner: { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; keywords: string[]; age: number; job: string; area: string; mbti: string; ideal: string; charm: string };
+  partner: { gender: 'f' | 'm'; number: number | null; shape: string; prop: string; color: number; keywords: string[]; age: number; job: string; area: string; mbti: string; ideal: string; charm: string; wc: { id: string; line: string } | null };
   messages: { id: string; me: boolean; body: string; at: string }[];
 };
 
@@ -34,7 +35,7 @@ async function load(slug: string) {
     db().from('events').select('pre_stage').eq('id', event.id).single(), // 0016 전에는 없다 → auto
   ]);
   const stage: PreStage = !st.error && PRE_STAGES.includes(st.data?.pre_stage) ? st.data!.pre_stage : 'auto';
-  const scr: TeamScreen = { screen: preScreen(ev?.phase ?? 'before', stage, ev?.starts_at ?? event.starts_at), chatFrom: chatOpensAt(ev?.starts_at ?? event.starts_at) };
+  const scr: TeamScreen = { screen: preScreen(ev?.phase ?? 'before', stage, ev?.starts_at ?? event.starts_at), chatFrom: stage === 'wait' ? 0 : chatOpensAt(ev?.starts_at ?? event.starts_at) }; // 대기면 날짜를 약속하지 않는다
   // 채팅방이 열리기 전(모임 이틀 전까지)에는 파트너도 채팅도 보이지 않는다
   return { event, p, scr, t: scr.screen === 'wait' ? null : (t as { no: number; f_id: string; m_id: string; name: string } | null) };
 }
@@ -50,10 +51,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
     db().from('team_messages').select('id,from_id,body,created_at').eq('event_id', event.id).eq('team_no', t.no).order('created_at').limit(300),
     db().from('events').select('table_count').eq('id', event.id).single(),
   ]);
+  const w = await db().from('participants').select('worldcup').eq('id', partnerId).maybeSingle(); // 0023 전엔 칸이 없다 → 없음
+  const wc = !w.error && w.data?.worldcup?.winner ? wcCard(w.data.worldcup.winner) : null;
   const o = ps?.[0];
   const team: TeamView = o ? {
     no: t.no, name: t.name, channel: teamChannel(event.id, t.no), firstTable: teamTable(t.no, 1, ev?.table_count ?? 1),
-    partner: { gender: o.gender, number: o.number, shape: o.shape, prop: o.prop, color: o.love_type, keywords: o.keywords, age: o.age, job: o.job, area: o.area, mbti: o.mbti, ideal: o.ideal ?? '', charm: o.charm ?? '' },
+    partner: { gender: o.gender, number: o.number, shape: o.shape, prop: o.prop, color: o.love_type, keywords: o.keywords, age: o.age, job: o.job, area: o.area, mbti: o.mbti, ideal: o.ideal ?? '', charm: o.charm ?? '', wc },
     messages: (msgs ?? []).map((m) => ({ id: m.id, me: m.from_id === p.id, body: m.body, at: m.created_at })),
   } : null;
   return NextResponse.json({ ok: true, team, ...scr }, { headers: { 'cache-control': 'no-store' } });

@@ -63,6 +63,22 @@ export function pairTeams(fs: P[], ms: P[]): { f: string; m: string; fit: number
   }).sort((a, b) => a.fit - b.fit);
 }
 
+/**
+ * 가장 잘 맞는 짝부터: fit 이 가장 높은 남녀 쌍을 차례로 묶는다. 점수가 같으면(애매하면) 무작위.
+ * 남는 사람(성비가 다를 때)은 팀이 없다.
+ */
+export function bestTeams(fs: P[], ms: P[], rand: () => number = Math.random): { f: string; m: string; fit: number; similar: number; mbtiSame: number }[] {
+  const all = fs.flatMap((f) => ms.map((m) => ({ f, m, fit: fit(f, m), k: rand() })));
+  all.sort((a, b) => b.fit - a.fit || a.k - b.k);
+  const used = new Set<string>(), out: { f: string; m: string; fit: number; similar: number; mbtiSame: number }[] = [];
+  for (const x of all) {
+    if (used.has(x.f.id) || used.has(x.m.id)) continue;
+    used.add(x.f.id); used.add(x.m.id);
+    out.push({ f: x.f.id, m: x.m.id, fit: x.fit, similar: similarity(x.f.answers, x.m.answers), mbtiSame: mbtiSame(x.f.mbti, x.m.mbti) });
+  }
+  return out;
+}
+
 /** 사전 랜덤 매칭: 성향과 상관없이 남녀를 무작위로 짝짓는다. 남는 사람(성비가 다를 때)은 팀이 없다. */
 export function randomTeams(fs: P[], ms: P[], rand: () => number = Math.random): { f: string; m: string; fit: number; similar: number; mbtiSame: number }[] {
   const shuffle = <T,>(a: T[]) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -76,9 +92,9 @@ export function randomTeams(fs: P[], ms: P[], rand: () => number = Math.random):
 /** 이상형 · 매력 포인트 (사전 등록, 파트너에게만 보인다) */
 export const IDEAL_MAX = 60;
 
-/** 시작 전 참가자 화면 설정 (호스트가 고른다). auto = 이틀 전부터 채팅방, chat = 지금 채팅방, lounge = 당일 라운지 */
-export type PreStage = 'auto' | 'chat' | 'lounge';
-export const PRE_STAGES: PreStage[] = ['auto', 'chat', 'lounge'];
+/** 시작 전 참가자 화면 설정 (호스트가 고른다). auto = 이틀 전부터 채팅방, wait = 호스트가 열 때까지 대기, chat = 지금 채팅방, lounge = 당일 라운지 */
+export type PreStage = 'auto' | 'wait' | 'chat' | 'lounge';
+export const PRE_STAGES: PreStage[] = ['auto', 'wait', 'chat', 'lounge'];
 
 const KST = 9 * 3600e3;
 /** 파트너 채팅방이 열리는 시각: 모임 날짜(한국 시간) 이틀 전 0시 */
@@ -90,6 +106,7 @@ export function chatOpensAt(startsAt: string | number) {
 /** 지금 더블 라운지 참가자 화면: wait = 채팅방 열리기 전, chat = 채팅방만, lounge = 라운지(채팅방은 카드로) */
 export function preScreen(phase: string, stage: PreStage, startsAt: string | number, now = Date.now()): 'wait' | 'chat' | 'lounge' {
   if (phase !== 'before' || stage === 'lounge') return 'lounge';
+  if (stage === 'wait') return 'wait';
   if (stage === 'chat' || now >= chatOpensAt(startsAt)) return 'chat';
   return 'wait';
 }
