@@ -8,7 +8,7 @@ import type { AppStatus, Session } from '../../../lib/signup/rules';
 import { QUESTIONS, typeName } from '../../../lib/domain/loveType';
 
 export type Row = {
-  id: string; name: string; gender: 'f' | 'm'; birthYear: number; job: string; phone: string; email: string; ideal: string; nearWork: string; source: string; mbti: string; hostMessage: string;
+  id: string; name: string; gender: 'f' | 'm'; birthYear: number; job: string; phone: string; email: string; ideal: string; nearWork: string; source: string; mbti: string; hostMessage: string; traits: string; exposure: string;
   status: AppStatus; paymentDue: string | null; createdAt: string; number: number | null; avoid: { name: string; note: string }[];
   photos: string[]; avoidHits: string[]; avoidedBy: string[];
   profile: { area: string; mbti: string; keywords: string[]; answers: number[]; loveType: number } | null; // 사전 등록 전이면 null
@@ -93,7 +93,7 @@ export default function Applicants({ event, session, rows }: { event: Ev; sessio
           <span className="badge">{STATUS_KO[open.status]}{open.number != null && ` · ${open.gender === 'f' ? '여' : '남'}${open.number}호`}</span>
           <h2 className="q" style={{ fontSize: 22, marginTop: 10 }}>{open.name} <small className="ds" style={{ fontSize: 14 }}>{open.gender === 'f' ? '여' : '남'} · {open.birthYear}년생</small></h2>
           <dl className="sum" style={{ marginTop: 12 }}>
-            {[['하는 일', open.job], ...(open.mbti ? [['MBTI', open.mbti]] : []), ...(open.ideal ? [['이상형', open.ideal]] : []), ...(open.hostMessage ? [['호스트에게', open.hostMessage]] : []), ...(open.nearWork ? [['근무지', open.nearWork]] : []), ...(open.source ? [['신청 경로', open.source]] : []), ['연락처', open.phone || '수락 후 받기'], ...(open.email ? [['이메일', open.email]] : []), ['신청', ago(open.createdAt)], ...(open.paymentDue ? [['입금 기한', kDue(open.paymentDue)]] : [])]
+            {[['하는 일', open.job], ...(open.mbti ? [['MBTI', open.mbti]] : []), ...(open.ideal ? [['이상형', open.ideal]] : []), ...(open.hostMessage ? [['호스트에게', open.hostMessage]] : []), ...(open.traits ? [['성격 키워드', open.traits]] : []), ...(open.exposure ? [['촬영 노출', open.exposure]] : []), ...(open.nearWork ? [['근무지', open.nearWork]] : []), ...(open.source ? [['신청 경로', open.source]] : []), ['연락처', open.phone || '수락 후 받기'], ...(open.email ? [['이메일', open.email]] : []), ['신청', ago(open.createdAt)], ...(open.paymentDue ? [['입금 기한', kDue(open.paymentDue)]] : [])]
               .map(([k, v]) => <div className="kv" key={k} style={{ borderTop: 0 }}><span>{k}</span><b>{k === '연락처' && open.phone ? <a href={`tel:${v}`}>{v}</a> : v}</b></div>)}
           </dl>
           {open.avoid.length > 0 && <div className="alert"><Icon name="info" /><div>

@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import ApplyForm from './ApplyForm';
+import { dLabel, gwPhase, PRICE_REGULAR, won } from './config';
 
 const IG = 'pov.love.archive';
-type Props = { startsAt: string | null; day: string; time: string; info: [string, string][]; raised: boolean };
+type Props = { startsAt: string | null; day: string; time: string; info: [string, string][]; serverNow: number };
 
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 const NS = 'http://www.w3.org/2000/svg';
@@ -14,11 +15,18 @@ function left(at: number) {
   return s > 0 ? [s / 86400, (s / 3600) % 24, (s / 60) % 60, s % 60].map(Math.floor) : null;
 }
 
-export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props) {
+export default function Gwanghwamun({ startsAt, day, time, info, serverNow }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const [count, setCount] = useState<number[] | null | undefined>(undefined); // undefined: 첫 렌더(서버와 같게 '--')
   const [sticky, setSticky] = useState(false);
   const [toast, setToast] = useState('');
+  const [now, setNow] = useState(serverNow); // 첫 렌더는 서버 시각, 이후 1분마다 기기 시각 (판단은 config 에서 한국 시간으로)
+  useEffect(() => { setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(t); }, []);
+  const ph = gwPhase(now);
+  const closed = ph.phase === 'closed';
+  const priceLine = closed ? <p className="gprice"><b>이번 모집은 마감됐어요</b></p>
+    : ph.phase === 'early' ? <p className="gprice">참가비 <b>{won(ph.price)}</b> <s>{won(PRICE_REGULAR)}</s> <em>{won(ph.price)}까지 {dLabel(ph.dDay)}</em></p>
+    : <p className="gprice">참가비 <b>{won(ph.price)}</b></p>;
 
   useEffect(() => {
     if (!startsAt) return;
@@ -108,7 +116,9 @@ export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props
             </g>
           </svg>
         </div>
-        <p className="desc">단둘의 어색함 없이, 넷이서 시작하는 설렘.</p>
+        <p className="desc">광화문·을지로 직장인만 모이는 로테이션 소개팅. 모임 전에 파트너와 먼저 인사하고, 당일엔 게임하며 자연스럽게 가까워져요.</p>
+        <ul className="tags"><li>혼자 와도 OK</li><li>10 : 10</li><li>사전채팅</li></ul>
+        {priceLine}
       </section>
 
       <section className="when">
@@ -146,10 +156,20 @@ export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props
         </figure>
       </section>
 
+      <section className="fu">
+        <h2>숫자로 보는 광화문연가</h2>
+        <ul className="stats">
+          <li><b>10 : 10</b><span>최대 20명, 한 사람씩 제대로 이야기할 수 있는 규모</span></li>
+          <li><b>D-2</b><span>모임 이틀 전 사전채팅 오픈</span></li>
+          <li><b>3년차</b><span>호스트가 첫인사부터 직접 케어</span></li>
+          <li><b>6쌍</b><span>호스트가 운영한 플러팅 라운지 21회차 매칭 기록</span></li>
+        </ul>
+      </section>
+
       <section id="about" className="fu">
         <h2>모임 안내</h2>
         <dl className="info">
-          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k === '참가비' && !raised ? <><s>42,000원</s> <b>{v}</b><small>12월 7일부터 42,000원으로 올라요</small></> : v}</dd></div>)}
+          {info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className={v.startsWith('[') ? 'gempty' : undefined}>{k !== '참가비' ? v : ph.phase === 'early' ? <><b>{won(ph.price)}</b> <s>{won(PRICE_REGULAR)}</s><small>12월 8일(화)까지 얼리버드 · {dLabel(ph.dDay)}</small></> : won(ph.price)}</dd></div>)}
         </dl>
       </section>
 
@@ -181,37 +201,44 @@ export default function Gwanghwamun({ startsAt, day, time, info, raised }: Props
           <figcaption><h2>4명이서, 20분씩<br />대화하고 자리를 바꿔요</h2></figcaption>
         </figure>
         <ol className="steps">
-          <li><span className="n">1</span><h3>간단한 신청서</h3><p>나이·직업·사진 1장만 받아요. 피하고 싶은 회사 동료도 알려주시면 걸러드려요.</p></li>
-          <li><span className="n">2</span><h3>호스트가 직접 수락</h3><p>나이와 분위기 밸런스를 보고 한 분씩 확인해요.</p></li>
-          <li><span className="n">3</span><h3>로테이션과 앱 콘텐츠</h3><p>광화문 근처 공간을 통대관했어요. 4명이서 20분씩 대화하고, 앱을 통한 익명게임 등 간단한 콘텐츠로 금방 친해져요</p></li>
-          <li><span className="n">4</span><h3>최종선택, 결과는 문자로</h3><p>마음에 든 분을 3명까지 고를 수 있어요. 서로 골랐다면 문자로 알려드려요.</p></li>
-          <li><span className="n">5</span><h3>롤링페이퍼와 2차</h3><p>나만 볼 수 있는 롤링페이퍼를 받아요. 아쉬운 분들을 위해 2차도 있어요 (참여는 자유예요).</p></li>
+          <li><span className="n">1</span><h3>간단한 신청서</h3><p>나이·직군·성격 키워드와 연락처, 사진을 적어요. 회사명은 묻지 않아요.</p></li>
+          <li><span className="n">2</span><h3>선정과 입금</h3><p>호스트가 확인하고 당일 안에 문자로 알려드려요. 안내된 기한 안에 입금하면 확정이에요.</p></li>
+          <li><span className="n">3</span><h3>웹앱 프로필 작성</h3><p>연애 가치관과 간단한 소개를 적어요.</p></li>
+          <li><span className="n">4</span><h3>사전채팅 오픈(모임 2일 전)</h3><p>파트너와 서로의 이상형을 묻고 어색함을 풀어요.</p></li>
+          <li><span className="n">5</span><h3>모임 당일</h3><p>파트너와 한 팀이 되어 게임하고, 자리를 돌며 이야기해요.</p></li>
+          <li><span className="n">6</span><h3>최종 선택</h3><p>파트너 또는 다른 이성 2명 중 한 분을 골라요. 파트너를 고르면 커피 지원금이 나가요. 2차 뒷풀이 자리는 안내해 드려요.</p></li>
         </ol>
       </section>
 
       <section className="fu">
         <h2>자주 묻는 질문</h2>
-        <details><summary>혼자 가도 어색하지 않나요?</summary><p>혼자 와도, 친구와 둘이 와도 괜찮아요. 로테이션이라 한 분씩이 아니라 여럿이서 함께 대화하게 돼서 어색할 틈이 적어요.</p></details>
-        <details><summary>신청하면 바로 확정인가요?</summary><p>아니에요. 호스트가 나이와 분위기 밸런스를 보고 선별해서 수락해요. 성비가 차면 마감돼요.</p></details>
-        <details><summary>뭘 준비해야 해요?</summary><p>휴대폰만 있으면 돼요. 최종선택과 롤링페이퍼 모두 모임웹으로 진행돼요.</p></details>
-        <details><summary>제 사진과 정보는 어떻게 되나요?</summary><p>나이·직업·사진 1장만 받고, 모임이 끝나면 폐기해요. 피하고 싶은 회사 동료가 있다면 신청할 때 알려주세요. 걸러드려요.</p></details>
-        <details><summary>결과는 어떻게 알려주나요?</summary><p>서로 선택했을 때만 문자로 알려드려요. 선택받지 못한 경우엔 아무에게도 알려지지 않아요.</p></details>
+        <details><summary>혼자 가도 어색하지 않나요?</summary><p>대부분 혼자 오세요. 사전채팅으로 파트너와 먼저 인사하고, 호스트가 현장을 이끌어요.</p></details>
+        <details><summary>신청하면 바로 확정인가요?</summary><p>아니요. 호스트가 확인한 뒤 당일 안에 문자로 알려드려요. 입금까지 끝나면 확정이에요.</p></details>
+        <details><summary>환불은 어떻게 되나요?</summary><p>모임 7일 전(12/4)까지 100%, 5일 전(12/6)까지 50%, 4일 전(12/7)부터 환불 불가예요. 노쇼·당일 취소도 환불되지 않아요. 호스트 사정으로 취소되면 전액 환불해요.</p></details>
+        <details><summary>인원이 부족하면요?</summary><p>최소 인원이 모이지 않아 취소되면 참가비는 전액 환불해요.</p></details>
+        <details><summary>사전채팅이 뭐예요?</summary><p>모임 2일 전에 열리는 채팅방이에요. 파트너와 이상형 이야기를 나누며 먼저 친해져요.</p></details>
+        <details><summary>촬영하나요?</summary><p>현장 콘텐츠 촬영이 있어요. 신청서에서 얼굴 노출 범위를 고를 수 있고, 어느 쪽이어도 선정에는 영향이 없어요.</p></details>
+        <details><summary>뭘 준비해야 해요?</summary><p>휴대폰이면 충분해요.</p></details>
       </section>
 
       <section className="fu" id="apply-form">
         <div className="end">
           <h2>광화문 직장인들을 위한<br />올해 마지막 연말모임(선착순)</h2>
-          <ApplyForm />
+          <p className="due">12/10(목) 오전 10시 신청 마감 · 최대 20명</p>
+          {priceLine}
+          {closed ? <p className="closed">이번 모집은 마감됐어요. 다음 모임 소식은 {ig}에서 알려드릴게요.</p> : <ApplyForm />}
         </div>
       </section>
 
       <footer>
-        <p className="use">대관비, 다과비, 수고비, 콘텐츠제작비로 활용돼요</p>
         <p>Hosted by 옷깃 · {ig}</p>
+        <p className="film">현장은 콘텐츠 촬영이 있어요. 노출 범위는 신청서에서 고를 수 있어요.</p>
         <button className="gbtn" type="button" onClick={share}>친구에게 링크 보내기</button>
       </footer>
 
-      <div className={`sticky${sticky ? ' on' : ''}`}><a className="gbtn p" href="#apply-form" tabIndex={sticky ? 0 : -1}>신청하기</a></div>
+      <div className={`sticky${sticky ? ' on' : ''}`}>{closed
+        ? <span className="gbtn p" aria-disabled="true">이번 모집은 마감됐어요</span>
+        : <a className="gbtn p" href="#apply-form" tabIndex={sticky ? 0 : -1}>신청하기 · {ph.phase === 'early' ? `${won(ph.price)} ${dLabel(ph.dDay)}` : '마감 임박'}</a>}</div>
       <div className={`gtoast${toast ? ' on' : ''}`} role="status" aria-live="polite">{toast}</div>
     </div>
   );

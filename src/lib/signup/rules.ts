@@ -16,20 +16,26 @@ export type Session = {
 export const birthFromKoreanAge = (age: number, year: number) => year - age + 1;
 
 /** 광화문연가 신청서 → applications 칸. 마이그레이션을 아직 안 돌렸으면 없는 칸의 값을 있는 칸 뒤에 붙인다.
- *  level 0: ideal·source·mbti·host_message 칸 모두 있음 (0019+0020+0021)
- *  level 1: 0021 전 → MBTI 는 job 뒤, 호스트에게 할 말은 ideal 뒤에 붙임
- *  level 2: 0020 전 → 위 + 경로를 job 뒤에 붙임
- *  level 3: 0019 전 → 이상형·호스트에게 할 말·MBTI·경로를 모두 job 에 함께 적음 */
-export type GwForm = { job: string; ideal: string; mbti: string; message: string; source: string };
-export function gwApplyRow(f: GwForm, level: 0 | 1 | 2 | 3) {
-  const { job, ideal, mbti, message, source } = f;
-  if (level === 0) return { job, ideal, source, mbti, host_message: message };
+ *  level 0: 0019~0022 칸 모두 있음
+ *  level 1: 0022 전 → 성격 키워드·촬영 노출을 호스트에게 할 말 뒤에 붙임
+ *  level 2: 0021 전 → 위 + MBTI 는 job 뒤, 호스트에게 할 말은 ideal 뒤에 붙임
+ *  level 3: 0020 전 → 위 + 경로를 job 뒤에 붙임
+ *  level 4: 0019 전 → 모두 job 에 함께 적음 */
+export type GwForm = { job: string; ideal: string; mbti: string; message: string; source: string; traits: string; exposure: string };
+export function gwApplyRow(f: GwForm, level: 0 | 1 | 2 | 3 | 4) {
+  const { job, ideal, mbti, source, traits, exposure } = f;
+  if (level === 0) return { job, ideal, source, mbti, host_message: f.message, traits, exposure };
+  const message = [f.message, traits && `성격: ${traits}`, exposure && `촬영: ${exposure}`].filter(Boolean).join(' · ');
+  if (level === 1) return { job, ideal, source, mbti, host_message: message };
   const jobM = mbti ? `${job} · MBTI: ${mbti}` : job;
   const idealM = message ? `${ideal} · 호스트에게: ${message}` : ideal;
-  if (level === 1) return { job: jobM, ideal: idealM, source };
-  if (level === 2) return { job: `${jobM} · 경로: ${source}`, ideal: idealM };
+  if (level === 2) return { job: jobM, ideal: idealM, source };
+  if (level === 3) return { job: `${jobM} · 경로: ${source}`, ideal: idealM };
   return { job: `${jobM} · 이상형: ${idealM} · 경로: ${source}` };
 }
+
+/** 촬영 노출 범위 (신청서 선택지 → 호스트가 보는 글) */
+export const EXPOSURE = { face: '얼굴 나와도 괜찮음', partial: '뒷모습·손만', none: '촬영에서 빼주세요' } as const;
 
 /** MBTI: 비워도 되고, 적었다면 4글자 유형(ENFP 등)이어야 한다. 대문자로 돌려주고 틀리면 null */
 export function parseMbti(v: string): string | null {

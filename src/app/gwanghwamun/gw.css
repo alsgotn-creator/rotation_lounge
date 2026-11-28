@@ -21,7 +21,9 @@ body:has(.gw){background:#080C18}
 .gw .kick{font-size:15px;font-weight:500;color:var(--amber);letter-spacing:.02em}
 .gw .gtitle h1{margin-top:10px;font-size:min(36px,9.4vw);font-weight:800;line-height:1.25;letter-spacing:-.02em;white-space:nowrap}
 .gw .sub2{margin-top:8px;font:700 min(26px,6.8vw) var(--serif);background:linear-gradient(90deg,#F7C77E,#F4A88A 60%,#F08FA0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
-.gw .desc{color:var(--sub);margin-top:20px;font-size:min(16px,4vw);white-space:nowrap}
+.gw .desc{color:var(--sub);margin-top:20px;font-size:15px;line-height:1.65;padding:0 4px}
+.gw .tags{display:flex;flex-wrap:nowrap;justify-content:center;gap:6px;margin:14px auto 0;list-style:none;padding:0}
+.gw .tags li{font-size:12px;line-height:1.6;padding:3px 10px;white-space:nowrap;border:1px solid var(--line);border-radius:99px;background:rgba(25,34,56,.7)}
 .gw .win{fill:var(--amber)}
 .gw .win.tw{animation:gw-tw var(--d) ease-in-out var(--delay) infinite}
 @keyframes gw-tw{0%,100%{opacity:1}50%{opacity:.15}}
@@ -67,7 +69,7 @@ body:has(.gw){background:#080C18}
 .gw dl.info dd s{color:var(--sub);margin-right:4px}
 .gw dl.info dd b{color:var(--amber);font-size:1.12em}
 .gw dl.info dd small{display:block;margin-top:4px;font-size:12px;color:var(--sub)}
-.gw dt{flex:0 0 52px;color:var(--amber);font-weight:700;font-size:15px}
+.gw dt{flex:0 0 68px;color:var(--amber);font-weight:700;font-size:15px}
 .gw dd{flex:1}
 .gw dd.gempty{color:var(--sub);text-decoration:underline dotted var(--rose);text-decoration-thickness:2px;text-underline-offset:5px}
 .gw details{background:var(--card);border-radius:16px;margin-bottom:10px}
@@ -122,6 +124,9 @@ body:has(.gw){background:#080C18}
 .gw .gform input:focus,.gw .gform textarea:focus{outline:none;border-color:var(--amber)}
 .gw .gform .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 .gw .gform .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gw .gform .seg.three{grid-template-columns:repeat(3,1fr)}
+.gw .gform .seg.three button{font-size:14px;padding:0 4px}
+.gw .gform fieldset .fine{margin-top:6px}
 .gw .gform .seg button{min-height:48px;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--text);font:500 16px 'Noto Sans KR',sans-serif;cursor:pointer}
 .gw .gform .seg button[aria-pressed=true]{border-color:var(--amber);background:rgba(244,185,104,.14);color:var(--amber);font-weight:700}
 .gw .gform .file{position:relative;display:grid;place-items:center;height:64px;border:1.5px dashed var(--line);border-radius:12px;overflow:hidden;cursor:pointer;color:var(--sub);font-size:14px}
@@ -137,3 +142,19 @@ body:has(.gw){background:#080C18}
 .gw .gdone p{color:var(--text);font-size:15px}
 .gw .gdone small{color:var(--sub);font-size:13px}
 .gw .bleed + .steps{margin-top:28px}
+
+/* 가격·마감 */
+.gw .gprice{margin-top:14px;font-size:15px;color:var(--text)}
+.gw .gprice b{color:var(--amber);font-size:19px;font-weight:800}
+.gw .gprice s{color:var(--sub);font-size:13px;margin-left:2px}
+.gw .gprice em{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:99px;background:rgba(240,143,160,.16);color:var(--rose);font:700 13px/1.6 'Noto Sans KR',sans-serif;font-style:normal}
+.gw dl.info dd b{color:var(--amber)}
+.gw .end .due{margin:-8px 0 0;color:var(--sub);font-size:14px}
+.gw .end .closed{margin-top:18px;color:var(--text);font-weight:500}
+.gw .sticky span.gbtn{opacity:.6;cursor:not-allowed}
+/* 숫자 카드 */
+.gw .stats{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gw .stats li{background:var(--card);border-radius:16px;padding:18px 16px;display:grid;gap:6px}
+.gw .stats b{font:800 26px/1.1 var(--serif);color:var(--amber)}
+.gw .stats span{font-size:13px;line-height:1.5;color:var(--sub)}
+.gw footer .film{margin-top:6px;font-size:13px}

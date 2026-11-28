@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { db, hasDb, PHOTO_BUCKET } from '../../../../lib/server/supabase';
 import { hash, newToken } from '../../../../lib/server/auth';
 import { nextGwanghwamun } from '../../../../lib/server/signup';
+import { APPLY_END } from '../../../gwanghwamun/config';
 import { birthError, formatPhone, isName, isPhone } from '../../../../lib/signup/validate';
-import { birthFromKoreanAge, gwApplyRow, gwSource, parseMbti, parseTails } from '../../../../lib/signup/rules';
+import { birthFromKoreanAge, EXPOSURE, gwApplyRow, gwSource, parseMbti, parseTails } from '../../../../lib/signup/rules';
 
 const fail = (message: string, status = 400) => NextResponse.json({ ok: false, message }, { status });
 
@@ -21,12 +22,15 @@ export async function POST(req: Request) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
   if (limited(ip)) return fail('신청이 너무 많아요. 잠시 뒤에 다시 시도해주세요.', 429);
 
+  if (Date.now() >= Date.parse(APPLY_END)) return fail('이번 모집은 마감됐어요.');
+
   let f: FormData;
   try { f = await req.formData(); } catch { return fail('보낸 내용을 읽지 못했어요. 사진을 바꿔서 다시 시도해주세요.'); }
   if (f.get('website')) return NextResponse.json({ ok: true, statusToken: newToken() }); // 봇용 숨은 칸
 
   const s = (k: string, max: number) => String(f.get(k) ?? '').trim().slice(0, max);
-  const gender = s('gender', 1), name = s('name', 20), job = s('job', 30), ideal = s('ideal', 200), message = s('message', 300), mbti = parseMbti(s('mbti', 4));
+  const gender = s('gender', 1), name = s('name', 20), job = s('job', 30), ideal = s('ideal', 200), message = s('message', 300), mbti = parseMbti(s('mbti', 4)), traits = s('traits', 40);
+  const exposure = EXPOSURE[s('exposure', 10) as keyof typeof EXPOSURE];
   const age = Number(s('age', 3)), phone = formatPhone(s('phone', 20));
   const photos = [f.get('photo'), f.get('photo2')].filter((x): x is File => x instanceof File && x.size > 0).slice(0, 2);
   const source = gwSource(s('from', 20) || null, req.headers.get('user-agent') ?? ''); // 인스타 / QR
@@ -47,6 +51,7 @@ export async function POST(req: Request) {
   if (!isPhone(phone)) return fail('휴대폰 번호를 확인해주세요.');
   if (job.length < 2) return fail('직업을 적어주세요.');
   if (ideal.length < 2) return fail('이상형을 적어주세요.');
+  if (!exposure) return fail('촬영 노출 범위를 골라주세요.');
   if (mbti === null) return fail('MBTI는 ENFP처럼 4글자로 적어주세요. 모르면 비워두셔도 돼요.');
   if (tails === null) return fail('마주치고 싶지 않은 분의 휴대폰 뒷번호 4자리를 확인해주세요.');
   if (!photos.length || !(f.get('photo') instanceof File)) return fail('얼굴이 나온 사진을 1장 이상 올려주세요.');
@@ -64,9 +69,9 @@ export async function POST(req: Request) {
   const base = { id, event_id: event.id, gender, name, birth_year: birth, phone, email: '', photo_paths: paths, avoid: tails.map((t) => ({ name: `뒷번호 ${t}`, note: '' })), status_token_hash: hash(statusToken) };
   // 0019(ideal) · 0020(source) · 0021(mbti·host_message) 마이그레이션을 아직 안 돌렸으면 없는 칸의 값을 있는 칸 뒤에 붙인다
   let error = null as null | { message: string };
-  for (const level of [0, 1, 2, 3] as const) {
-    ({ error } = await db().from('applications').insert({ ...base, ...gwApplyRow({ job, ideal, mbti, message, source }, level) }));
-    if (!error || !/ideal|near_work|source|column/i.test(error.message)) break;
+  for (const level of [0, 1, 2, 3, 4] as const) {
+    ({ error } = await db().from('applications').insert({ ...base, ...gwApplyRow({ job, ideal, mbti, message, source, traits, exposure }, level) }));
+    if (!error || !/ideal|near_work|source|traits|exposure|column/i.test(error.message)) break;
   }
   if (error) {
     await db().storage.from(PHOTO_BUCKET).remove(paths);

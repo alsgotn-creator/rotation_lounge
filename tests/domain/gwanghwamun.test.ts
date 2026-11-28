@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { gwPhase } from '../../src/app/gwanghwamun/config';
 import { avoidHits, birthFromKoreanAge, gwApplyRow, gwSource, isGwanghwamun, parseMbti, parsePrice, parseTails } from '../../src/lib/signup/rules';
 
 describe('birthFromKoreanAge', () => {
@@ -9,18 +10,36 @@ describe('birthFromKoreanAge', () => {
 });
 
 describe('gwApplyRow', () => {
-  const f = { job: '디자이너', ideal: '대화가 잘 통하는 사람', mbti: 'ENFP', message: '잘 부탁드려요', source: '인스타' };
-  test('uses the new columns when 0019~0021 all exist', () => {
-    expect(gwApplyRow(f, 0)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', source: '인스타', mbti: 'ENFP', host_message: '잘 부탁드려요' });
+  const f = { job: '디자이너', ideal: '대화가 잘 통하는 사람', mbti: 'ENFP', message: '잘 부탁드려요', source: '인스타', traits: '차분함', exposure: '뒷모습·손만' };
+  test('uses every column when 0019~0022 all exist', () => {
+    expect(gwApplyRow(f, 0)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', source: '인스타', mbti: 'ENFP', host_message: '잘 부탁드려요', traits: '차분함', exposure: '뒷모습·손만' });
+  });
+  test('appends traits and exposure to the host message before 0022', () => {
+    expect(gwApplyRow(f, 1)).toEqual({ job: '디자이너', ideal: '대화가 잘 통하는 사람', source: '인스타', mbti: 'ENFP', host_message: '잘 부탁드려요 · 성격: 차분함 · 촬영: 뒷모습·손만' });
   });
   test('appends mbti to job and the message to ideal before 0021', () => {
-    expect(gwApplyRow(f, 1)).toEqual({ job: '디자이너 · MBTI: ENFP', ideal: '대화가 잘 통하는 사람 · 호스트에게: 잘 부탁드려요', source: '인스타' });
+    expect(gwApplyRow({ ...f, traits: '', exposure: '' }, 2)).toEqual({ job: '디자이너 · MBTI: ENFP', ideal: '대화가 잘 통하는 사람 · 호스트에게: 잘 부탁드려요', source: '인스타' });
   });
   test('appends the source to job as well before 0020', () => {
-    expect(gwApplyRow({ ...f, mbti: '', message: '', source: 'QR' }, 2)).toEqual({ job: '디자이너 · 경로: QR', ideal: '대화가 잘 통하는 사람' });
+    expect(gwApplyRow({ ...f, mbti: '', message: '', traits: '', exposure: '', source: 'QR' }, 3)).toEqual({ job: '디자이너 · 경로: QR', ideal: '대화가 잘 통하는 사람' });
   });
   test('packs everything into job before the 0019 migration', () => {
-    expect(gwApplyRow({ ...f, source: 'QR' }, 3)).toEqual({ job: '디자이너 · MBTI: ENFP · 이상형: 대화가 잘 통하는 사람 · 호스트에게: 잘 부탁드려요 · 경로: QR' });
+    expect(gwApplyRow({ ...f, traits: '', exposure: '', source: 'QR' }, 4)).toEqual({ job: '디자이너 · MBTI: ENFP · 이상형: 대화가 잘 통하는 사람 · 호스트에게: 잘 부탁드려요 · 경로: QR' });
+  });
+});
+
+describe('gwPhase (KST, whatever the device timezone)', () => {
+  test('12/8 23:00 is still early bird, D-DAY', () => {
+    expect(gwPhase(Date.parse('2026-12-08T23:00:00+09:00'))).toEqual({ phase: 'early', price: 39000, dDay: 0 });
+  });
+  test('12/9 00:10 is regular price', () => {
+    expect(gwPhase(Date.parse('2026-12-09T00:10:00+09:00'))).toMatchObject({ phase: 'regular', price: 42000 });
+  });
+  test('12/10 10:10 is closed', () => {
+    expect(gwPhase(Date.parse('2026-12-10T10:10:00+09:00')).phase).toBe('closed');
+  });
+  test('counts days in Korean dates, not UTC', () => {
+    expect(gwPhase(Date.parse('2026-12-05T08:00:00+09:00')).dDay).toBe(3); // UTC 로는 아직 12/4
   });
 });
 

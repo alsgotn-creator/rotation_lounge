@@ -20,7 +20,7 @@ export default async function HostEvent({ params }: { params: Promise<{ slug: st
   const urls = await photoUrls(apps.flatMap((a) => a.photo_paths));
   let k = 0;
   const rows: Row[] = apps.map((a) => ({
-    id: a.id, name: a.name, gender: a.gender, birthYear: a.birth_year, job: a.job, phone: a.phone, email: a.email, ideal: a.ideal ?? '', nearWork: a.near_work ?? '', source: a.source ?? '', mbti: a.mbti ?? '', hostMessage: a.host_message ?? '',
+    id: a.id, name: a.name, gender: a.gender, birthYear: a.birth_year, job: a.job, phone: a.phone, email: a.email, ideal: a.ideal ?? '', nearWork: a.near_work ?? '', source: a.source ?? '', mbti: a.mbti ?? '', hostMessage: a.host_message ?? '', traits: a.traits ?? '', exposure: a.exposure ?? '',
     status: a.status, paymentDue: a.payment_due, createdAt: a.created_at, number: a.number, avoid: a.avoid,
     photos: a.photo_paths.map(() => urls[k++]),
     profile: prof.get(a.id) ?? null,

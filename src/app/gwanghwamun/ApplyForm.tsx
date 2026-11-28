@@ -16,6 +16,7 @@ async function shrink(file: File): Promise<Blob> {
 /** 광화문연가 신청서: 성별 · 이름 · 나이 · 직업 · MBTI · 연락처 · 이상형 · 호스트에게 · 사진 1~2장. 입금은 수락 뒤에 안내한다 */
 export default function ApplyForm() {
   const [gender, setGender] = useState<'f' | 'm' | ''>('');
+  const [exposure, setExposure] = useState('');
   const [photos, setPhotos] = useState<(File | null)[]>([null, null]);
   const [previews, setPreviews] = useState(['', '']);
   const [busy, setBusy] = useState(false);
@@ -34,8 +35,9 @@ export default function ApplyForm() {
     e.preventDefault(); setErr('');
     if (!gender) return setErr('성별을 골라주세요.');
     if (!photos[0]) return setErr('얼굴이 나온 사진을 1장 이상 올려주세요.');
+    if (!exposure) return setErr('촬영 노출 범위를 골라주세요.');
     const fd = new FormData(e.currentTarget);
-    fd.set('gender', gender);
+    fd.set('gender', gender); fd.set('exposure', exposure);
     fd.set('from', new URLSearchParams(location.search).get('from') ?? ''); // 리틀리 링크는 ?from=insta
     const imgs = await Promise.all(photos.filter((p): p is File => !!p).map(shrink));
     if (imgs.reduce((n, b) => n + b.size, 0) > 4_200_000) return setErr('사진이 너무 커요. 다른 사진을 골라주세요.');
@@ -75,9 +77,10 @@ export default function ApplyForm() {
         <label><span>나이 (한국 나이)</span><input name="age" required inputMode="numeric" maxLength={2} placeholder="예: 29" /></label>
       </div>
       <div className="two">
-        <label><span>직업</span><input name="job" required maxLength={30} placeholder="예: IT 디자이너" /></label>
+        <label><span>직군</span><input name="job" required maxLength={30} placeholder="예: IT 기획" /></label>
         <label><span>MBTI</span><input name="mbti" maxLength={4} autoCapitalize="characters" placeholder="예: ENFP" /></label>
       </div>
+      <label><span>성격 키워드 (선택)</span><input name="traits" maxLength={40} placeholder="예: 차분함, 잘 웃어요, 계획형" /></label>
       <label><span>휴대폰 번호</span><input name="phone" type="tel" required inputMode="tel" maxLength={13} autoComplete="tel" placeholder="010-1234-5678" /></label>
       <div className="two">
         <label><span>본인의 이상형</span><textarea name="ideal" required maxLength={200} rows={4} placeholder="끌리는 사람을 편하게 적어주세요" /></label>
@@ -97,6 +100,14 @@ export default function ApplyForm() {
       <label><span className="qn">3. 마주치고 싶지 않은 사람의 뒷번호를 입력해주세요 (선택)</span>
         <input name="avoidTails" inputMode="numeric" maxLength={40} placeholder="휴대폰 뒷번호 4자리, 여러 명이면 쉼표로 (예: 1234, 5678)" /></label>
 
+      <fieldset>
+        <legend className="qn">4. 현장 촬영, 얼굴 노출은 어디까지 괜찮으세요?</legend>
+        <div className="seg three">
+          {([['face', '얼굴도 OK'], ['partial', '뒷모습·손만'], ['none', '빼주세요']] as const).map(([v, l]) => <button type="button" key={v} aria-pressed={exposure === v} onClick={() => setExposure(v)}>{l}</button>)}
+        </div>
+        <p className="fine">어느 쪽을 골라도 선정에는 영향이 없어요.</p>
+      </fieldset>
+
       <p className="qn">유의사항</p>
       <ul className="notes">
         <li>광화문, 종각, 을지로 직장인만 참여 가능합니다 (명함 랜덤확인 예정)</li>
@@ -105,7 +116,7 @@ export default function ApplyForm() {
         <li>제출한 사진과 정보는 모임 후 폐기돼요.</li>
       </ul>
       {err && <p className="ferr" role="alert">{err}</p>}
-      <button className="gbtn p" disabled={busy}>{busy ? '보내는 중…' : '신청서 보내기'}</button>
+      <button className="gbtn p" disabled={busy}>{busy ? '보내는 중…' : '지금 신청하기'}</button>
     </form>
   );
 }
